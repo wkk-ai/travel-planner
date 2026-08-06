@@ -8,6 +8,7 @@ import {
   GRID_START,
   HOUR_HEIGHT,
   SLOT_MINUTES,
+  EVENT_GAP_PX,
   cn,
   eventHeightPx,
   eventTopPx,
@@ -148,8 +149,11 @@ export function DayColumn({
         <div
           className="pointer-events-none absolute left-1 right-1 z-10 rounded-md border-2 border-dashed border-[var(--gcal-blue)] bg-[#e8f0fe]/80 px-1.5 py-0.5 text-[11px] font-semibold text-[var(--gcal-blue)]"
           style={{
-            top: (rangePreview.start / 60) * HOUR_HEIGHT,
-            height: Math.max(((rangePreview.end - rangePreview.start) / 60) * HOUR_HEIGHT, 22),
+            top: (rangePreview.start / 60) * HOUR_HEIGHT + EVENT_GAP_PX / 2,
+            height: Math.max(
+              ((rangePreview.end - rangePreview.start) / 60) * HOUR_HEIGHT - EVENT_GAP_PX,
+              16,
+            ),
           }}
         >
           New event · {minutesToTime(rangePreview.start)}–{minutesToTime(rangePreview.end)}

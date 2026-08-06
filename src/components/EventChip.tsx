@@ -50,7 +50,7 @@ export function EventChip({
         }
       }}
       className={cn(
-        'event-block absolute left-1 right-1 overflow-hidden rounded-md border-l-4 px-1.5 py-0.5 text-left text-[11px] leading-tight shadow-sm',
+        'event-block absolute left-1 right-1 overflow-hidden rounded-md border-l-4 px-1.5 py-0.5 text-left text-[11px] leading-tight',
         isDragging && 'opacity-40',
         isNow && 'is-now',
         isDraft && 'border-2 border-dashed border-[var(--gcal-blue)] opacity-90',

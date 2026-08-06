@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Check, Plus, Trash2, X } from 'lucide-react'
+import { Check, MapPin, Plus, Sparkles, Trash2, X } from 'lucide-react'
+import { differenceInCalendarDays, format, parseISO } from 'date-fns'
 import { shareUrls, useTripStore } from '../store/tripStore'
 import { parseConfirmationText, currentEventAt, cn } from '../lib/time'
 import { CATEGORIES } from '../data/categories'
@@ -426,57 +427,119 @@ function TripsPanel() {
   }, [refreshTrips])
 
   const confirmTrip = trips.find((t) => t.id === confirmId) ?? null
+  const datesOk = endDate >= startDate
+  const nightCount = datesOk
+    ? Math.max(0, differenceInCalendarDays(parseISO(endDate), parseISO(startDate)))
+    : 0
+
+  function onStartChange(value: string) {
+    setStartDate(value)
+    if (endDate < value) setEndDate(value)
+  }
+
+  function onEndChange(value: string) {
+    if (value < startDate) {
+      setEndDate(startDate)
+      return
+    }
+    setEndDate(value)
+  }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
-          All trips
+    <div className="space-y-5">
+      <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#e8f0fe] via-white to-[#e6f4ea] p-4 ring-1 ring-[var(--gcal-border)]">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--gcal-muted)]">
+          Your trips
         </div>
-        <ul className="space-y-1.5">
-          {trips.map((t) => {
-            const active = t.id === trip?.id
-            const whatIf = Boolean(t.whatIfOf)
-            return (
-              <li
-                key={t.id}
+        <div className="brand-serif mt-1 text-2xl leading-tight text-[var(--gcal-text)]">
+          Pick where you plan next
+        </div>
+        <p className="mt-1.5 text-xs leading-relaxed text-[var(--gcal-muted)]">
+          {trips.length} trip{trips.length === 1 ? '' : 's'} saved
+          {trip ? ` · open: ${trip.name}` : ''}
+        </p>
+      </div>
+
+      <ul className="space-y-2.5">
+        {trips.map((t) => {
+          const active = t.id === trip?.id
+          const whatIf = Boolean(t.whatIfOf)
+          const nights = Math.max(
+            0,
+            differenceInCalendarDays(parseISO(t.endDate), parseISO(t.startDate)),
+          )
+          const rangeLabel = `${format(parseISO(t.startDate), 'd MMM')} – ${format(parseISO(t.endDate), 'd MMM yyyy')}`
+          return (
+            <li key={t.id}>
+              <div
                 className={cn(
-                  'rounded-xl border px-3 py-2 text-sm',
+                  'group relative overflow-hidden rounded-2xl border bg-white transition-shadow',
                   active
-                    ? 'border-[var(--gcal-blue)] bg-[#e8f0fe]'
-                    : 'border-[var(--gcal-border)]',
+                    ? 'border-[var(--gcal-blue)] shadow-[0_8px_24px_rgba(26,115,232,0.12)]'
+                    : 'border-[var(--gcal-border)] hover:shadow-md',
                 )}
               >
+                <div
+                  className={cn(
+                    'absolute inset-y-0 left-0 w-1',
+                    whatIf ? 'bg-[#f9ab00]' : active ? 'bg-[var(--gcal-blue)]' : 'bg-[#dadce0]',
+                  )}
+                />
                 <button
                   type="button"
                   disabled={mode === 'view'}
                   onClick={() => void switchTrip(t.editToken)}
-                  className="w-full text-left"
+                  className="w-full py-3 pl-4 pr-3 text-left disabled:cursor-default"
                 >
-                  <div className="font-semibold">{t.name}</div>
-                  <div className="text-[11px] text-[var(--gcal-muted)]">
-                    {t.startDate} → {t.endDate}
-                    {whatIf ? ' · what-if copy' : ''}
-                    {active ? ' · open now' : ''}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="truncate font-semibold text-[var(--gcal-text)]">{t.name}</span>
+                        {active ? (
+                          <span className="rounded-full bg-[#e8f0fe] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--gcal-blue)]">
+                            Open
+                          </span>
+                        ) : null}
+                        {whatIf ? (
+                          <span className="inline-flex items-center gap-0.5 rounded-full bg-[#fef7e0] px-1.5 py-0.5 text-[10px] font-semibold text-[#b06000]">
+                            <Sparkles className="size-2.5" /> What-if
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="mt-1 flex items-center gap-1 text-[11px] text-[var(--gcal-muted)]">
+                        <MapPin className="size-3 shrink-0" />
+                        <span>
+                          {rangeLabel}
+                          {nights > 0 ? ` · ${nights} night${nights === 1 ? '' : 's'}` : ' · same day'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </button>
                 {mode === 'edit' ? (
-                  <button
-                    type="button"
-                    className="mt-1.5 text-[11px] font-medium text-[#c5221f] hover:underline"
-                    onClick={() => setConfirmId(t.id)}
-                  >
-                    Delete trip…
-                  </button>
+                  <div className="flex items-center justify-end border-t border-[var(--gcal-border)]/70 px-3 py-1.5">
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-[#c5221f] hover:bg-[#fce8e6]"
+                      onClick={() => setConfirmId(t.id)}
+                    >
+                      <Trash2 className="size-3" />
+                      Delete
+                    </button>
+                  </div>
                 ) : null}
-              </li>
-            )
-          })}
-          {!trips.length ? (
-            <p className="text-xs text-[var(--gcal-muted)]">No trips loaded yet.</p>
-          ) : null}
-        </ul>
-      </div>
+              </div>
+            </li>
+          )
+        })}
+        {!trips.length ? (
+          <li className="rounded-2xl border border-dashed border-[var(--gcal-border)] bg-[var(--gcal-bg)]/60 px-4 py-8 text-center">
+            <MapPin className="mx-auto size-6 text-[var(--gcal-muted)]" />
+            <p className="mt-2 text-sm font-medium text-[var(--gcal-text)]">No trips yet</p>
+            <p className="mt-1 text-xs text-[var(--gcal-muted)]">Create one below to start planning.</p>
+          </li>
+        ) : null}
+      </ul>
 
       {confirmTrip ? (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
@@ -511,61 +574,115 @@ function TripsPanel() {
       ) : null}
 
       {mode === 'edit' ? (
-        <div className="rounded-xl border border-[var(--gcal-border)] p-3">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
-            Create new trip
+        <div className="overflow-hidden rounded-2xl border border-[var(--gcal-border)] bg-white shadow-sm">
+          <div className="border-b border-[var(--gcal-border)] bg-[var(--gcal-bg)]/80 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex size-7 items-center justify-center rounded-full bg-[var(--gcal-blue)] text-white">
+                <Plus className="size-3.5" />
+              </span>
+              <div>
+                <div className="text-sm font-semibold text-[var(--gcal-text)]">New trip</div>
+                <div className="text-[11px] text-[var(--gcal-muted)]">Name it, set dates, go</div>
+              </div>
+            </div>
           </div>
-          <input
-            className="mb-2 w-full rounded-lg border border-[var(--gcal-border)] px-2 py-1.5 text-sm"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Trip name"
-          />
-          <div className="mb-2 grid grid-cols-2 gap-2">
-            <input
-              type="date"
-              className="rounded-lg border border-[var(--gcal-border)] px-2 py-1.5 text-sm"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-            <input
-              type="date"
-              className="rounded-lg border border-[var(--gcal-border)] px-2 py-1.5 text-sm"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
+          <div className="space-y-3 p-4">
+            <label className="block">
+              <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+                Trip name
+              </span>
+              <input
+                className="w-full rounded-xl border border-[var(--gcal-border)] bg-white px-3 py-2.5 text-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe]"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Japan spring 2027"
+              />
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="block">
+                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+                  Start
+                </span>
+                <input
+                  type="date"
+                  className="w-full rounded-xl border border-[var(--gcal-border)] px-2.5 py-2 text-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe]"
+                  value={startDate}
+                  onChange={(e) => onStartChange(e.target.value)}
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+                  End
+                </span>
+                <input
+                  type="date"
+                  min={startDate}
+                  className={cn(
+                    'w-full rounded-xl border px-2.5 py-2 text-sm outline-none focus:ring-2',
+                    datesOk
+                      ? 'border-[var(--gcal-border)] focus:border-[var(--gcal-blue)] focus:ring-[#e8f0fe]'
+                      : 'border-[#c5221f] focus:border-[#c5221f] focus:ring-[#fce8e6]',
+                  )}
+                  value={endDate}
+                  onChange={(e) => onEndChange(e.target.value)}
+                />
+              </label>
+            </div>
+            {!datesOk ? (
+              <p className="text-[11px] font-medium text-[#c5221f]">
+                End date cannot be before start date.
+              </p>
+            ) : (
+              <p className="text-[11px] text-[var(--gcal-muted)]">
+                {nightCount === 0
+                  ? 'Same-day trip'
+                  : `${nightCount} night${nightCount === 1 ? '' : 's'} · ${nightCount + 1} days`}
+              </p>
+            )}
+            <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-[var(--gcal-border)] bg-[var(--gcal-bg)]/50 px-3 py-2.5">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={seed}
+                onChange={(e) => setSeed(e.target.checked)}
+              />
+              <span>
+                <span className="block text-xs font-medium text-[var(--gcal-text)]">
+                  Prefill BigBang US Trip 2026
+                </span>
+                <span className="mt-0.5 block text-[11px] text-[var(--gcal-muted)]">
+                  Copies the full seeded itinerary into this new trip.
+                </span>
+              </span>
+            </label>
+            <button
+              type="button"
+              disabled={busy || !name.trim() || !datesOk}
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--gcal-blue)] py-2.5 text-sm font-semibold text-white hover:bg-[var(--gcal-blue-hover)] disabled:opacity-40"
+              onClick={async () => {
+                if (!datesOk) return
+                setBusy(true)
+                try {
+                  await createNewTrip({
+                    name: name.trim(),
+                    startDate,
+                    endDate,
+                    seedBigBang: seed,
+                  })
+                } finally {
+                  setBusy(false)
+                }
+              }}
+            >
+              <Plus className="size-4" />
+              Create trip
+            </button>
           </div>
-          <label className="mb-3 flex items-center gap-2 text-xs text-[var(--gcal-muted)]">
-            <input
-              type="checkbox"
-              checked={seed}
-              onChange={(e) => setSeed(e.target.checked)}
-            />
-            Prefill BigBang US Trip 2026 events
-          </label>
-          <button
-            type="button"
-            disabled={busy || !name.trim()}
-            className="w-full rounded-lg bg-[var(--gcal-blue)] py-2 text-sm font-semibold text-white disabled:opacity-40"
-            onClick={async () => {
-              setBusy(true)
-              try {
-                await createNewTrip({
-                  name: name.trim(),
-                  startDate,
-                  endDate,
-                  seedBigBang: seed,
-                })
-              } finally {
-                setBusy(false)
-              }
-            }}
-          >
-            Create trip
-          </button>
         </div>
       ) : (
-        <p className="text-xs text-[var(--gcal-muted)]">View-only — open an edit link to manage trips.</p>
+        <p className="rounded-xl bg-[var(--gcal-bg)] px-3 py-2 text-xs text-[var(--gcal-muted)]">
+          View-only — open an edit link to manage trips.
+        </p>
       )}
     </div>
   )

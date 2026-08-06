@@ -18,6 +18,8 @@ export function cn(...inputs: ClassValue[]) {
 
 export const HOUR_HEIGHT = 56
 export const SLOT_MINUTES = 30
+/** Visual gap between back-to-back event blocks in the grid. */
+export const EVENT_GAP_PX = 16
 export const GRID_START = 0 // midnight
 export const GRID_END = 24
 
@@ -34,7 +36,7 @@ export function minutesToTime(mins: number): string {
 }
 
 export function eventTopPx(startTime: string): number {
-  return (timeToMinutes(startTime) / 60) * HOUR_HEIGHT
+  return (timeToMinutes(startTime) / 60) * HOUR_HEIGHT + EVENT_GAP_PX / 2
 }
 
 export function eventHeightPx(startTime: string, endTime: string): number {
@@ -42,7 +44,7 @@ export function eventHeightPx(startTime: string, endTime: string): number {
   let end = timeToMinutes(endTime)
   if (end <= start) end += 24 * 60
   const h = ((end - start) / 60) * HOUR_HEIGHT
-  return Math.max(h, 22)
+  return Math.max(h - EVENT_GAP_PX, 16)
 }
 
 export function tripDays(startDate: string, endDate: string): Date[] {

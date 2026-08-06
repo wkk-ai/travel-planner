@@ -254,6 +254,7 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
             >
               <MenuItem
                 icon={<Redo2 className="size-4" />}
+                hint="Push today’s remaining events later by 30 minutes when you fall behind."
                 onClick={() => {
                   void runningLate(selectedDate, format(new Date(), 'HH:mm'), 30)
                   setMenu('none')
@@ -261,10 +262,18 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
               >
                 Running late (+30m)
               </MenuItem>
-              <MenuItem icon={<FileDown className="size-4" />} onClick={() => openPanel('import')}>
+              <MenuItem
+                icon={<FileDown className="size-4" />}
+                hint="Paste a booking email or text — we suggest matching events to add."
+                onClick={() => openPanel('import')}
+              >
                 Import confirmation
               </MenuItem>
-              <MenuItem icon={<Sparkles className="size-4" />} onClick={() => openPanel('whatif')}>
+              <MenuItem
+                icon={<Sparkles className="size-4" />}
+                hint="Clone this trip as a separate sandbox so you can try changes safely."
+                onClick={() => openPanel('whatif')}
+              >
                 What-if copy
               </MenuItem>
             </MenuButton>
@@ -387,7 +396,7 @@ function MenuButton({
         <Ellipsis className="size-3.5 sm:hidden" />
       </button>
       {open ? (
-        <div className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[200px] rounded-xl border border-[var(--gcal-border)] bg-white py-1 shadow-xl">
+        <div className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[240px] max-w-[min(100vw-1rem,320px)] rounded-xl border border-[var(--gcal-border)] bg-white py-1 shadow-xl">
           <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
             {label}
           </div>
@@ -403,21 +412,29 @@ function MenuItem({
   icon,
   onClick,
   disabled,
+  hint,
 }: {
   children: React.ReactNode
   icon: React.ReactNode
   onClick: () => void
   disabled?: boolean
+  hint?: string
 }) {
   return (
     <button
       type="button"
       disabled={disabled}
+      title={hint}
       onClick={onClick}
-      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-[var(--gcal-bg)] disabled:opacity-40"
+      className="flex w-full items-start gap-2 px-3 py-2 text-left hover:bg-[var(--gcal-bg)] disabled:opacity-40"
     >
-      <span className="text-[var(--gcal-muted)]">{icon}</span>
-      {children}
+      <span className="mt-0.5 shrink-0 text-[var(--gcal-muted)]">{icon}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium text-[var(--gcal-text)]">{children}</span>
+        {hint ? (
+          <span className="mt-0.5 block text-[11px] leading-snug text-[var(--gcal-muted)]">{hint}</span>
+        ) : null}
+      </span>
     </button>
   )
 }

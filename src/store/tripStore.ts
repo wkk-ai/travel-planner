@@ -247,6 +247,10 @@ export const useTripStore = create<TripState>((set, get) => ({
       set({ toast: 'Need online Supabase to create trips' })
       return
     }
+    if (endDate < startDate) {
+      set({ toast: 'End date cannot be before start date' })
+      return
+    }
     const trip = await createTrip({
       name,
       startDate,
