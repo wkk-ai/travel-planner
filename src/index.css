@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+:root {
+  --gcal-blue: #1a73e8;
+  --gcal-blue-hover: #1765cc;
+  --gcal-surface: #ffffff;
+  --gcal-bg: #f8f9fa;
+  --gcal-border: #dadce0;
+  --gcal-text: #3c4043;
+  --gcal-muted: #70757a;
+  --gcal-today: #1a73e8;
+  --hour-height: 56px;
+  --header-h: 64px;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  color: var(--gcal-text);
+  background: var(--gcal-bg);
+  line-height: 1.4;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #e8f0fe 0%, transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, #e6f4ea 0%, transparent 50%),
+    var(--gcal-bg);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.brand-serif {
+  font-family: "Instrument Serif", Georgia, serif;
+}
+
+/* Google Calendar-ish scrollbar */
+.cal-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.cal-scroll::-webkit-scrollbar-thumb {
+  background: #c0c4c8;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.cal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9aa0a6;
+  background-clip: content-box;
+  border: 2px solid transparent;
+}
+
+.event-block {
+  transition: box-shadow 120ms ease, transform 120ms ease;
+  touch-action: none;
+}
+.event-block:hover {
+  box-shadow: 0 2px 8px rgba(60, 64, 67, 0.2);
+  z-index: 5;
+}
+.event-block.is-now {
+  outline: 2px solid var(--gcal-blue);
+  outline-offset: 1px;
+  animation: pulse-now 2s ease-in-out infinite;
+}
+@keyframes pulse-now {
+  0%,
+  100% {
+    outline-color: var(--gcal-blue);
+  }
+  50% {
+    outline-color: #8ab4f8;
+  }
+}
+
+.now-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ea4335;
+  z-index: 20;
+  pointer-events: none;
+}
+.now-line::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ea4335;
+}
+
+.drag-ghost {
+  opacity: 0.85;
+  box-shadow: 0 8px 24px rgba(60, 64, 67, 0.28);
+  transform: scale(1.02);
+}
+
+.fab {
+  box-shadow:
+    0 1px 3px rgba(60, 64, 67, 0.3),
+    0 4px 8px rgba(60, 64, 67, 0.15);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.fab:hover {
+  transform: translateY(-1px) scale(1.03);
+}
+.fab:active {
+  transform: scale(0.97);
+}
+
+.panel-enter {
+  animation: slide-in 180ms ease-out;
+}
+@keyframes slide-in {
+  from {
+    transform: translateX(12px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.toast {
+  animation: toast-in 200ms ease-out;
+}
+@keyframes toast-in {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@media print {
+  body {
+    overflow: visible;
+    background: white;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-area {
+    overflow: visible !important;
+    height: auto !important;
+  }
+}

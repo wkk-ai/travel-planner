@@ -1,0 +1,627 @@
+import { create } from 'zustand'
+import { v4 as uuid } from 'uuid'
+import type {
+  AccessMode,
+  CalendarView,
+  ChecklistItem,
+  Expense,
+  Trip,
+  TripEvent,
+  TripNote,
+  UndoSnapshot,
+} from '../types'
+import {
+  SEED_CHECKLIST,
+  SEED_EVENTS,
+  SEED_NOTES,
+  TRIP_META,
+} from '../data/seed'
+import {
+  createTrip,
+  deleteChecklistRemote,
+  deleteEventRemote,
+  deleteExpenseRemote,
+  deleteNoteRemote,
+  enqueue,
+  fetchTripBundle,
+  fetchTripByToken,
+  flushQueue,
+  supabase,
+  supabaseConfigured,
+  updateTripRemote,
+  upsertChecklistItem,
+  upsertEvent,
+  upsertEvents,
+  upsertExpense,
+  upsertNote,
+} from '../lib/supabase'
+import { addDaysIso, shiftEventsFrom } from '../lib/time'
+
+const LOCAL_TOKEN_KEY = 'travel-planner-last-token'
+
+interface TripState {
+  trip: Trip | null
+  events: TripEvent[]
+  notes: TripNote[]
+  checklist: ChecklistItem[]
+  expenses: Expense[]
+  mode: AccessMode
+  view: CalendarView
+  selectedDate: string
+  selectedEventId: string | null
+  loading: boolean
+  syncing: boolean
+  online: boolean
+  pendingOps: number
+  undoStack: UndoSnapshot[]
+  searchQuery: string
+  panel: 'none' | 'checklist' | 'notes' | 'budget' | 'emergency' | 'share' | 'import' | 'whatif' | 'recap'
+  toast: string | null
+  init: () => Promise<void>
+  setView: (v: CalendarView) => void
+  setSelectedDate: (d: string) => void
+  selectEvent: (id: string | null) => void
+  setSearchQuery: (q: string) => void
+  setPanel: (p: TripState['panel']) => void
+  setToast: (t: string | null) => void
+  pushUndo: (label: string) => void
+  undo: () => Promise<void>
+  addEvent: (partial?: Partial<TripEvent>) => Promise<TripEvent>
+  updateEvent: (id: string, patch: Partial<TripEvent>) => Promise<void>
+  deleteEvent: (id: string) => Promise<void>
+  moveEvent: (id: string, date: string, startTime: string, endTime: string) => Promise<void>
+  duplicateDay: (fromDate: string, toDate: string) => Promise<void>
+  runningLate: (date: string, fromTime: string, minutes: number) => Promise<void>
+  addNote: (partial?: Partial<TripNote>) => Promise<void>
+  updateNote: (id: string, patch: Partial<TripNote>) => Promise<void>
+  deleteNote: (id: string) => Promise<void>
+  addChecklist: (text: string, dayDate?: string | null) => Promise<void>
+  toggleChecklist: (id: string) => Promise<void>
+  deleteChecklist: (id: string) => Promise<void>
+  addExpense: (partial?: Partial<Expense>) => Promise<void>
+  deleteExpense: (id: string) => Promise<void>
+  updateTrip: (patch: Partial<Trip>) => Promise<void>
+  createWhatIf: () => Promise<string | null>
+  seedIfEmpty: () => Promise<void>
+  flush: () => Promise<void>
+}
+
+async function syncEvent(e: TripEvent, canEdit: boolean) {
+  if (!canEdit) return
+  if (!supabaseConfigured || !navigator.onLine) {
+    enqueue({ type: 'upsert_event', payload: e })
+    return
+  }
+  const { error } = await upsertEvent(e)
+  if (error) enqueue({ type: 'upsert_event', payload: e })
+}
+
+let initStarted = false
+
+function subscribeRealtime(tripId: string) {
+  if (!supabaseConfigured) return
+  supabase
+    .channel(`trip-${tripId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'travel_events',
+        filter: `trip_id=eq.${tripId}`,
+      },
+      async () => {
+        const b = await fetchTripBundle(tripId)
+        useTripStore.setState({ events: b.events })
+      },
+    )
+    .subscribe()
+}
+
+function localFallbackTrip(): Trip {
+  return {
+    id: uuid(),
+    name: TRIP_META.name,
+    startDate: TRIP_META.startDate,
+    endDate: TRIP_META.endDate,
+    editToken: uuid(),
+    viewToken: uuid(),
+    whatIfOf: null,
+    emergency: TRIP_META.emergency,
+  }
+}
+
+export const useTripStore = create<TripState>((set, get) => ({
+  trip: null,
+  events: [],
+  notes: [],
+  checklist: [],
+  expenses: [],
+  mode: 'edit',
+  view: 'week',
+  selectedDate: TRIP_META.startDate,
+  selectedEventId: null,
+  loading: true,
+  syncing: false,
+  online: typeof navigator !== 'undefined' ? navigator.onLine : true,
+  pendingOps: 0,
+  undoStack: [],
+  searchQuery: '',
+  panel: 'none',
+  toast: null,
+
+  setView: (v) => set({ view: v }),
+  setSelectedDate: (d) => set({ selectedDate: d }),
+  selectEvent: (id) => set({ selectedEventId: id }),
+  setSearchQuery: (q) => set({ searchQuery: q }),
+  setPanel: (p) => set({ panel: p }),
+  setToast: (t) => set({ toast: t }),
+
+  pushUndo: (label) => {
+    const { events, undoStack } = get()
+    set({
+      undoStack: [...undoStack.slice(-19), { label, events: structuredClone(events) }],
+    })
+  },
+
+  undo: async () => {
+    const { undoStack, mode } = get()
+    if (!undoStack.length || mode !== 'edit') return
+    const snap = undoStack[undoStack.length - 1]
+    set({ events: snap.events, undoStack: undoStack.slice(0, -1) })
+    if (supabaseConfigured && navigator.onLine) {
+      await upsertEvents(snap.events)
+    } else {
+      for (const e of snap.events) enqueue({ type: 'upsert_event', payload: e })
+    }
+    set({ toast: `Undid: ${snap.label}` })
+  },
+
+  init: async () => {
+    if (initStarted && get().trip) {
+      set({ loading: false })
+      return
+    }
+    initStarted = true
+    set({ loading: true })
+
+    const hash = window.location.hash.replace(/^#\/?/, '')
+    const parts = hash.split('/')
+    let token: string | null = null
+    let forcedMode: AccessMode | null = null
+
+    if (parts[0] === 'e' && parts[1]) {
+      token = parts[1]
+      forcedMode = 'edit'
+    } else if (parts[0] === 'v' && parts[1]) {
+      token = parts[1]
+      forcedMode = 'view'
+    } else if (parts[0] && parts[0].length > 20) {
+      token = parts[0]
+    } else {
+      token = localStorage.getItem(LOCAL_TOKEN_KEY)
+    }
+
+    const failLocal = async (msg: string) => {
+      const localTrip = localFallbackTrip()
+      set({
+        trip: localTrip,
+        mode: 'edit',
+        selectedDate: localTrip.startDate,
+        loading: false,
+        toast: msg,
+      })
+      void get().seedIfEmpty()
+    }
+
+    try {
+      if (supabaseConfigured && token) {
+        const found = await Promise.race([
+          fetchTripByToken(token),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
+        ])
+        if (found) {
+          const actualMode =
+            forcedMode === 'view'
+              ? 'view'
+              : forcedMode === 'edit' && found.mode === 'edit'
+                ? 'edit'
+                : found.mode
+
+          const bundle = await fetchTripBundle(found.trip.id)
+          localStorage.setItem(LOCAL_TOKEN_KEY, found.trip.editToken)
+          window.location.hash =
+            actualMode === 'edit'
+              ? `#/e/${found.trip.editToken}`
+              : `#/v/${found.trip.viewToken}`
+
+          set({
+            trip: found.trip,
+            mode: actualMode,
+            events: bundle.events,
+            notes: bundle.notes,
+            checklist: bundle.checklist,
+            expenses: bundle.expenses,
+            selectedDate: found.trip.startDate,
+            loading: false,
+          })
+
+          subscribeRealtime(found.trip.id)
+          if (bundle.events.length === 0 && actualMode === 'edit') {
+            void get().seedIfEmpty()
+          }
+          void get().flush()
+          return
+        }
+      }
+
+      if (supabaseConfigured) {
+        const trip = await Promise.race([
+          createTrip({
+            name: TRIP_META.name,
+            startDate: TRIP_META.startDate,
+            endDate: TRIP_META.endDate,
+            emergency: TRIP_META.emergency,
+          }),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
+        ])
+        if (!trip) {
+          await failLocal('Cloud slow — working offline')
+          return
+        }
+        localStorage.setItem(LOCAL_TOKEN_KEY, trip.editToken)
+        window.location.hash = `#/e/${trip.editToken}`
+        set({
+          trip,
+          mode: 'edit',
+          events: [],
+          notes: [],
+          checklist: [],
+          expenses: [],
+          selectedDate: trip.startDate,
+          loading: false,
+        })
+        subscribeRealtime(trip.id)
+        void get().seedIfEmpty()
+        return
+      }
+
+      await failLocal('')
+    } catch (err) {
+      console.error(err)
+      await failLocal('Failed to load trip — using local seed')
+    }
+  },
+
+  seedIfEmpty: async () => {
+    const { trip, events, mode } = get()
+    if (!trip || events.length > 0 || mode !== 'edit') return
+
+    const seeded: TripEvent[] = SEED_EVENTS.map((s) => ({
+      id: uuid(),
+      tripId: trip.id,
+      title: s.title,
+      category: s.category,
+      color: null,
+      date: s.date,
+      startTime: s.startTime,
+      endTime: s.endTime,
+      notes: s.notes ?? '',
+      location: s.location ?? '',
+      mapsUrl: s.mapsUrl ?? '',
+      flight: s.flight ?? null,
+      budgetCents: s.budgetCents ?? 0,
+      photoDataUrl: null,
+    }))
+
+    const notes: TripNote[] = SEED_NOTES.map((n) => ({
+      id: uuid(),
+      tripId: trip.id,
+      date: n.date,
+      title: n.title,
+      body: n.body,
+    }))
+
+    const checklist: ChecklistItem[] = SEED_CHECKLIST.map((c, i) => ({
+      id: uuid(),
+      tripId: trip.id,
+      text: c.text,
+      done: false,
+      dayDate: c.dayDate,
+      sortOrder: i,
+    }))
+
+    const expenses: Expense[] = seeded
+      .filter((e) => e.budgetCents > 0)
+      .map((e) => ({
+        id: uuid(),
+        tripId: trip.id,
+        eventId: e.id,
+        label: e.title,
+        category: e.category,
+        amountCents: e.budgetCents,
+        currency: 'USD',
+        spentOn: e.date,
+      }))
+
+    const renamed = { ...trip, name: TRIP_META.name, emergency: TRIP_META.emergency }
+    set({ events: seeded, notes, checklist, expenses, trip: renamed })
+
+    if (supabaseConfigured && navigator.onLine) {
+      await updateTripRemote(renamed)
+      await upsertEvents(seeded)
+      await Promise.all([
+        ...notes.map((n) => upsertNote(n)),
+        ...checklist.map((c) => upsertChecklistItem(c)),
+        ...expenses.map((e) => upsertExpense(e)),
+      ])
+      set({ toast: 'Trip seeded from spreadsheet' })
+    }
+  },
+
+  addEvent: async (partial = {}) => {
+    const { trip, mode, selectedDate } = get()
+    if (!trip || mode !== 'edit') throw new Error('Read-only')
+    get().pushUndo('Add event')
+    const ev: TripEvent = {
+      id: uuid(),
+      tripId: trip.id,
+      title: partial.title ?? 'New event',
+      category: partial.category ?? 'other',
+      color: partial.color ?? null,
+      date: partial.date ?? selectedDate,
+      startTime: partial.startTime ?? '10:00',
+      endTime: partial.endTime ?? '11:00',
+      notes: partial.notes ?? '',
+      location: partial.location ?? '',
+      mapsUrl: partial.mapsUrl ?? '',
+      flight: partial.flight ?? null,
+      budgetCents: partial.budgetCents ?? 0,
+      photoDataUrl: partial.photoDataUrl ?? null,
+    }
+    set({ events: [...get().events, ev], selectedEventId: ev.id })
+    await syncEvent(ev, true)
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate?.(10)
+    }
+    return ev
+  },
+
+  updateEvent: async (id, patch) => {
+    if (get().mode !== 'edit') return
+    get().pushUndo('Edit event')
+    const events = get().events.map((e) => (e.id === id ? { ...e, ...patch } : e))
+    set({ events })
+    const updated = events.find((e) => e.id === id)
+    if (updated) await syncEvent(updated, true)
+  },
+
+  deleteEvent: async (id) => {
+    if (get().mode !== 'edit') return
+    get().pushUndo('Delete event')
+    set({ events: get().events.filter((e) => e.id !== id), selectedEventId: null })
+    if (!supabaseConfigured || !navigator.onLine) {
+      enqueue({ type: 'delete_event', id })
+    } else {
+      const { error } = await deleteEventRemote(id)
+      if (error) enqueue({ type: 'delete_event', id })
+    }
+  },
+
+  moveEvent: async (id, date, startTime, endTime) => {
+    if (get().mode !== 'edit') return
+    get().pushUndo('Move event')
+    const events = get().events.map((e) =>
+      e.id === id ? { ...e, date, startTime, endTime } : e,
+    )
+    set({ events })
+    const updated = events.find((e) => e.id === id)
+    if (updated) {
+      await syncEvent(updated, true)
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        navigator.vibrate?.([8, 20, 8])
+      }
+    }
+  },
+
+  duplicateDay: async (fromDate, toDate) => {
+    if (get().mode !== 'edit' || !get().trip) return
+    get().pushUndo('Duplicate day')
+    const copies = get()
+      .events.filter((e) => e.date === fromDate)
+      .map((e) => ({
+        ...e,
+        id: uuid(),
+        date: toDate,
+      }))
+    set({ events: [...get().events, ...copies] })
+    for (const e of copies) await syncEvent(e, true)
+    set({ toast: `Copied ${copies.length} events to ${toDate}` })
+  },
+
+  runningLate: async (date, fromTime, minutes) => {
+    if (get().mode !== 'edit') return
+    get().pushUndo('Running late')
+    const events = shiftEventsFrom(get().events, date, fromTime, minutes)
+    set({ events })
+    for (const e of events.filter((x) => x.date === date)) {
+      await syncEvent(e, true)
+    }
+    set({ toast: `Shifted remaining events +${minutes}m` })
+  },
+
+  addNote: async (partial = {}) => {
+    const { trip, mode } = get()
+    if (!trip || mode !== 'edit') return
+    const n: TripNote = {
+      id: uuid(),
+      tripId: trip.id,
+      date: partial.date ?? null,
+      title: partial.title ?? 'Note',
+      body: partial.body ?? '',
+    }
+    set({ notes: [...get().notes, n] })
+    if (!supabaseConfigured || !navigator.onLine) enqueue({ type: 'upsert_note', payload: n })
+    else await upsertNote(n)
+  },
+
+  updateNote: async (id, patch) => {
+    if (get().mode !== 'edit') return
+    const notes = get().notes.map((n) => (n.id === id ? { ...n, ...patch } : n))
+    set({ notes })
+    const n = notes.find((x) => x.id === id)
+    if (!n) return
+    if (!supabaseConfigured || !navigator.onLine) enqueue({ type: 'upsert_note', payload: n })
+    else await upsertNote(n)
+  },
+
+  deleteNote: async (id) => {
+    if (get().mode !== 'edit') return
+    set({ notes: get().notes.filter((n) => n.id !== id) })
+    if (!supabaseConfigured || !navigator.onLine) enqueue({ type: 'delete_note', id })
+    else await deleteNoteRemote(id)
+  },
+
+  addChecklist: async (text, dayDate = null) => {
+    const { trip, mode, checklist } = get()
+    if (!trip || mode !== 'edit') return
+    const c: ChecklistItem = {
+      id: uuid(),
+      tripId: trip.id,
+      text,
+      done: false,
+      dayDate,
+      sortOrder: checklist.length,
+    }
+    set({ checklist: [...checklist, c] })
+    if (!supabaseConfigured || !navigator.onLine)
+      enqueue({ type: 'upsert_checklist', payload: c })
+    else await upsertChecklistItem(c)
+  },
+
+  toggleChecklist: async (id) => {
+    if (get().mode !== 'edit') return
+    const checklist = get().checklist.map((c) =>
+      c.id === id ? { ...c, done: !c.done } : c,
+    )
+    set({ checklist })
+    const c = checklist.find((x) => x.id === id)
+    if (!c) return
+    if (!supabaseConfigured || !navigator.onLine)
+      enqueue({ type: 'upsert_checklist', payload: c })
+    else await upsertChecklistItem(c)
+  },
+
+  deleteChecklist: async (id) => {
+    if (get().mode !== 'edit') return
+    set({ checklist: get().checklist.filter((c) => c.id !== id) })
+    if (!supabaseConfigured || !navigator.onLine)
+      enqueue({ type: 'delete_checklist', id })
+    else await deleteChecklistRemote(id)
+  },
+
+  addExpense: async (partial = {}) => {
+    const { trip, mode } = get()
+    if (!trip || mode !== 'edit') return
+    const e: Expense = {
+      id: uuid(),
+      tripId: trip.id,
+      eventId: partial.eventId ?? null,
+      label: partial.label ?? 'Expense',
+      category: partial.category ?? 'other',
+      amountCents: partial.amountCents ?? 0,
+      currency: partial.currency ?? 'USD',
+      spentOn: partial.spentOn ?? get().selectedDate,
+    }
+    set({ expenses: [...get().expenses, e] })
+    if (!supabaseConfigured || !navigator.onLine)
+      enqueue({ type: 'upsert_expense', payload: e })
+    else await upsertExpense(e)
+  },
+
+  deleteExpense: async (id) => {
+    if (get().mode !== 'edit') return
+    set({ expenses: get().expenses.filter((e) => e.id !== id) })
+    if (!supabaseConfigured || !navigator.onLine)
+      enqueue({ type: 'delete_expense', id })
+    else await deleteExpenseRemote(id)
+  },
+
+  updateTrip: async (patch) => {
+    const current = get().trip
+    if (get().mode !== 'edit' || !current) return
+    const trip: Trip = { ...current, ...patch }
+    set({ trip })
+    if (!supabaseConfigured || !navigator.onLine)
+      enqueue({ type: 'update_trip', payload: trip })
+    else await updateTripRemote(trip)
+  },
+
+  createWhatIf: async () => {
+    const { trip, events, notes, checklist, expenses, mode } = get()
+    if (!trip || mode !== 'edit' || !supabaseConfigured) {
+      set({ toast: 'What-if needs online Supabase' })
+      return null
+    }
+    const clone = await createTrip({
+      name: `${trip.name} (what-if)`,
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+      emergency: trip.emergency,
+      whatIfOf: trip.id,
+    })
+    const idMap = new Map<string, string>()
+    const newEvents = events.map((e) => {
+      const nid = uuid()
+      idMap.set(e.id, nid)
+      return { ...e, id: nid, tripId: clone.id }
+    })
+    await upsertEvents(newEvents)
+    for (const n of notes) {
+      await upsertNote({ ...n, id: uuid(), tripId: clone.id })
+    }
+    for (const c of checklist) {
+      await upsertChecklistItem({ ...c, id: uuid(), tripId: clone.id })
+    }
+    for (const e of expenses) {
+      await upsertExpense({
+        ...e,
+        id: uuid(),
+        tripId: clone.id,
+        eventId: e.eventId ? (idMap.get(e.eventId) ?? null) : null,
+      })
+    }
+    set({
+      toast: 'What-if copy ready — opening edit link',
+      panel: 'none',
+    })
+    return clone.editToken
+  },
+
+  flush: async () => {
+    set({ syncing: true })
+    const n = await flushQueue()
+    set({ syncing: false, pendingOps: 0, toast: n ? `Synced ${n} offline changes` : null })
+  },
+}))
+
+// Online/offline listeners
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    useTripStore.setState({ online: true })
+    void useTripStore.getState().flush()
+  })
+  window.addEventListener('offline', () => {
+    useTripStore.setState({ online: false, toast: 'Offline — edits queued' })
+  })
+}
+
+export function shareUrls(trip: Trip) {
+  const base = `${window.location.origin}${import.meta.env.BASE_URL}`.replace(/\/$/, '')
+  return {
+    edit: `${base}/#/e/${trip.editToken}`,
+    view: `${base}/#/v/${trip.viewToken}`,
+  }
+}
+
+export { addDaysIso }
