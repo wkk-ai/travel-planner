@@ -1,106 +1,13 @@
-import { useDroppable } from '@dnd-kit/core'
-import { useMemo } from 'react'
-import { format, isToday, parseISO } from 'date-fns'
+import { format, isToday } from 'date-fns'
 import { useTripStore } from '../store/tripStore'
 import type { TripEvent } from '../types'
-import {
-  GRID_END,
-  GRID_START,
-  HOUR_HEIGHT,
-  currentEventAt,
-  eventHeightPx,
-  eventTopPx,
-  isoDate,
-  tripDays,
-} from '../lib/time'
-import { EventChip } from './EventChip'
-import { cn } from '../lib/time'
+import { currentEventAt, isoDate, tripDays, cn } from '../lib/time'
+import { DayColumn, TimeGutter } from './DayColumn'
 
 interface Props {
   events: TripEvent[]
   warnings: { eventId: string; message: string }[]
   onSelect: (e: TripEvent) => void
-}
-
-function DayColumn({
-  date,
-  events,
-  warnings,
-  onSelect,
-  nowEventId,
-}: {
-  date: string
-  events: TripEvent[]
-  warnings: { eventId: string; message: string }[]
-  onSelect: (e: TripEvent) => void
-  nowEventId: string | null
-}) {
-  const mode = useTripStore((s) => s.mode)
-  const hours = useMemo(
-    () => Array.from({ length: GRID_END - GRID_START }, (_, i) => GRID_START + i),
-    [],
-  )
-  const d = parseISO(date)
-  const today = isToday(d)
-
-  return (
-    <div className="relative min-w-[140px] flex-1 border-r border-[var(--gcal-border)]">
-      {hours.map((h) => (
-        <HourSlot key={h} date={date} hour={h} editable={mode === 'edit'} />
-      ))}
-      {today ? <NowLine /> : null}
-      {events.map((ev) => {
-        const warn = warnings.find((w) => w.eventId === ev.id)?.message
-        return (
-          <EventChip
-            key={ev.id}
-            event={ev}
-            draggable={mode === 'edit'}
-            isNow={ev.id === nowEventId}
-            warning={warn}
-            onClick={() => onSelect(ev)}
-            style={{
-              top: eventTopPx(ev.startTime),
-              height: eventHeightPx(ev.startTime, ev.endTime),
-            }}
-          />
-        )
-      })}
-    </div>
-  )
-}
-
-function HourSlot({
-  date,
-  hour,
-  editable,
-}: {
-  date: string
-  hour: number
-  editable: boolean
-}) {
-  const time = `${String(hour).padStart(2, '0')}:00`
-  const { setNodeRef, isOver } = useDroppable({
-    id: `slot:${date}:${time}`,
-    disabled: !editable,
-  })
-  return (
-    <div
-      ref={setNodeRef}
-      className={cn(
-        'border-b border-[var(--gcal-border)]/70',
-        isOver && 'bg-[#e8f0fe]',
-      )}
-      style={{ height: HOUR_HEIGHT }}
-    />
-  )
-}
-
-function NowLine() {
-  const top = eventTopPx(
-    `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`,
-  )
-  return <div className="now-line" style={{ top }} />
 }
 
 export function WeekGrid({ events, warnings, onSelect }: Props) {
@@ -109,10 +16,6 @@ export function WeekGrid({ events, warnings, onSelect }: Props) {
   const setSelectedDate = useTripStore((s) => s.setSelectedDate)
   const setView = useTripStore((s) => s.setView)
   const days = tripDays(trip.startDate, trip.endDate)
-  const hours = useMemo(
-    () => Array.from({ length: GRID_END - GRID_START }, (_, i) => GRID_START + i),
-    [],
-  )
   const nowEv = currentEventAt(events)
 
   return (
@@ -160,27 +63,15 @@ export function WeekGrid({ events, warnings, onSelect }: Props) {
       </div>
 
       <div className="flex">
-        <div className="w-14 shrink-0 border-r border-[var(--gcal-border)] bg-white">
-          {hours.map((h) => (
-            <div
-              key={h}
-              className="relative border-b border-transparent text-right text-[10px] text-[var(--gcal-muted)]"
-              style={{ height: HOUR_HEIGHT }}
-            >
-              <span className="absolute -top-2 right-2">
-                {h === 0 ? '' : `${String(h).padStart(2, '0')}:00`}
-              </span>
-            </div>
-          ))}
-        </div>
+        <TimeGutter />
         {days.map((d) => {
           const iso = isoDate(d)
-          const dayEvents = events.filter((e) => e.date === iso)
           return (
             <DayColumn
               key={iso}
               date={iso}
-              events={dayEvents}
+              className="min-w-[140px]"
+              events={events.filter((e) => e.date === iso)}
               warnings={warnings}
               onSelect={onSelect}
               nowEventId={nowEv?.id ?? null}

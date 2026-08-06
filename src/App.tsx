@@ -18,7 +18,8 @@ import { SidePanel } from './components/SidePanel'
 import { QuickAdd } from './components/QuickAdd'
 import { EventChip } from './components/EventChip'
 import { Toast } from './components/Toast'
-import { minutesToTime, snapMinutes, timeToMinutes, travelBufferWarnings } from './lib/time'
+import { minutesToTime, snapMinutes, timeToMinutes, travelBufferWarnings, SLOT_MINUTES } from './lib/time'
+import { parseSlotId } from './components/DayColumn'
 import type { TripEvent } from './types'
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
   const selectEvent = useTripStore((s) => s.selectEvent)
   const moveEvent = useTripStore((s) => s.moveEvent)
   const searchQuery = useTripStore((s) => s.searchQuery)
+  const categoryFilter = useTripStore((s) => s.categoryFilter)
   const toast = useTripStore((s) => s.toast)
   const setToast = useTripStore((s) => s.setToast)
   const trip = useTripStore((s) => s.trip)
@@ -56,15 +58,17 @@ export default function App() {
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
-    if (!q) return events
-    return events.filter(
-      (e) =>
+    return events.filter((e) => {
+      if (categoryFilter !== 'all' && e.category !== categoryFilter) return false
+      if (!q) return true
+      return (
         e.title.toLowerCase().includes(q) ||
         e.notes.toLowerCase().includes(q) ||
         e.location.toLowerCase().includes(q) ||
-        e.category.includes(q),
-    )
-  }, [events, searchQuery])
+        e.category.includes(q)
+      )
+    })
+  }, [events, searchQuery, categoryFilter])
 
   const warnings = useMemo(() => travelBufferWarnings(events), [events])
   const activeEvent = events.find((e) => e.id === activeId) ?? null
@@ -84,17 +88,23 @@ export default function App() {
     if (!event) return
 
     const overId = String(over.id)
-    // droppable ids: day:YYYY-MM-DD or slot:YYYY-MM-DD:HH:mm
-    if (overId.startsWith('slot:')) {
-      const [, date, time] = overId.split(':')
-      const duration =
-        timeToMinutes(event.endTime) - timeToMinutes(event.startTime) || 60
-      const startMins = snapMinutes(timeToMinutes(time))
-      const endMins = startMins + Math.max(duration, 15)
-      await moveEvent(event.id, date, minutesToTime(startMins), minutesToTime(Math.min(endMins, 23 * 60 + 59)))
+    const slot = parseSlotId(overId)
+    if (slot) {
+      let duration =
+        timeToMinutes(event.endTime) - timeToMinutes(event.startTime)
+      if (duration <= 0) duration = SLOT_MINUTES
+      duration = Math.max(SLOT_MINUTES, snapMinutes(duration, SLOT_MINUTES))
+      const startMins = snapMinutes(timeToMinutes(slot.time), SLOT_MINUTES)
+      const endMins = Math.min(startMins + duration, 23 * 60 + 30)
+      await moveEvent(
+        event.id,
+        slot.date,
+        minutesToTime(startMins),
+        minutesToTime(endMins),
+      )
       return
     }
-    if (overId.startsWith('day:')) {
+    if (overId.startsWith('day|')) {
       const date = overId.slice(4)
       await moveEvent(event.id, date, event.startTime, event.endTime)
     }

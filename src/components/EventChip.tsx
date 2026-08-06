@@ -33,12 +33,14 @@ export function EventChip({
   return (
     <button
       type="button"
+      data-event-chip
       ref={setNodeRef}
       {...(draggable ? { ...listeners, ...attributes } : {})}
       onClick={(e) => {
         e.stopPropagation()
         onClick?.()
       }}
+      onPointerDown={(e) => e.stopPropagation()}
       className={cn(
         'event-block absolute left-1 right-1 overflow-hidden rounded-md border-l-4 px-1.5 py-0.5 text-left text-[11px] leading-tight shadow-sm',
         isDragging && 'opacity-40',
@@ -76,5 +78,3 @@ export function EventChip({
     </button>
   )
 }
-
-// re-export cn from time file path fix - EventChip imports cn from time which has cn - good

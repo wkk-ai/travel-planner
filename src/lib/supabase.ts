@@ -148,6 +148,16 @@ export async function upsertEvents(events: TripEvent[]) {
   return supabase.from('travel_events').upsert(events.map(eventToRow))
 }
 
+export async function listTrips(): Promise<Trip[]> {
+  if (!supabaseConfigured) return []
+  const { data, error } = await supabase
+    .from('travel_trips')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data ?? []).map((r) => mapTrip(r as Record<string, unknown>))
+}
+
 export async function createTrip(payload: {
   name: string
   startDate: string

@@ -26,6 +26,7 @@ import {
   fetchTripBundle,
   fetchTripByToken,
   flushQueue,
+  listTrips,
   supabase,
   supabaseConfigured,
   updateTripRemote,
@@ -35,12 +36,14 @@ import {
   upsertExpense,
   upsertNote,
 } from '../lib/supabase'
-import { addDaysIso, shiftEventsFrom } from '../lib/time'
+import { addDaysIso, minutesToTime, shiftEventsFrom, SLOT_MINUTES, timeToMinutes } from '../lib/time'
+import type { EventCategory } from '../types'
 
 const LOCAL_TOKEN_KEY = 'travel-planner-last-token'
 
 interface TripState {
   trip: Trip | null
+  trips: Trip[]
   events: TripEvent[]
   notes: TripNote[]
   checklist: ChecklistItem[]
@@ -55,13 +58,23 @@ interface TripState {
   pendingOps: number
   undoStack: UndoSnapshot[]
   searchQuery: string
-  panel: 'none' | 'checklist' | 'notes' | 'budget' | 'emergency' | 'share' | 'import' | 'whatif' | 'recap'
+  categoryFilter: EventCategory | 'all'
+  panel: 'none' | 'checklist' | 'notes' | 'budget' | 'emergency' | 'share' | 'import' | 'whatif' | 'recap' | 'trips'
   toast: string | null
   init: () => Promise<void>
+  refreshTrips: () => Promise<void>
+  switchTrip: (editToken: string) => Promise<void>
+  createNewTrip: (input: {
+    name: string
+    startDate: string
+    endDate: string
+    seedBigBang?: boolean
+  }) => Promise<void>
   setView: (v: CalendarView) => void
   setSelectedDate: (d: string) => void
   selectEvent: (id: string | null) => void
   setSearchQuery: (q: string) => void
+  setCategoryFilter: (c: EventCategory | 'all') => void
   setPanel: (p: TripState['panel']) => void
   setToast: (t: string | null) => void
   pushUndo: (label: string) => void
@@ -133,6 +146,7 @@ function localFallbackTrip(): Trip {
 
 export const useTripStore = create<TripState>((set, get) => ({
   trip: null,
+  trips: [],
   events: [],
   notes: [],
   checklist: [],
@@ -147,6 +161,7 @@ export const useTripStore = create<TripState>((set, get) => ({
   pendingOps: 0,
   undoStack: [],
   searchQuery: '',
+  categoryFilter: 'all',
   panel: 'none',
   toast: null,
 
@@ -154,8 +169,58 @@ export const useTripStore = create<TripState>((set, get) => ({
   setSelectedDate: (d) => set({ selectedDate: d }),
   selectEvent: (id) => set({ selectedEventId: id }),
   setSearchQuery: (q) => set({ searchQuery: q }),
+  setCategoryFilter: (c) => set({ categoryFilter: c }),
   setPanel: (p) => set({ panel: p }),
   setToast: (t) => set({ toast: t }),
+
+  refreshTrips: async () => {
+    if (!supabaseConfigured) return
+    try {
+      const trips = await listTrips()
+      set({ trips })
+    } catch (err) {
+      console.error(err)
+    }
+  },
+
+  switchTrip: async (editToken) => {
+    set({ loading: true, panel: 'none' })
+    initStarted = false
+    localStorage.setItem(LOCAL_TOKEN_KEY, editToken)
+    window.location.hash = `#/e/${editToken}`
+    await get().init()
+  },
+
+  createNewTrip: async ({ name, startDate, endDate, seedBigBang }) => {
+    if (!supabaseConfigured) {
+      set({ toast: 'Need online Supabase to create trips' })
+      return
+    }
+    const trip = await createTrip({
+      name,
+      startDate,
+      endDate,
+      emergency: seedBigBang ? TRIP_META.emergency : {},
+    })
+    localStorage.setItem(LOCAL_TOKEN_KEY, trip.editToken)
+    window.location.hash = `#/e/${trip.editToken}`
+    initStarted = false
+    set({
+      trip,
+      mode: 'edit',
+      events: [],
+      notes: [],
+      checklist: [],
+      expenses: [],
+      selectedDate: startDate,
+      loading: false,
+      panel: 'none',
+      toast: `Created “${name}”`,
+    })
+    subscribeRealtime(trip.id)
+    if (seedBigBang) await get().seedIfEmpty()
+    await get().refreshTrips()
+  },
 
   pushUndo: (label) => {
     const { events, undoStack } = get()
@@ -251,6 +316,7 @@ export const useTripStore = create<TripState>((set, get) => ({
             void get().seedIfEmpty()
           }
           void get().flush()
+          void get().refreshTrips()
           return
         }
       }
@@ -283,6 +349,7 @@ export const useTripStore = create<TripState>((set, get) => ({
         })
         subscribeRealtime(trip.id)
         void get().seedIfEmpty()
+        void get().refreshTrips()
         return
       }
 
@@ -363,6 +430,10 @@ export const useTripStore = create<TripState>((set, get) => ({
     const { trip, mode, selectedDate } = get()
     if (!trip || mode !== 'edit') throw new Error('Read-only')
     get().pushUndo('Add event')
+    const startTime = partial.startTime ?? '10:00'
+    const defaultEnd = minutesToTime(
+      Math.min(timeToMinutes(startTime) + SLOT_MINUTES, 23 * 60 + 59),
+    )
     const ev: TripEvent = {
       id: uuid(),
       tripId: trip.id,
@@ -370,8 +441,8 @@ export const useTripStore = create<TripState>((set, get) => ({
       category: partial.category ?? 'other',
       color: partial.color ?? null,
       date: partial.date ?? selectedDate,
-      startTime: partial.startTime ?? '10:00',
-      endTime: partial.endTime ?? '11:00',
+      startTime,
+      endTime: partial.endTime ?? defaultEnd,
       notes: partial.notes ?? '',
       location: partial.location ?? '',
       mapsUrl: partial.mapsUrl ?? '',
@@ -592,9 +663,10 @@ export const useTripStore = create<TripState>((set, get) => ({
       })
     }
     set({
-      toast: 'What-if copy ready — opening edit link',
+      toast: 'What-if copy saved as a new trip in the cloud — opening its edit link',
       panel: 'none',
     })
+    void get().refreshTrips()
     return clone.editToken
   },
 

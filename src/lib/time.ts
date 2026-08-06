@@ -17,6 +17,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const HOUR_HEIGHT = 56
+export const SLOT_MINUTES = 30
 export const GRID_START = 0 // midnight
 export const GRID_END = 24
 
@@ -210,7 +211,7 @@ export function isDateInTrip(date: string, start: string, end: string): boolean 
   })
 }
 
-export function snapMinutes(mins: number, step = 15): number {
+export function snapMinutes(mins: number, step = SLOT_MINUTES): number {
   return Math.round(mins / step) * step
 }
 

@@ -23,7 +23,7 @@ export function QuickAdd({ onClose }: Props) {
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState<EventCategory>('other')
   const [start, setStart] = useState('12:00')
-  const [end, setEnd] = useState('13:00')
+  const [end, setEnd] = useState('12:30')
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {

@@ -30,6 +30,7 @@ export function SidePanel() {
         {panel === 'import' ? <ImportPanel /> : null}
         {panel === 'whatif' ? <WhatIfPanel /> : null}
         {panel === 'recap' ? <RecapPanel /> : null}
+        {panel === 'trips' ? <TripsPanel /> : null}
       </div>
       <WeatherFooter />
     </aside>
@@ -46,6 +47,7 @@ function titleFor(p: string) {
     import: 'Import confirmation',
     whatif: 'What-if mode',
     recap: 'Trip recap',
+    trips: 'My trips',
   }
   return map[p] ?? p
 }
@@ -371,11 +373,19 @@ function ImportPanel() {
 function WhatIfPanel() {
   const createWhatIf = useTripStore((s) => s.createWhatIf)
   const setToast = useTripStore((s) => s.setToast)
+  const trip = useTripStore((s) => s.trip)
 
   return (
     <div className="space-y-3">
+      <div className="rounded-xl border border-[#feefc3] bg-[#fef7e0] p-3 text-sm">
+        <div className="font-semibold text-[#e37400]">Where is it saved?</div>
+        <p className="mt-1 text-[var(--gcal-muted)]">
+          What-if creates a <strong>brand-new trip</strong> in Supabase (cloud), separate from “{trip?.name}”.
+          It gets its own edit link and shows up under <strong>My trips</strong>. Your original trip stays untouched.
+        </p>
+      </div>
       <p className="text-sm text-[var(--gcal-muted)]">
-        Duplicate this whole trip into a sandbox copy. Shuffle days there without touching the real plan. Compare by opening both links.
+        Use it to shuffle days, try alternate plans, then compare both links side by side.
       </p>
       <button
         type="button"
@@ -385,13 +395,130 @@ function WhatIfPanel() {
           if (token) {
             const url = `${window.location.origin}${import.meta.env.BASE_URL}#/e/${token}`
             void navigator.clipboard.writeText(url)
-            setToast('What-if link copied — opening')
+            setToast('What-if trip saved in cloud — link copied')
             window.open(url, '_blank')
           }
         }}
       >
-        Create what-if copy
+        Create what-if trip copy
       </button>
+    </div>
+  )
+}
+
+function TripsPanel() {
+  const trips = useTripStore((s) => s.trips)
+  const trip = useTripStore((s) => s.trip)
+  const mode = useTripStore((s) => s.mode)
+  const switchTrip = useTripStore((s) => s.switchTrip)
+  const createNewTrip = useTripStore((s) => s.createNewTrip)
+  const refreshTrips = useTripStore((s) => s.refreshTrips)
+  const [name, setName] = useState('New trip')
+  const [startDate, setStartDate] = useState('2026-08-29')
+  const [endDate, setEndDate] = useState('2026-09-07')
+  const [seed, setSeed] = useState(false)
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    void refreshTrips()
+  }, [refreshTrips])
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+          All trips
+        </div>
+        <ul className="space-y-1.5">
+          {trips.map((t) => {
+            const active = t.id === trip?.id
+            const whatIf = Boolean(t.whatIfOf)
+            return (
+              <li key={t.id}>
+                <button
+                  type="button"
+                  disabled={mode === 'view'}
+                  onClick={() => void switchTrip(t.editToken)}
+                  className={cn(
+                    'w-full rounded-xl border px-3 py-2 text-left text-sm transition-colors',
+                    active
+                      ? 'border-[var(--gcal-blue)] bg-[#e8f0fe]'
+                      : 'border-[var(--gcal-border)] hover:bg-[var(--gcal-bg)]',
+                  )}
+                >
+                  <div className="font-semibold">{t.name}</div>
+                  <div className="text-[11px] text-[var(--gcal-muted)]">
+                    {t.startDate} → {t.endDate}
+                    {whatIf ? ' · what-if copy' : ''}
+                    {active ? ' · open now' : ''}
+                  </div>
+                </button>
+              </li>
+            )
+          })}
+          {!trips.length ? (
+            <p className="text-xs text-[var(--gcal-muted)]">No trips loaded yet.</p>
+          ) : null}
+        </ul>
+      </div>
+
+      {mode === 'edit' ? (
+        <div className="rounded-xl border border-[var(--gcal-border)] p-3">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+            Create new trip
+          </div>
+          <input
+            className="mb-2 w-full rounded-lg border border-[var(--gcal-border)] px-2 py-1.5 text-sm"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Trip name"
+          />
+          <div className="mb-2 grid grid-cols-2 gap-2">
+            <input
+              type="date"
+              className="rounded-lg border border-[var(--gcal-border)] px-2 py-1.5 text-sm"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <input
+              type="date"
+              className="rounded-lg border border-[var(--gcal-border)] px-2 py-1.5 text-sm"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
+          <label className="mb-3 flex items-center gap-2 text-xs text-[var(--gcal-muted)]">
+            <input
+              type="checkbox"
+              checked={seed}
+              onChange={(e) => setSeed(e.target.checked)}
+            />
+            Prefill BigBang US Trip 2026 events
+          </label>
+          <button
+            type="button"
+            disabled={busy || !name.trim()}
+            className="w-full rounded-lg bg-[var(--gcal-blue)] py-2 text-sm font-semibold text-white disabled:opacity-40"
+            onClick={async () => {
+              setBusy(true)
+              try {
+                await createNewTrip({
+                  name: name.trim(),
+                  startDate,
+                  endDate,
+                  seedBigBang: seed,
+                })
+              } finally {
+                setBusy(false)
+              }
+            }}
+          >
+            Create trip
+          </button>
+        </div>
+      ) : (
+        <p className="text-xs text-[var(--gcal-muted)]">View-only — open an edit link to manage trips.</p>
+      )}
     </div>
   )
 }
