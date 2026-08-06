@@ -19,3 +19,11 @@
 - Travel buffer warnings on tight post-flight gaps
 - Running late shifts remaining day events
 - Current event outline (where-now)
+
+### Phase 4 verification
+- Photo pin on event modal
+- Duplicate day from event modal
+- Paste confirmation import
+- What-if trip clone
+- Expenses CSV + trip recap collage
+- Haptic vibrate on add/move
