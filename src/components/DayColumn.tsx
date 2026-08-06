@@ -56,10 +56,10 @@ export function DayColumn({
   className,
 }: Props) {
   const mode = useTripStore((s) => s.mode)
-  const addEvent = useTripStore((s) => s.addEvent)
-  const selectEvent = useTripStore((s) => s.selectEvent)
+  const beginDraft = useTripStore((s) => s.beginDraft)
+  const pendingDraft = useTripStore((s) => s.pendingDraft)
   const colRef = useRef<HTMLDivElement>(null)
-  const [draft, setDraft] = useState<DraftRange | null>(null)
+  const [rangePreview, setRangePreview] = useState<DraftRange | null>(null)
   const draftRef = useRef<DraftRange | null>(null)
   const dragRef = useRef<{ origin: number; active: boolean } | null>(null)
 
@@ -68,12 +68,13 @@ export function DayColumn({
 
   const setDraftBoth = (d: DraftRange | null) => {
     draftRef.current = d
-    setDraft(d)
+    setRangePreview(d)
   }
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (mode !== 'edit') return
+      if (pendingDraft) return
       const target = e.target as HTMLElement
       if (target.closest('[data-event-chip]')) return
       if (!colRef.current) return
@@ -84,7 +85,7 @@ export function DayColumn({
       setDraftBoth({ start, end: start + SLOT_MINUTES })
       colRef.current.setPointerCapture(e.pointerId)
     },
-    [mode],
+    [mode, pendingDraft],
   )
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
@@ -107,7 +108,7 @@ export function DayColumn({
     })
   }, [])
 
-  const onPointerUp = useCallback(async () => {
+  const onPointerUp = useCallback(() => {
     const range = draftRef.current
     if (!dragRef.current?.active || !range) {
       dragRef.current = null
@@ -118,15 +119,14 @@ export function DayColumn({
     const startTime = minutesToTime(range.start)
     const endTime = minutesToTime(Math.min(range.end, 23 * 60 + 59))
     setDraftBoth(null)
-    const ev = await addEvent({
+    beginDraft({
       title: 'New event',
       date,
       startTime,
       endTime,
       category: 'other',
     })
-    selectEvent(ev.id)
-  }, [addEvent, date, selectEvent])
+  }, [beginDraft, date])
 
   return (
     <div
@@ -134,7 +134,7 @@ export function DayColumn({
       className={cn('relative flex-1 border-r border-[var(--gcal-border)]', className)}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
-      onPointerUp={() => void onPointerUp()}
+      onPointerUp={onPointerUp}
       onPointerCancel={() => {
         dragRef.current = null
         setDraftBoth(null)
@@ -144,16 +144,27 @@ export function DayColumn({
         <HourBlock key={h} date={date} hour={h} editable={mode === 'edit'} />
       ))}
       {today ? <NowLine /> : null}
-      {draft ? (
+      {rangePreview ? (
         <div
           className="pointer-events-none absolute left-1 right-1 z-10 rounded-md border-2 border-dashed border-[var(--gcal-blue)] bg-[#e8f0fe]/80 px-1.5 py-0.5 text-[11px] font-semibold text-[var(--gcal-blue)]"
           style={{
-            top: (draft.start / 60) * HOUR_HEIGHT,
-            height: Math.max(((draft.end - draft.start) / 60) * HOUR_HEIGHT, 22),
+            top: (rangePreview.start / 60) * HOUR_HEIGHT,
+            height: Math.max(((rangePreview.end - rangePreview.start) / 60) * HOUR_HEIGHT, 22),
           }}
         >
-          New event · {minutesToTime(draft.start)}–{minutesToTime(draft.end)}
+          New event · {minutesToTime(rangePreview.start)}–{minutesToTime(rangePreview.end)}
         </div>
+      ) : null}
+      {pendingDraft && pendingDraft.date === date ? (
+        <EventChip
+          event={pendingDraft}
+          isDraft
+          onClick={() => {}}
+          style={{
+            top: eventTopPx(pendingDraft.startTime),
+            height: eventHeightPx(pendingDraft.startTime, pendingDraft.endTime),
+          }}
+        />
       ) : null}
       {events.map((ev) => {
         const warn = warnings.find((w) => w.eventId === ev.id)?.message

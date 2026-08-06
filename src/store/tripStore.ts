@@ -22,6 +22,7 @@ import {
   deleteEventRemote,
   deleteExpenseRemote,
   deleteNoteRemote,
+  deleteTripRemote,
   enqueue,
   fetchTripBundle,
   fetchTripByToken,
@@ -45,6 +46,7 @@ interface TripState {
   trip: Trip | null
   trips: Trip[]
   events: TripEvent[]
+  pendingDraft: TripEvent | null
   notes: TripNote[]
   checklist: ChecklistItem[]
   expenses: Expense[]
@@ -70,6 +72,10 @@ interface TripState {
     endDate: string
     seedBigBang?: boolean
   }) => Promise<void>
+  deleteTrip: (tripId: string) => Promise<void>
+  beginDraft: (partial: Partial<TripEvent>) => TripEvent
+  commitDraft: (patch: Partial<TripEvent>) => Promise<void>
+  discardDraft: () => void
   setView: (v: CalendarView) => void
   setSelectedDate: (d: string) => void
   selectEvent: (id: string | null) => void
@@ -148,6 +154,7 @@ export const useTripStore = create<TripState>((set, get) => ({
   trip: null,
   trips: [],
   events: [],
+  pendingDraft: null,
   notes: [],
   checklist: [],
   expenses: [],
@@ -167,11 +174,55 @@ export const useTripStore = create<TripState>((set, get) => ({
 
   setView: (v) => set({ view: v }),
   setSelectedDate: (d) => set({ selectedDate: d }),
-  selectEvent: (id) => set({ selectedEventId: id }),
+  selectEvent: (id) =>
+    set({
+      selectedEventId: id,
+      pendingDraft: id ? null : get().pendingDraft,
+    }),
   setSearchQuery: (q) => set({ searchQuery: q }),
   setCategoryFilter: (c) => set({ categoryFilter: c }),
   setPanel: (p) => set({ panel: p }),
   setToast: (t) => set({ toast: t }),
+
+  beginDraft: (partial) => {
+    const { trip, selectedDate, pendingDraft } = get()
+    if (!trip || get().mode !== 'edit') throw new Error('Read-only')
+    if (pendingDraft) get().discardDraft()
+    const startTime = partial.startTime ?? '10:00'
+    const defaultEnd = minutesToTime(
+      Math.min(timeToMinutes(startTime) + SLOT_MINUTES, 23 * 60 + 59),
+    )
+    const draft: TripEvent = {
+      id: `draft-${uuid()}`,
+      tripId: trip.id,
+      title: partial.title ?? 'New event',
+      category: partial.category ?? 'other',
+      color: partial.color ?? null,
+      date: partial.date ?? selectedDate,
+      startTime,
+      endTime: partial.endTime ?? defaultEnd,
+      notes: partial.notes ?? '',
+      location: partial.location ?? '',
+      mapsUrl: partial.mapsUrl ?? '',
+      flight: partial.flight ?? null,
+      budgetCents: partial.budgetCents ?? 0,
+      photoDataUrl: partial.photoDataUrl ?? null,
+    }
+    set({ pendingDraft: draft, selectedEventId: null })
+    return draft
+  },
+
+  commitDraft: async (patch) => {
+    const draft = get().pendingDraft
+    if (!draft) return
+    const { id: _draftId, ...rest } = draft
+    set({ pendingDraft: null })
+    await get().addEvent({ ...rest, ...patch })
+  },
+
+  discardDraft: () => {
+    set({ pendingDraft: null })
+  },
 
   refreshTrips: async () => {
     if (!supabaseConfigured) return
@@ -220,6 +271,32 @@ export const useTripStore = create<TripState>((set, get) => ({
     subscribeRealtime(trip.id)
     if (seedBigBang) await get().seedIfEmpty()
     await get().refreshTrips()
+  },
+
+  deleteTrip: async (tripId) => {
+    if (get().mode !== 'edit' || !supabaseConfigured) {
+      set({ toast: 'Cannot delete trip right now' })
+      return
+    }
+    const { trip, trips } = get()
+    const { error } = await deleteTripRemote(tripId)
+    if (error) {
+      set({ toast: 'Failed to delete trip' })
+      return
+    }
+    const remaining = trips.filter((t) => t.id !== tripId)
+    set({ trips: remaining, toast: 'Trip deleted' })
+    if (trip?.id === tripId) {
+      if (remaining.length) {
+        await get().switchTrip(remaining[0].editToken)
+      } else {
+        await get().createNewTrip({
+          name: 'New trip',
+          startDate: TRIP_META.startDate,
+          endDate: TRIP_META.endDate,
+        })
+      }
+    }
   },
 
   pushUndo: (label) => {

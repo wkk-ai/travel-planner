@@ -12,6 +12,7 @@ interface Props {
   warning?: string
   onClick?: () => void
   draggable?: boolean
+  isDraft?: boolean
 }
 
 export function EventChip({
@@ -22,11 +23,12 @@ export function EventChip({
   warning,
   onClick,
   draggable = false,
+  isDraft = false,
 }: Props) {
   const colors = eventColors(event.category, event.color)
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: event.id,
-    disabled: !draggable,
+    disabled: !draggable || isDraft,
     data: { event },
   })
 
@@ -35,16 +37,23 @@ export function EventChip({
       type="button"
       data-event-chip
       ref={setNodeRef}
-      {...(draggable ? { ...listeners, ...attributes } : {})}
+      {...attributes}
       onClick={(e) => {
         e.stopPropagation()
         onClick?.()
       }}
-      onPointerDown={(e) => e.stopPropagation()}
+      onPointerDown={(e) => {
+        // Keep DayColumn from starting create-drag, but still feed dnd-kit.
+        e.stopPropagation()
+        if (draggable && !isDraft && listeners?.onPointerDown) {
+          listeners.onPointerDown(e)
+        }
+      }}
       className={cn(
         'event-block absolute left-1 right-1 overflow-hidden rounded-md border-l-4 px-1.5 py-0.5 text-left text-[11px] leading-tight shadow-sm',
         isDragging && 'opacity-40',
         isNow && 'is-now',
+        isDraft && 'border-2 border-dashed border-[var(--gcal-blue)] opacity-90',
         compact && 'relative left-0 right-0',
       )}
       style={{
@@ -73,6 +82,7 @@ export function EventChip({
       {!compact ? (
         <div className="mt-0.5 opacity-70">
           {event.startTime}–{event.endTime}
+          {isDraft ? ' · draft' : ''}
         </div>
       ) : null}
     </button>

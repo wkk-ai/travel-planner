@@ -6,6 +6,7 @@ import {
   ChevronDown,
   CloudSun,
   Copy,
+  Ellipsis,
   FileDown,
   FileText,
   Filter,
@@ -20,6 +21,7 @@ import {
   Sparkles,
   Undo2,
   Wallet,
+  Wrench,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { useTripStore } from '../store/tripStore'
@@ -27,7 +29,7 @@ import { daysUntil, tripDays, isoDate, cn } from '../lib/time'
 import { exportCalendarImage, exportCalendarPdf, exportExpensesCsv } from '../lib/export'
 import { CATEGORIES } from '../data/categories'
 import type { EventCategory } from '../types'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface Props {
   exportRef: RefObject<HTMLDivElement | null>
@@ -54,6 +56,7 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
   const runningLate = useTripStore((s) => s.runningLate)
   const setToast = useTripStore((s) => s.setToast)
   const [busy, setBusy] = useState(false)
+  const [menu, setMenu] = useState<'none' | 'plan' | 'tools' | 'share'>('none')
 
   const days = tripDays(trip.startDate, trip.endDate)
   const countdown = daysUntil(trip.startDate)
@@ -69,6 +72,7 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
       setToast('Image export failed')
     } finally {
       setBusy(false)
+      setMenu('none')
     }
   }
 
@@ -82,12 +86,19 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
       setToast('PDF export failed')
     } finally {
       setBusy(false)
+      setMenu('none')
     }
   }
 
   function copy(text: string, label: string) {
     void navigator.clipboard.writeText(text)
     setToast(`${label} copied`)
+    setMenu('none')
+  }
+
+  function openPanel(p: typeof panel) {
+    setPanel(panel === p ? 'none' : p)
+    setMenu('none')
   }
 
   return (
@@ -99,7 +110,7 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
           title="Open trips menu"
           onClick={() => {
             void useTripStore.getState().refreshTrips()
-            setPanel(panel === 'trips' ? 'none' : 'trips')
+            openPanel('trips')
           }}
         >
           <div className="flex size-9 items-center justify-center rounded-lg bg-[var(--gcal-blue)] text-white">
@@ -121,16 +132,12 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
                 : ''}
             </div>
           </div>
-          <Tip>My trips — switch or create</Tip>
         </button>
 
         <div className="flex items-center rounded-full border border-[var(--gcal-border)] bg-[var(--gcal-bg)] p-0.5 text-sm">
           <button
             type="button"
-            className={cn(
-              'rounded-full px-3 py-1.5 font-medium',
-              view === 'day' && 'bg-white shadow-sm',
-            )}
+            className={cn('rounded-full px-3 py-1.5 font-medium', view === 'day' && 'bg-white shadow-sm')}
             onClick={() => setView('day')}
             title="Day view"
           >
@@ -138,10 +145,7 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
           </button>
           <button
             type="button"
-            className={cn(
-              'rounded-full px-3 py-1.5 font-medium',
-              view === 'week' && 'bg-white shadow-sm',
-            )}
+            className={cn('rounded-full px-3 py-1.5 font-medium', view === 'week' && 'bg-white shadow-sm')}
             onClick={() => setView('week')}
             title="Week view"
           >
@@ -162,15 +166,12 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
           ))}
         </select>
 
-        <label className="group relative flex items-center gap-1 rounded-lg border border-[var(--gcal-border)] bg-white px-2 py-1.5 text-sm">
+        <label className="flex items-center gap-1 rounded-lg border border-[var(--gcal-border)] bg-white px-2 py-1.5 text-sm" title="Filter by category">
           <Filter className="size-3.5 text-[var(--gcal-muted)]" />
           <select
             className="max-w-[120px] bg-transparent outline-none"
             value={categoryFilter}
-            onChange={(e) =>
-              setCategoryFilter(e.target.value as EventCategory | 'all')
-            }
-            title="Filter by category"
+            onChange={(e) => setCategoryFilter(e.target.value as EventCategory | 'all')}
           >
             <option value="all">All categories</option>
             {Object.entries(CATEGORIES).map(([k, v]) => (
@@ -179,15 +180,14 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
               </option>
             ))}
           </select>
-          <Tip>Filter by category</Tip>
         </label>
 
-        <div className="relative min-w-[140px] flex-1 max-w-xs">
+        <div className="relative min-w-[120px] flex-1 max-w-xs">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--gcal-muted)]" />
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search events…"
+            placeholder="Search…"
             title="Search events"
             className="w-full rounded-full border border-[var(--gcal-border)] bg-white py-1.5 pl-8 pr-3 text-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe]"
           />
@@ -197,103 +197,112 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
           <StatusDot online={online} />
           {mode === 'edit' ? (
             <>
-              <IconBtn label="Undo last change" disabled={!undoStack.length} onClick={() => void undo()}>
+              <IconBtn label="Undo" disabled={!undoStack.length} onClick={() => void undo()}>
                 <Undo2 className="size-4" />
-              </IconBtn>
-              <IconBtn
-                label="Running late — shift rest of day +30 min"
-                onClick={() =>
-                  void runningLate(selectedDate, format(new Date(), 'HH:mm'), 30)
-                }
-              >
-                <Redo2 className="size-4" />
               </IconBtn>
               <button
                 type="button"
                 onClick={onQuickAdd}
                 title="Quick add event"
-                className="fab group relative inline-flex items-center gap-1 rounded-full bg-[var(--gcal-blue)] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[var(--gcal-blue-hover)]"
+                className="fab inline-flex items-center gap-1 rounded-full bg-[var(--gcal-blue)] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[var(--gcal-blue-hover)]"
               >
                 <Plus className="size-4" /> Add
-                <Tip light>Quick add event</Tip>
               </button>
             </>
           ) : null}
 
-          <IconBtn label="Trips list" active={panel === 'trips'} onClick={() => {
-            void useTripStore.getState().refreshTrips()
-            setPanel(panel === 'trips' ? 'none' : 'trips')
-          }}>
-            <FolderOpen className="size-4" />
-          </IconBtn>
-          <IconBtn label="Checklist" active={panel === 'checklist'} onClick={() => setPanel(panel === 'checklist' ? 'none' : 'checklist')}>
-            <ListTodo className="size-4" />
-          </IconBtn>
-          <IconBtn label="Day notes" active={panel === 'notes'} onClick={() => setPanel(panel === 'notes' ? 'none' : 'notes')}>
-            <FileText className="size-4" />
-          </IconBtn>
-          <IconBtn label="Budget & expenses" active={panel === 'budget'} onClick={() => setPanel(panel === 'budget' ? 'none' : 'budget')}>
-            <Wallet className="size-4" />
-          </IconBtn>
-          <IconBtn label="Weather & trip recap" active={panel === 'recap'} onClick={() => setPanel(panel === 'recap' ? 'none' : 'recap')}>
-            <CloudSun className="size-4" />
-          </IconBtn>
-          <IconBtn label="Emergency card" active={panel === 'emergency'} onClick={() => setPanel(panel === 'emergency' ? 'none' : 'emergency')}>
-            <Shield className="size-4" />
-          </IconBtn>
-          <IconBtn label="Share edit & view links" active={panel === 'share'} onClick={() => setPanel(panel === 'share' ? 'none' : 'share')}>
-            <Share2 className="size-4" />
-          </IconBtn>
-          {mode === 'edit' ? (
-            <>
-              <IconBtn label="Import flight/hotel confirmation" active={panel === 'import'} onClick={() => setPanel(panel === 'import' ? 'none' : 'import')}>
-                <FileDown className="size-4" />
-              </IconBtn>
-              <IconBtn label="What-if — save a sandbox copy as a new trip" active={panel === 'whatif'} onClick={() => setPanel(panel === 'whatif' ? 'none' : 'whatif')}>
-                <Sparkles className="size-4" />
-              </IconBtn>
-            </>
-          ) : null}
-          <IconBtn label="Trip recap photos & places" active={panel === 'recap'} onClick={() => setPanel(panel === 'recap' ? 'none' : 'recap')}>
-            <Camera className="size-4" />
-          </IconBtn>
-          <IconBtn label="Save calendar as image (PNG)" disabled={busy} onClick={() => void doExportImage()}>
-            <Copy className="size-4" />
-          </IconBtn>
-          <IconBtn label="Export calendar as PDF" disabled={busy} onClick={() => void doExportPdf()}>
-            <FileDown className="size-4" />
-          </IconBtn>
-          <IconBtn
-            label="Download expenses CSV"
-            onClick={() => {
-              exportExpensesCsv(useTripStore.getState().expenses, `${trip.name}-expenses.csv`)
-              setToast('Expenses CSV downloaded')
-            }}
+          <MenuButton
+            open={menu === 'plan'}
+            label="Plan"
+            icon={<ListTodo className="size-4" />}
+            onToggle={() => setMenu(menu === 'plan' ? 'none' : 'plan')}
+            onClose={() => setMenu('none')}
           >
-            <CheckSquare className="size-4" />
-          </IconBtn>
-          <IconBtn label="Copy view-only link" onClick={() => copy(share.view, 'View link')}>
-            <Link2 className="size-4" />
-          </IconBtn>
+            <MenuItem icon={<FolderOpen className="size-4" />} onClick={() => {
+              void useTripStore.getState().refreshTrips()
+              openPanel('trips')
+            }}>
+              My trips
+            </MenuItem>
+            <MenuItem icon={<ListTodo className="size-4" />} onClick={() => openPanel('checklist')}>
+              Checklist
+            </MenuItem>
+            <MenuItem icon={<FileText className="size-4" />} onClick={() => openPanel('notes')}>
+              Notes
+            </MenuItem>
+            <MenuItem icon={<Wallet className="size-4" />} onClick={() => openPanel('budget')}>
+              Budget
+            </MenuItem>
+            <MenuItem icon={<Shield className="size-4" />} onClick={() => openPanel('emergency')}>
+              Emergency card
+            </MenuItem>
+            <MenuItem icon={<Camera className="size-4" />} onClick={() => openPanel('recap')}>
+              Trip recap
+            </MenuItem>
+            <MenuItem icon={<CloudSun className="size-4" />} onClick={() => openPanel('recap')}>
+              Weather (in recap)
+            </MenuItem>
+          </MenuButton>
+
+          {mode === 'edit' ? (
+            <MenuButton
+              open={menu === 'tools'}
+              label="Tools"
+              icon={<Wrench className="size-4" />}
+              onToggle={() => setMenu(menu === 'tools' ? 'none' : 'tools')}
+              onClose={() => setMenu('none')}
+            >
+              <MenuItem
+                icon={<Redo2 className="size-4" />}
+                onClick={() => {
+                  void runningLate(selectedDate, format(new Date(), 'HH:mm'), 30)
+                  setMenu('none')
+                }}
+              >
+                Running late (+30m)
+              </MenuItem>
+              <MenuItem icon={<FileDown className="size-4" />} onClick={() => openPanel('import')}>
+                Import confirmation
+              </MenuItem>
+              <MenuItem icon={<Sparkles className="size-4" />} onClick={() => openPanel('whatif')}>
+                What-if copy
+              </MenuItem>
+            </MenuButton>
+          ) : null}
+
+          <MenuButton
+            open={menu === 'share'}
+            label="Share"
+            icon={<Share2 className="size-4" />}
+            onToggle={() => setMenu(menu === 'share' ? 'none' : 'share')}
+            onClose={() => setMenu('none')}
+          >
+            <MenuItem icon={<Share2 className="size-4" />} onClick={() => openPanel('share')}>
+              Edit & view links
+            </MenuItem>
+            <MenuItem icon={<Link2 className="size-4" />} onClick={() => copy(share.view, 'View link')}>
+              Copy view-only link
+            </MenuItem>
+            <MenuItem icon={<Copy className="size-4" />} disabled={busy} onClick={() => void doExportImage()}>
+              Save as image
+            </MenuItem>
+            <MenuItem icon={<FileDown className="size-4" />} disabled={busy} onClick={() => void doExportPdf()}>
+              Export PDF
+            </MenuItem>
+            <MenuItem
+              icon={<CheckSquare className="size-4" />}
+              onClick={() => {
+                exportExpensesCsv(useTripStore.getState().expenses, `${trip.name}-expenses.csv`)
+                setToast('Expenses CSV downloaded')
+                setMenu('none')
+              }}
+            >
+              Expenses CSV
+            </MenuItem>
+          </MenuButton>
         </div>
       </div>
     </header>
-  )
-}
-
-function Tip({ children, light }: { children: React.ReactNode; light?: boolean }) {
-  return (
-    <span
-      className={cn(
-        'pointer-events-none absolute left-1/2 top-[calc(100%+6px)] z-50 hidden -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[11px] font-medium shadow-lg group-hover:block',
-        light
-          ? 'bg-white text-[var(--gcal-text)]'
-          : 'bg-[#3c4043] text-white',
-      )}
-      role="tooltip"
-    >
-      {children}
-    </span>
   )
 }
 
@@ -301,13 +310,13 @@ function StatusDot({ online }: { online: boolean }) {
   return (
     <span
       className={cn(
-        'group relative mr-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium',
+        'mr-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium',
         online ? 'bg-[#e6f4ea] text-[#137333]' : 'bg-[#fce8e6] text-[#c5221f]',
       )}
+      title={online ? 'Synced live' : 'Offline — edits queued'}
     >
       <span className={cn('size-1.5 rounded-full', online ? 'bg-[#34a853]' : 'bg-[#ea4335]')} />
       {online ? 'Live' : 'Offline'}
-      <Tip>{online ? 'Synced live' : 'Offline — edits queued'}</Tip>
     </span>
   )
 }
@@ -317,13 +326,11 @@ function IconBtn({
   label,
   onClick,
   disabled,
-  active,
 }: {
   children: React.ReactNode
   label: string
   onClick: () => void
   disabled?: boolean
-  active?: boolean
 }) {
   return (
     <button
@@ -332,13 +339,85 @@ function IconBtn({
       title={label}
       disabled={disabled}
       onClick={onClick}
-      className={cn(
-        'group relative inline-flex size-8 items-center justify-center rounded-full text-[var(--gcal-text)] hover:bg-[var(--gcal-bg)] disabled:opacity-40',
-        active && 'bg-[#e8f0fe] text-[var(--gcal-blue)]',
-      )}
+      className="inline-flex size-8 items-center justify-center rounded-full text-[var(--gcal-text)] hover:bg-[var(--gcal-bg)] disabled:opacity-40"
     >
       {children}
-      <Tip>{label}</Tip>
+    </button>
+  )
+}
+
+function MenuButton({
+  open,
+  label,
+  icon,
+  onToggle,
+  onClose,
+  children,
+}: {
+  open: boolean
+  label: string
+  icon: React.ReactNode
+  onToggle: () => void
+  onClose: () => void
+  children: React.ReactNode
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    function onDoc(e: MouseEvent) {
+      if (!ref.current?.contains(e.target as Node)) onClose()
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [open, onClose])
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        title={label}
+        onClick={onToggle}
+        className={cn(
+          'inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-sm font-medium hover:bg-[var(--gcal-bg)]',
+          open && 'bg-[#e8f0fe] text-[var(--gcal-blue)]',
+        )}
+      >
+        {icon}
+        <span className="hidden sm:inline">{label}</span>
+        <Ellipsis className="size-3.5 sm:hidden" />
+      </button>
+      {open ? (
+        <div className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[200px] rounded-xl border border-[var(--gcal-border)] bg-white py-1 shadow-xl">
+          <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+            {label}
+          </div>
+          {children}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function MenuItem({
+  children,
+  icon,
+  onClick,
+  disabled,
+}: {
+  children: React.ReactNode
+  icon: React.ReactNode
+  onClick: () => void
+  disabled?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-[var(--gcal-bg)] disabled:opacity-40"
+    >
+      <span className="text-[var(--gcal-muted)]">{icon}</span>
+      {children}
     </button>
   )
 }

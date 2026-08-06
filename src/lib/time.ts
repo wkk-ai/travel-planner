@@ -215,6 +215,15 @@ export function snapMinutes(mins: number, step = SLOT_MINUTES): number {
   return Math.round(mins / step) * step
 }
 
+export function timeOptions30(): string[] {
+  const opts: string[] = []
+  for (let m = 0; m < 24 * 60; m += SLOT_MINUTES) {
+    opts.push(minutesToTime(m))
+  }
+  return opts
+}
+
+
 export function addDaysIso(date: string, days: number): string {
   return isoDate(addDays(parseISO(date), days))
 }

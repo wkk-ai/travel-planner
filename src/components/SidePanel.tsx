@@ -412,16 +412,20 @@ function TripsPanel() {
   const mode = useTripStore((s) => s.mode)
   const switchTrip = useTripStore((s) => s.switchTrip)
   const createNewTrip = useTripStore((s) => s.createNewTrip)
+  const deleteTrip = useTripStore((s) => s.deleteTrip)
   const refreshTrips = useTripStore((s) => s.refreshTrips)
   const [name, setName] = useState('New trip')
   const [startDate, setStartDate] = useState('2026-08-29')
   const [endDate, setEndDate] = useState('2026-09-07')
   const [seed, setSeed] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
 
   useEffect(() => {
     void refreshTrips()
   }, [refreshTrips])
+
+  const confirmTrip = trips.find((t) => t.id === confirmId) ?? null
 
   return (
     <div className="space-y-4">
@@ -434,17 +438,20 @@ function TripsPanel() {
             const active = t.id === trip?.id
             const whatIf = Boolean(t.whatIfOf)
             return (
-              <li key={t.id}>
+              <li
+                key={t.id}
+                className={cn(
+                  'rounded-xl border px-3 py-2 text-sm',
+                  active
+                    ? 'border-[var(--gcal-blue)] bg-[#e8f0fe]'
+                    : 'border-[var(--gcal-border)]',
+                )}
+              >
                 <button
                   type="button"
                   disabled={mode === 'view'}
                   onClick={() => void switchTrip(t.editToken)}
-                  className={cn(
-                    'w-full rounded-xl border px-3 py-2 text-left text-sm transition-colors',
-                    active
-                      ? 'border-[var(--gcal-blue)] bg-[#e8f0fe]'
-                      : 'border-[var(--gcal-border)] hover:bg-[var(--gcal-bg)]',
-                  )}
+                  className="w-full text-left"
                 >
                   <div className="font-semibold">{t.name}</div>
                   <div className="text-[11px] text-[var(--gcal-muted)]">
@@ -453,6 +460,15 @@ function TripsPanel() {
                     {active ? ' · open now' : ''}
                   </div>
                 </button>
+                {mode === 'edit' ? (
+                  <button
+                    type="button"
+                    className="mt-1.5 text-[11px] font-medium text-[#c5221f] hover:underline"
+                    onClick={() => setConfirmId(t.id)}
+                  >
+                    Delete trip…
+                  </button>
+                ) : null}
               </li>
             )
           })}
@@ -461,6 +477,38 @@ function TripsPanel() {
           ) : null}
         </ul>
       </div>
+
+      {confirmTrip ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-4 shadow-2xl">
+            <div className="brand-serif text-xl">Delete trip?</div>
+            <p className="mt-2 text-sm text-[var(--gcal-muted)]">
+              Permanently delete <strong>{confirmTrip.name}</strong> and all its events, notes,
+              checklist, and expenses. This cannot be undone.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-xl px-3 py-2 text-sm font-medium hover:bg-[var(--gcal-bg)]"
+                onClick={() => setConfirmId(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="rounded-xl bg-[#c5221f] px-3 py-2 text-sm font-semibold text-white"
+                onClick={async () => {
+                  const id = confirmTrip.id
+                  setConfirmId(null)
+                  await deleteTrip(id)
+                }}
+              >
+                Yes, delete
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {mode === 'edit' ? (
         <div className="rounded-xl border border-[var(--gcal-border)] p-3">

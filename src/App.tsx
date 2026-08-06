@@ -30,6 +30,8 @@ export default function App() {
   const mode = useTripStore((s) => s.mode)
   const selectedEventId = useTripStore((s) => s.selectedEventId)
   const selectEvent = useTripStore((s) => s.selectEvent)
+  const pendingDraft = useTripStore((s) => s.pendingDraft)
+  const discardDraft = useTripStore((s) => s.discardDraft)
   const moveEvent = useTripStore((s) => s.moveEvent)
   const searchQuery = useTripStore((s) => s.searchQuery)
   const categoryFilter = useTripStore((s) => s.categoryFilter)
@@ -73,6 +75,8 @@ export default function App() {
   const warnings = useMemo(() => travelBufferWarnings(events), [events])
   const activeEvent = events.find((e) => e.id === activeId) ?? null
   const selected = events.find((e) => e.id === selectedEventId) ?? null
+  const modalEvent = pendingDraft ?? selected
+  const modalIsDraft = Boolean(pendingDraft)
 
   function onDragStart(e: DragStartEvent) {
     if (mode !== 'edit') return
@@ -158,8 +162,15 @@ export default function App() {
         <SidePanel />
       </div>
 
-      {selected ? (
-        <EventModal event={selected} onClose={() => selectEvent(null)} />
+      {modalEvent ? (
+        <EventModal
+          event={modalEvent}
+          isDraft={modalIsDraft}
+          onClose={() => {
+            if (modalIsDraft) discardDraft()
+            else selectEvent(null)
+          }}
+        />
       ) : null}
 
       {quickOpen && mode === 'edit' ? (

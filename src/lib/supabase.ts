@@ -148,6 +148,10 @@ export async function upsertEvents(events: TripEvent[]) {
   return supabase.from('travel_events').upsert(events.map(eventToRow))
 }
 
+export async function deleteTripRemote(id: string) {
+  return supabase.from('travel_trips').delete().eq('id', id)
+}
+
 export async function listTrips(): Promise<Trip[]> {
   if (!supabaseConfigured) return []
   const { data, error } = await supabase
