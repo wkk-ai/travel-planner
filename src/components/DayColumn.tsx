@@ -152,7 +152,7 @@ export function DayColumn({
             top: (rangePreview.start / 60) * HOUR_HEIGHT + EVENT_GAP_PX / 2,
             height: Math.max(
               ((rangePreview.end - rangePreview.start) / 60) * HOUR_HEIGHT - EVENT_GAP_PX,
-              20,
+              22,
             ),
           }}
         >
