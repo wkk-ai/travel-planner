@@ -46,7 +46,6 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
   const mode = useTripStore((s) => s.mode)
   const undo = useTripStore((s) => s.undo)
   const undoStack = useTripStore((s) => s.undoStack)
-  const online = useTripStore((s) => s.online)
   const searchQuery = useTripStore((s) => s.searchQuery)
   const setSearchQuery = useTripStore((s) => s.setSearchQuery)
   const categoryFilter = useTripStore((s) => s.categoryFilter)
@@ -194,7 +193,7 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
         </div>
 
         <div className="ml-auto flex flex-wrap items-center gap-1">
-          <StatusDot online={online} />
+          <StatusDot />
           {mode === 'edit' ? (
             <>
               <IconBtn label="Undo" disabled={!undoStack.length} onClick={() => void undo()}>
@@ -315,17 +314,53 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
   )
 }
 
-function StatusDot({ online }: { online: boolean }) {
+function StatusDot() {
+  const online = useTripStore((s) => s.online)
+  const syncing = useTripStore((s) => s.syncing)
+  const pendingOps = useTripStore((s) => s.pendingOps)
+
+  let label = 'Live'
+  let tip = 'Connected — changes sync to the cloud'
+  let tone: 'ok' | 'warn' | 'bad' | 'busy' = 'ok'
+
+  if (!online) {
+    label = 'Offline'
+    tip =
+      pendingOps > 0
+        ? `Offline — ${pendingOps} change${pendingOps === 1 ? '' : 's'} saved on this device`
+        : 'Offline — edits stay on this device until you’re back online'
+    tone = 'bad'
+  } else if (syncing) {
+    label = 'Syncing'
+    tip = 'Uploading offline changes…'
+    tone = 'busy'
+  } else if (pendingOps > 0) {
+    label = `${pendingOps} pending`
+    tip = `${pendingOps} change${pendingOps === 1 ? '' : 's'} waiting to sync`
+    tone = 'warn'
+  }
+
   return (
     <span
       className={cn(
         'mr-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium',
-        online ? 'bg-[#e6f4ea] text-[#137333]' : 'bg-[#fce8e6] text-[#c5221f]',
+        tone === 'ok' && 'bg-[#e6f4ea] text-[#137333]',
+        tone === 'busy' && 'bg-[#e8f0fe] text-[var(--gcal-blue)]',
+        tone === 'warn' && 'bg-[#fef7e0] text-[#b06000]',
+        tone === 'bad' && 'bg-[#fce8e6] text-[#c5221f]',
       )}
-      title={online ? 'Synced live' : 'Offline — edits queued'}
+      title={tip}
     >
-      <span className={cn('size-1.5 rounded-full', online ? 'bg-[#34a853]' : 'bg-[#ea4335]')} />
-      {online ? 'Live' : 'Offline'}
+      <span
+        className={cn(
+          'size-1.5 rounded-full',
+          tone === 'ok' && 'bg-[#34a853]',
+          tone === 'busy' && 'animate-pulse bg-[var(--gcal-blue)]',
+          tone === 'warn' && 'bg-[#f9ab00]',
+          tone === 'bad' && 'bg-[#ea4335]',
+        )}
+      />
+      {label}
     </span>
   )
 }

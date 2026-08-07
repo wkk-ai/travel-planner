@@ -28,6 +28,8 @@ import {
   fetchTripByToken,
   flushQueue,
   listTrips,
+  loadQueue,
+  type OfflineOp,
   supabase,
   supabaseConfigured,
   updateTripRemote,
@@ -89,7 +91,6 @@ interface TripState {
   updateEvent: (id: string, patch: Partial<TripEvent>) => Promise<void>
   deleteEvent: (id: string) => Promise<void>
   moveEvent: (id: string, date: string, startTime: string, endTime: string) => Promise<void>
-  duplicateDay: (fromDate: string, toDate: string) => Promise<void>
   runningLate: (date: string, fromTime: string, minutes: number) => Promise<void>
   addNote: (partial?: Partial<TripNote>) => Promise<void>
   updateNote: (id: string, patch: Partial<TripNote>) => Promise<void>
@@ -108,11 +109,16 @@ interface TripState {
 async function syncEvent(e: TripEvent, canEdit: boolean) {
   if (!canEdit) return
   if (!supabaseConfigured || !navigator.onLine) {
-    enqueue({ type: 'upsert_event', payload: e })
+    queueOp({ type: 'upsert_event', payload: e })
     return
   }
   const { error } = await upsertEvent(e)
-  if (error) enqueue({ type: 'upsert_event', payload: e })
+  if (error) queueOp({ type: 'upsert_event', payload: e })
+}
+
+function queueOp(op: OfflineOp) {
+  enqueue(op)
+  useTripStore.setState({ pendingOps: loadQueue().length })
 }
 
 let initStarted = false
@@ -318,7 +324,7 @@ export const useTripStore = create<TripState>((set, get) => ({
     if (supabaseConfigured && navigator.onLine) {
       await upsertEvents(snap.events)
     } else {
-      for (const e of snap.events) enqueue({ type: 'upsert_event', payload: e })
+      for (const e of snap.events) queueOp({ type: 'upsert_event', payload: e })
     }
     set({ toast: `Undid: ${snap.label}` })
   },
@@ -329,7 +335,7 @@ export const useTripStore = create<TripState>((set, get) => ({
       return
     }
     initStarted = true
-    set({ loading: true })
+    set({ loading: true, pendingOps: loadQueue().length, online: navigator.onLine })
 
     const hash = window.location.hash.replace(/^#\/?/, '')
     const parts = hash.split('/')
@@ -553,10 +559,10 @@ export const useTripStore = create<TripState>((set, get) => ({
     get().pushUndo('Delete event')
     set({ events: get().events.filter((e) => e.id !== id), selectedEventId: null })
     if (!supabaseConfigured || !navigator.onLine) {
-      enqueue({ type: 'delete_event', id })
+      queueOp({ type: 'delete_event', id })
     } else {
       const { error } = await deleteEventRemote(id)
-      if (error) enqueue({ type: 'delete_event', id })
+      if (error) queueOp({ type: 'delete_event', id })
     }
   },
 
@@ -574,21 +580,6 @@ export const useTripStore = create<TripState>((set, get) => ({
         navigator.vibrate?.([8, 20, 8])
       }
     }
-  },
-
-  duplicateDay: async (fromDate, toDate) => {
-    if (get().mode !== 'edit' || !get().trip) return
-    get().pushUndo('Duplicate day')
-    const copies = get()
-      .events.filter((e) => e.date === fromDate)
-      .map((e) => ({
-        ...e,
-        id: uuid(),
-        date: toDate,
-      }))
-    set({ events: [...get().events, ...copies] })
-    for (const e of copies) await syncEvent(e, true)
-    set({ toast: `Copied ${copies.length} events to ${toDate}` })
   },
 
   runningLate: async (date, fromTime, minutes) => {
@@ -613,7 +604,7 @@ export const useTripStore = create<TripState>((set, get) => ({
       body: partial.body ?? '',
     }
     set({ notes: [...get().notes, n] })
-    if (!supabaseConfigured || !navigator.onLine) enqueue({ type: 'upsert_note', payload: n })
+    if (!supabaseConfigured || !navigator.onLine) queueOp({ type: 'upsert_note', payload: n })
     else await upsertNote(n)
   },
 
@@ -623,14 +614,14 @@ export const useTripStore = create<TripState>((set, get) => ({
     set({ notes })
     const n = notes.find((x) => x.id === id)
     if (!n) return
-    if (!supabaseConfigured || !navigator.onLine) enqueue({ type: 'upsert_note', payload: n })
+    if (!supabaseConfigured || !navigator.onLine) queueOp({ type: 'upsert_note', payload: n })
     else await upsertNote(n)
   },
 
   deleteNote: async (id) => {
     if (get().mode !== 'edit') return
     set({ notes: get().notes.filter((n) => n.id !== id) })
-    if (!supabaseConfigured || !navigator.onLine) enqueue({ type: 'delete_note', id })
+    if (!supabaseConfigured || !navigator.onLine) queueOp({ type: 'delete_note', id })
     else await deleteNoteRemote(id)
   },
 
@@ -647,7 +638,7 @@ export const useTripStore = create<TripState>((set, get) => ({
     }
     set({ checklist: [...checklist, c] })
     if (!supabaseConfigured || !navigator.onLine)
-      enqueue({ type: 'upsert_checklist', payload: c })
+      queueOp({ type: 'upsert_checklist', payload: c })
     else await upsertChecklistItem(c)
   },
 
@@ -660,7 +651,7 @@ export const useTripStore = create<TripState>((set, get) => ({
     const c = checklist.find((x) => x.id === id)
     if (!c) return
     if (!supabaseConfigured || !navigator.onLine)
-      enqueue({ type: 'upsert_checklist', payload: c })
+      queueOp({ type: 'upsert_checklist', payload: c })
     else await upsertChecklistItem(c)
   },
 
@@ -668,7 +659,7 @@ export const useTripStore = create<TripState>((set, get) => ({
     if (get().mode !== 'edit') return
     set({ checklist: get().checklist.filter((c) => c.id !== id) })
     if (!supabaseConfigured || !navigator.onLine)
-      enqueue({ type: 'delete_checklist', id })
+      queueOp({ type: 'delete_checklist', id })
     else await deleteChecklistRemote(id)
   },
 
@@ -687,7 +678,7 @@ export const useTripStore = create<TripState>((set, get) => ({
     }
     set({ expenses: [...get().expenses, e] })
     if (!supabaseConfigured || !navigator.onLine)
-      enqueue({ type: 'upsert_expense', payload: e })
+      queueOp({ type: 'upsert_expense', payload: e })
     else await upsertExpense(e)
   },
 
@@ -695,7 +686,7 @@ export const useTripStore = create<TripState>((set, get) => ({
     if (get().mode !== 'edit') return
     set({ expenses: get().expenses.filter((e) => e.id !== id) })
     if (!supabaseConfigured || !navigator.onLine)
-      enqueue({ type: 'delete_expense', id })
+      queueOp({ type: 'delete_expense', id })
     else await deleteExpenseRemote(id)
   },
 
@@ -705,7 +696,7 @@ export const useTripStore = create<TripState>((set, get) => ({
     const trip: Trip = { ...current, ...patch }
     set({ trip })
     if (!supabaseConfigured || !navigator.onLine)
-      enqueue({ type: 'update_trip', payload: trip })
+      queueOp({ type: 'update_trip', payload: trip })
     else await updateTripRemote(trip)
   },
 
@@ -754,18 +745,33 @@ export const useTripStore = create<TripState>((set, get) => ({
   flush: async () => {
     set({ syncing: true })
     const n = await flushQueue()
-    set({ syncing: false, pendingOps: 0, toast: n ? `Synced ${n} offline changes` : null })
+    const left = loadQueue().length
+    set({
+      syncing: false,
+      pendingOps: left,
+      toast: n
+        ? left
+          ? `Synced ${n} — ${left} still waiting`
+          : `Synced ${n} offline change${n === 1 ? '' : 's'}`
+        : left
+          ? 'Still waiting to sync — try again'
+          : null,
+    })
   },
 }))
 
 // Online/offline listeners
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
-    useTripStore.setState({ online: true })
+    useTripStore.setState({ online: true, pendingOps: loadQueue().length })
     void useTripStore.getState().flush()
   })
   window.addEventListener('offline', () => {
-    useTripStore.setState({ online: false, toast: 'Offline — edits queued' })
+    useTripStore.setState({
+      online: false,
+      pendingOps: loadQueue().length,
+      toast: 'You’re offline — edits stay on this device',
+    })
   })
 }
 

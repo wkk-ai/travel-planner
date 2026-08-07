@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Camera, ExternalLink, Info, Trash2, X } from 'lucide-react'
+import { Camera, ExternalLink, Trash2, X } from 'lucide-react'
 import type { EventCategory, TripEvent } from '../types'
 import { CATEGORIES, eventColors } from '../data/categories'
 import { useTripStore } from '../store/tripStore'
-import { tripDays, isoDate, timeOptions30, cn } from '../lib/time'
-import { format, parseISO } from 'date-fns'
+import { timeOptions30, cn } from '../lib/time'
 
 interface Props {
   event: TripEvent
@@ -14,10 +13,8 @@ interface Props {
 
 export function EventModal({ event, isDraft = false, onClose }: Props) {
   const mode = useTripStore((s) => s.mode)
-  const trip = useTripStore((s) => s.trip)!
   const updateEvent = useTripStore((s) => s.updateEvent)
   const deleteEvent = useTripStore((s) => s.deleteEvent)
-  const duplicateDay = useTripStore((s) => s.duplicateDay)
   const commitDraft = useTripStore((s) => s.commitDraft)
   const discardDraft = useTripStore((s) => s.discardDraft)
   const setToast = useTripStore((s) => s.setToast)
@@ -25,7 +22,6 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [draft, setDraft] = useState(event)
-  const [dupTarget, setDupTarget] = useState('')
   const [saving, setSaving] = useState(false)
   const times = useMemo(() => timeOptions30(), [])
 
@@ -71,7 +67,6 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
     reader.readAsDataURL(file)
   }
 
-  const days = tripDays(trip.startDate, trip.endDate)
   const colors = eventColors(draft.category, draft.color)
 
   return (
@@ -357,48 +352,6 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
               </>
             ) : null}
           </section>
-
-          {!readOnly && !isDraft ? (
-            <section className="rounded-xl border border-[var(--gcal-border)] bg-[var(--gcal-bg)]/50 p-3">
-              <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
-                Duplicate this day
-                <span className="group relative inline-flex">
-                  <Info className="size-3.5 cursor-help text-[var(--gcal-blue)]" />
-                  <span className="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-20 hidden w-56 -translate-x-1/2 rounded-md bg-[#3c4043] px-2 py-1.5 text-[11px] font-normal normal-case tracking-normal text-white shadow-lg group-hover:block">
-                    Copies every event from this day onto another day (template for similar park/shopping days).
-                  </span>
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <select
-                  className="field flex-1"
-                  value={dupTarget}
-                  onChange={(e) => setDupTarget(e.target.value)}
-                >
-                  <option value="">Copy all events to…</option>
-                  {days
-                    .map((d) => isoDate(d))
-                    .filter((d) => d !== draft.date)
-                    .map((d) => (
-                      <option key={d} value={d}>
-                        {format(parseISO(d), 'EEE dd/MM')}
-                      </option>
-                    ))}
-                </select>
-                <button
-                  type="button"
-                  disabled={!dupTarget}
-                  className="rounded-xl bg-white px-3 text-sm font-medium shadow-sm disabled:opacity-40"
-                  onClick={() => {
-                    void duplicateDay(draft.date, dupTarget)
-                    handleClose()
-                  }}
-                >
-                  Copy
-                </button>
-              </div>
-            </section>
-          ) : null}
         </div>
 
         <div className="flex items-center justify-between gap-2 border-t border-[var(--gcal-border)] bg-white px-4 py-3">

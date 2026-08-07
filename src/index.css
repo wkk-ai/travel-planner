@@ -70,15 +70,9 @@ textarea {
 .event-block {
   transition: box-shadow 120ms ease, transform 120ms ease;
   touch-action: none;
-  /* Opaque white ring hides grid lines in the gap so blocks read as separate */
-  box-shadow:
-    0 0 0 4px #fff,
-    0 1px 3px rgba(60, 64, 67, 0.14);
 }
 .event-block:hover {
-  box-shadow:
-    0 0 0 4px #fff,
-    0 2px 8px rgba(60, 64, 67, 0.22);
+  box-shadow: 0 1px 4px rgba(60, 64, 67, 0.18);
   z-index: 5;
 }
 .event-block.is-now {

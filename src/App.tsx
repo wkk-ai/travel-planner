@@ -11,6 +11,7 @@ import {
 } from '@dnd-kit/core'
 import { shareUrls, useTripStore } from './store/tripStore'
 import { TopBar } from './components/TopBar'
+import { SyncBanner } from './components/SyncBanner'
 import { WeekGrid } from './components/WeekGrid'
 import { DayGrid } from './components/DayGrid'
 import { EventModal } from './components/EventModal'
@@ -132,6 +133,7 @@ export default function App() {
         onQuickAdd={() => setQuickOpen(true)}
         share={shareUrls(trip)}
       />
+      <SyncBanner />
 
       <div className="relative flex min-h-0 flex-1">
         <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
