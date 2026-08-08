@@ -1,11 +1,10 @@
-import { format } from 'date-fns'
+import { format, isToday } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { CATEGORIES } from '../data/categories'
 import { cn, isoDate, tripDaysIncludingEvents } from '../lib/time'
 import { useTripStore } from '../store/tripStore'
 import type { EventCategory } from '../types'
 
-/** Fixed-height row below Story | Schedule tabs — prevents tab bar from jumping. */
 export function ScheduleToolbar() {
   const trip = useTripStore((s) => s.trip)!
   const activeTab = useTripStore((s) => s.activeTab)
@@ -15,8 +14,11 @@ export function ScheduleToolbar() {
   const setSelectedDate = useTripStore((s) => s.setSelectedDate)
   const categoryFilter = useTripStore((s) => s.categoryFilter)
   const setCategoryFilter = useTripStore((s) => s.setCategoryFilter)
-
+  const setActiveTab = useTripStore((s) => s.setActiveTab)
   const events = useTripStore((s) => s.events)
+
+  if (activeTab !== 'schedule') return null
+
   const days = tripDaysIncludingEvents(trip.startDate, trip.endDate, events)
   const dayIndex = days.findIndex((d) => isoDate(d) === selectedDate)
   const selectedDay = days[Math.max(0, dayIndex)]
@@ -29,16 +31,8 @@ export function ScheduleToolbar() {
     if (dayIndex >= 0 && dayIndex < days.length - 1) setSelectedDate(isoDate(days[dayIndex + 1]))
   }
 
-  const showSchedule = activeTab === 'schedule'
-
   return (
-    <div
-      className={cn(
-        'no-print schedule-toolbar shrink-0 border-b border-[var(--gcal-border)] bg-[var(--gcal-bg)]',
-        showSchedule ? 'opacity-100' : 'pointer-events-none opacity-0',
-      )}
-      aria-hidden={!showSchedule}
-    >
+    <div className="no-print schedule-toolbar shrink-0 border-b border-[var(--gcal-border)] bg-[var(--gcal-bg)]">
       <div className="flex h-12 items-center gap-2 px-3 sm:px-4">
         <div className="flex shrink-0 rounded-lg bg-white p-0.5 ring-1 ring-[var(--gcal-border)]">
           <button
@@ -87,6 +81,14 @@ export function ScheduleToolbar() {
           </button>
         </div>
 
+        <button
+          type="button"
+          onClick={() => setActiveTab('story')}
+          className="hidden shrink-0 text-ui-sm font-semibold text-[var(--gcal-blue)] hover:underline sm:block"
+        >
+          Story
+        </button>
+
         <select
           className="hidden max-w-[8rem] shrink-0 rounded-lg border border-[var(--gcal-border)] bg-white px-2 py-1.5 text-ui-sm sm:block"
           value={selectedDate}
@@ -113,6 +115,33 @@ export function ScheduleToolbar() {
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Mobile week strip */}
+      <div className="flex gap-1.5 overflow-x-auto px-3 pb-2.5 sm:hidden">
+        {days.map((d) => {
+          const iso = isoDate(d)
+          const selected = iso === selectedDate
+          const today = isToday(d)
+          return (
+            <button
+              key={iso}
+              type="button"
+              onClick={() => {
+                setSelectedDate(iso)
+                setView('day')
+              }}
+              className={cn(
+                'flex shrink-0 flex-col items-center rounded-xl px-3 py-1.5 text-center',
+                selected ? 'bg-[var(--gcal-blue)] text-white' : 'bg-white text-[var(--gcal-text)] ring-1 ring-[var(--gcal-border)]',
+                today && !selected && 'ring-[var(--gcal-blue)]',
+              )}
+            >
+              <span className="text-[10px] font-semibold uppercase opacity-80">{format(d, 'EEE')}</span>
+              <span className="text-ui-base font-bold leading-tight">{format(d, 'd')}</span>
+            </button>
+          )
+        })}
       </div>
     </div>
   )

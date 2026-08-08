@@ -36,7 +36,7 @@ export function DayGrid({ events, warnings, onSelect }: Props) {
             {format(d, 'd')}
           </div>
           <div className="min-w-0">
-            <div className="truncate text-lg font-semibold sm:brand-serif sm:text-2xl">{format(d, 'MMMM yyyy')}</div>
+            <div className="truncate text-lg font-semibold sm:text-2xl">{format(d, 'MMMM yyyy')}</div>
             <div className="hidden text-sm text-[var(--gcal-muted)] sm:block">{dayEvents.length} events</div>
           </div>
         </div>

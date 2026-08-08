@@ -26,6 +26,11 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
   const [saving, setSaving] = useState(false)
   const times = useMemo(() => timeOptions30(), [])
 
+  const dirty = useMemo(
+    () => !isDraft && !readOnly && JSON.stringify(draft) !== JSON.stringify(event),
+    [draft, event, isDraft, readOnly],
+  )
+
   useEffect(() => setDraft(event), [event])
 
   useEffect(() => {
@@ -38,6 +43,7 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
   }, [isDraft])
 
   function handleClose() {
+    if (!isDraft && dirty && !window.confirm('Discard unsaved changes?')) return
     if (isDraft) discardDraft()
     onClose()
   }
@@ -401,11 +407,11 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
             {!readOnly ? (
               <button
                 type="button"
-                disabled={saving || !draft.title.trim()}
+                disabled={saving || !draft.title.trim() || (!isDraft && !dirty)}
                 onClick={() => void save()}
                 className="rounded-xl bg-[var(--gcal-blue)] px-5 py-2 text-sm font-semibold text-white hover:bg-[var(--gcal-blue-hover)] disabled:opacity-40"
               >
-                {isDraft ? 'Create event' : 'Save'}
+                {isDraft ? 'Create event' : dirty ? 'Save' : 'Saved'}
               </button>
             ) : null}
           </div>

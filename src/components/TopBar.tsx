@@ -1,14 +1,11 @@
 import type { RefObject } from 'react'
 import {
   CalendarDays,
-  Camera,
   CheckSquare,
   ChevronDown,
-  CloudSun,
   Copy,
   Ellipsis,
   FileDown,
-  FileText,
   FolderOpen,
   Link2,
   ListTodo,
@@ -16,10 +13,8 @@ import {
   Redo2,
   Search,
   Share2,
-  Shield,
   Sparkles,
   Undo2,
-  Wallet,
   Wrench,
   X,
 } from 'lucide-react'
@@ -37,7 +32,6 @@ interface Props {
 
 export function TopBar({ exportRef, onQuickAdd, share }: Props) {
   const trip = useTripStore((s) => s.trip)!
-  const activeTab = useTripStore((s) => s.activeTab)
   const selectedDate = useTripStore((s) => s.selectedDate)
   const mode = useTripStore((s) => s.mode)
   const undo = useTripStore((s) => s.undo)
@@ -53,7 +47,7 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
   const [searchOpen, setSearchOpen] = useState(false)
 
   const countdown = daysUntil(trip.startDate)
-  const bigbang = daysUntil('2026-09-04')
+  const concertCountdown = daysUntil('2026-09-04')
 
   const tripStatus =
     countdown > 0
@@ -129,7 +123,9 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
             <div className="truncate text-ui-lg font-semibold leading-tight">{trip.name}</div>
             <div className="truncate text-ui-sm text-[var(--gcal-muted)]">
               {tripStatus}
-              {bigbang > 0 && trip.name.toLowerCase().includes('bigbang') ? ` · BB ${bigbang}d` : ''}
+              {concertCountdown > 0 && trip.name.toLowerCase().includes('bigbang')
+                ? ` · Concert ${concertCountdown}d`
+                : ''}
             </div>
           </button>
 
@@ -165,20 +161,8 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
             }}>
               My trips
             </MenuItem>
-            <MenuItem icon={<ListTodo className="size-4" />} onClick={() => openPanel('checklist')}>
-              Checklist
-            </MenuItem>
-            <MenuItem icon={<FileText className="size-4" />} onClick={() => openPanel('notes')}>
-              Notes
-            </MenuItem>
-            <MenuItem icon={<Wallet className="size-4" />} onClick={() => openPanel('budget')}>
-              Budget
-            </MenuItem>
-            <MenuItem icon={<Shield className="size-4" />} onClick={() => openPanel('emergency')}>
-              Emergency card
-            </MenuItem>
-            <MenuItem icon={<Camera className="size-4" />} onClick={() => openPanel('recap')}>
-              Trip recap
+            <MenuItem icon={<ListTodo className="size-4" />} onClick={() => openPanel('plan')}>
+              Plan
             </MenuItem>
             {mode === 'edit' ? (
               <>
@@ -256,25 +240,23 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
                 : countdown === 0
                   ? 'Trip starts today'
                   : `Day ${Math.abs(countdown) + 1} of trip`}
-              {bigbang > 0 && trip.name.toLowerCase().includes('bigbang')
-                ? ` · BigBang in ${bigbang}d`
+              {concertCountdown > 0 && trip.name.toLowerCase().includes('bigbang')
+                ? ` · Concert in ${concertCountdown}d`
                 : ''}
             </div>
           </div>
         </button>
 
-        {activeTab === 'schedule' ? (
-          <div className="relative min-w-[120px] flex-1 max-w-xs">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--gcal-muted)]" />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search…"
-              title="Search events"
-              className="w-full rounded-full border border-[var(--gcal-border)] bg-white py-2 pl-8 pr-3 text-ui-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe]"
-            />
-          </div>
-        ) : null}
+        <div className="relative min-w-[120px] flex-1 max-w-xs">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--gcal-muted)]" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search events…"
+            title="Search events"
+            className="w-full rounded-full border border-[var(--gcal-border)] bg-white py-2 pl-8 pr-3 text-ui-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe]"
+          />
+        </div>
 
         <div className="ml-auto flex flex-wrap items-center gap-1">
           <StatusDot />
@@ -307,23 +289,8 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
             }}>
               My trips
             </MenuItem>
-            <MenuItem icon={<ListTodo className="size-4" />} onClick={() => openPanel('checklist')}>
-              Checklist
-            </MenuItem>
-            <MenuItem icon={<FileText className="size-4" />} onClick={() => openPanel('notes')}>
-              Notes
-            </MenuItem>
-            <MenuItem icon={<Wallet className="size-4" />} onClick={() => openPanel('budget')}>
-              Budget
-            </MenuItem>
-            <MenuItem icon={<Shield className="size-4" />} onClick={() => openPanel('emergency')}>
-              Emergency card
-            </MenuItem>
-            <MenuItem icon={<Camera className="size-4" />} onClick={() => openPanel('recap')}>
-              Trip recap
-            </MenuItem>
-            <MenuItem icon={<CloudSun className="size-4" />} onClick={() => openPanel('recap')}>
-              Weather (in recap)
+            <MenuItem icon={<ListTodo className="size-4" />} onClick={() => openPanel('plan')}>
+              Plan hub
             </MenuItem>
           </MenuButton>
 
@@ -437,25 +404,33 @@ function StatusDot({ compact }: { compact?: boolean }) {
     <span
       className={cn(
         'inline-flex items-center gap-1 rounded-full font-medium',
-        compact ? 'size-2.5 p-0' : 'mr-1 px-2 py-0.5 text-[11px]',
+        compact ? 'rounded-lg px-1.5 py-0.5 text-[10px]' : 'mr-1 px-2 py-0.5 text-[11px]',
         !compact && tone === 'ok' && 'bg-[#e6f4ea] text-[#137333]',
         !compact && tone === 'busy' && 'bg-[#e8f0fe] text-[var(--gcal-blue)]',
         !compact && tone === 'warn' && 'bg-[#fef7e0] text-[#b06000]',
         !compact && tone === 'bad' && 'bg-[#fce8e6] text-[#c5221f]',
+        compact && tone === 'ok' && 'text-[#137333]',
+        compact && tone === 'busy' && 'text-[var(--gcal-blue)]',
+        compact && tone === 'warn' && 'text-[#b06000]',
+        compact && tone === 'bad' && 'text-[#c5221f]',
       )}
       title={tip}
     >
       <span
         className={cn(
           'rounded-full',
-          compact ? 'size-2.5' : 'size-1.5',
+          compact ? 'size-2' : 'size-1.5',
           tone === 'ok' && 'bg-[#34a853]',
           tone === 'busy' && 'animate-pulse bg-[var(--gcal-blue)]',
           tone === 'warn' && 'bg-[#f9ab00]',
           tone === 'bad' && 'bg-[#ea4335]',
         )}
       />
-      {compact ? null : label}
+      {compact ? (
+        <span className="max-w-[4.5rem] truncate text-[10px] font-semibold">{label}</span>
+      ) : (
+        label
+      )}
     </span>
   )
 }

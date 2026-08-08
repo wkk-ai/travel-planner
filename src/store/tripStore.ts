@@ -84,7 +84,7 @@ interface TripState {
   undoStack: UndoSnapshot[]
   searchQuery: string
   categoryFilter: EventCategory | 'all'
-  panel: 'none' | 'checklist' | 'notes' | 'budget' | 'emergency' | 'share' | 'import' | 'whatif' | 'recap' | 'trips'
+  panel: 'none' | 'plan' | 'settings' | 'checklist' | 'notes' | 'budget' | 'emergency' | 'share' | 'import' | 'whatif' | 'recap' | 'trips'
   toast: string | null
   init: () => Promise<void>
   refreshTrips: () => Promise<void>

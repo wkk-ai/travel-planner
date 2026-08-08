@@ -46,6 +46,8 @@ export default function App() {
   const setToast = useTripStore((s) => s.setToast)
   const trip = useTripStore((s) => s.trip)
   const setView = useTripStore((s) => s.setView)
+  const setPanel = useTripStore((s) => s.setPanel)
+  const panel = useTripStore((s) => s.panel)
   const isMobile = useIsMobile()
 
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -66,6 +68,16 @@ export default function App() {
     const t = setTimeout(() => setToast(null), 2800)
     return () => clearTimeout(t)
   }, [toast, setToast])
+
+  useEffect(() => {
+    if (!trip || mode !== 'edit' || activeTab !== 'schedule') return
+    if (localStorage.getItem('tp-drag-hint')) return
+    const t = setTimeout(() => {
+      setToast('Tip: long-press an event to move it')
+      localStorage.setItem('tp-drag-hint', '1')
+    }, 2500)
+    return () => clearTimeout(t)
+  }, [trip?.id, mode, activeTab, setToast])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 12 } }),
@@ -132,7 +144,7 @@ export default function App() {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <div className="brand-serif text-3xl text-[var(--gcal-blue)]">Travel Planner</div>
+          <div className="text-ui-xl font-bold text-[var(--gcal-blue)]">Travel Planner</div>
           <p className="mt-2 text-sm text-[var(--gcal-muted)]">Loading your trip…</p>
         </div>
       </div>
@@ -151,6 +163,14 @@ export default function App() {
       <SyncBanner />
 
       <div className="relative flex min-h-0 flex-1">
+        {panel !== 'none' ? (
+          <button
+            type="button"
+            className="fixed inset-0 z-20 bg-black/35 sm:hidden"
+            aria-label="Close panel"
+            onClick={() => setPanel('none')}
+          />
+        ) : null}
         {activeTab === 'story' ? (
           <div className="cal-scroll min-h-0 min-w-0 flex-1 overflow-auto bg-[var(--gcal-bg)]">
             <StoryTab />
@@ -206,7 +226,7 @@ export default function App() {
         <button
           type="button"
           onClick={() => setQuickOpen(true)}
-          className="mobile-fab no-print fixed bottom-5 right-4 z-50 flex size-14 items-center justify-center rounded-2xl bg-[var(--gcal-blue)] text-white shadow-lg hover:bg-[var(--gcal-blue-hover)] active:scale-95"
+          className="mobile-fab no-print fixed bottom-20 right-4 z-50 flex size-14 items-center justify-center rounded-2xl bg-[var(--gcal-blue)] text-white shadow-lg hover:bg-[var(--gcal-blue-hover)] active:scale-95 sm:bottom-5"
           aria-label="Add event"
         >
           <Plus className="size-7" />
@@ -214,7 +234,7 @@ export default function App() {
       ) : null}
 
       {mode === 'view' ? (
-        <div className="no-print fixed bottom-4 left-1/2 z-40 max-w-[90vw] -translate-x-1/2 rounded-full bg-[#3c4043] px-4 py-2 text-center text-xs font-medium text-white shadow-lg sm:max-w-none">
+        <div className="no-print fixed bottom-4 left-1/2 z-40 max-w-[90vw] -translate-x-1/2 rounded-full bg-[#3c4043]/95 px-4 py-2 text-center text-xs font-medium text-white shadow-lg backdrop-blur sm:bottom-4 sm:max-w-none">
           View-only — ask for the edit link to make changes
         </div>
       ) : null}
