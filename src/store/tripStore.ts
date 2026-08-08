@@ -144,7 +144,38 @@ function queueOp(op: OfflineOp) {
   useTripStore.setState({ pendingOps: loadQueue().length })
 }
 
-let initStarted = false
+let initPromise: Promise<void> | null = null
+
+async function openTripBundle(
+  set: (partial: Partial<TripState>) => void,
+  get: () => TripState,
+  trip: Trip,
+  mode: AccessMode,
+) {
+  const bundle = await fetchTripBundle(trip.id)
+  localStorage.setItem(LOCAL_TOKEN_KEY, trip.editToken)
+  window.location.hash =
+    mode === 'edit' ? `#/e/${trip.editToken}` : `#/v/${trip.viewToken}`
+
+  set({
+    trip,
+    mode,
+    events: bundle.events,
+    notes: bundle.notes,
+    checklist: bundle.checklist,
+    expenses: bundle.expenses,
+    selectedDate: trip.startDate,
+    activeTab: loadTabForTrip(trip.id),
+    loading: false,
+  })
+
+  subscribeRealtime(trip.id)
+  if (bundle.events.length === 0 && mode === 'edit') {
+    void get().seedIfEmpty()
+  }
+  void get().flush()
+  void get().refreshTrips()
+}
 
 function subscribeRealtime(tripId: string) {
   if (!supabaseConfigured) return
@@ -272,7 +303,7 @@ export const useTripStore = create<TripState>((set, get) => ({
 
   switchTrip: async (editToken) => {
     set({ loading: true, panel: 'none' })
-    initStarted = false
+    initPromise = null
     localStorage.setItem(LOCAL_TOKEN_KEY, editToken)
     window.location.hash = `#/e/${editToken}`
     await get().init()
@@ -295,7 +326,7 @@ export const useTripStore = create<TripState>((set, get) => ({
     })
     localStorage.setItem(LOCAL_TOKEN_KEY, trip.editToken)
     window.location.hash = `#/e/${trip.editToken}`
-    initStarted = false
+    initPromise = null
     set({
       trip,
       mode: 'edit',
@@ -361,124 +392,110 @@ export const useTripStore = create<TripState>((set, get) => ({
   },
 
   init: async () => {
-    if (initStarted && get().trip) {
-      set({ loading: false })
-      return
-    }
-    initStarted = true
-    set({ loading: true, pendingOps: loadQueue().length, online: navigator.onLine })
+    if (initPromise) return initPromise
 
-    const hash = window.location.hash.replace(/^#\/?/, '')
-    const parts = hash.split('/')
-    let token: string | null = null
-    let forcedMode: AccessMode | null = null
+    initPromise = (async () => {
+      set({ loading: true, pendingOps: loadQueue().length, online: navigator.onLine })
 
-    if (parts[0] === 'e' && parts[1]) {
-      token = parts[1]
-      forcedMode = 'edit'
-    } else if (parts[0] === 'v' && parts[1]) {
-      token = parts[1]
-      forcedMode = 'view'
-    } else if (parts[0] && parts[0].length > 20) {
-      token = parts[0]
-    } else {
-      token = localStorage.getItem(LOCAL_TOKEN_KEY)
-    }
+      const hash = window.location.hash.replace(/^#\/?/, '')
+      const parts = hash.split('/')
+      let token: string | null = null
+      let forcedMode: AccessMode | null = null
 
-    const failLocal = async (msg: string) => {
-      const localTrip = localFallbackTrip()
-      set({
-        trip: localTrip,
-        mode: 'edit',
-        selectedDate: localTrip.startDate,
-        activeTab: loadTabForTrip(localTrip.id),
-        loading: false,
-        toast: msg,
-      })
-      void get().seedIfEmpty()
-    }
+      if (parts[0] === 'e' && parts[1]) {
+        token = parts[1]
+        forcedMode = 'edit'
+      } else if (parts[0] === 'v' && parts[1]) {
+        token = parts[1]
+        forcedMode = 'view'
+      } else if (parts[0] && parts[0].length > 20) {
+        token = parts[0]
+      } else {
+        token = localStorage.getItem(LOCAL_TOKEN_KEY)
+      }
 
-    try {
-      if (supabaseConfigured && token) {
-        const found = await Promise.race([
-          fetchTripByToken(token),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
-        ])
-        if (found) {
-          const actualMode =
-            forcedMode === 'view'
-              ? 'view'
-              : forcedMode === 'edit' && found.mode === 'edit'
-                ? 'edit'
-                : found.mode
+      const failLocal = async (msg: string) => {
+        const localTrip = localFallbackTrip()
+        set({
+          trip: localTrip,
+          mode: 'edit',
+          selectedDate: localTrip.startDate,
+          activeTab: loadTabForTrip(localTrip.id),
+          loading: false,
+          toast: msg,
+        })
+        void get().seedIfEmpty()
+      }
 
-          const bundle = await fetchTripBundle(found.trip.id)
-          localStorage.setItem(LOCAL_TOKEN_KEY, found.trip.editToken)
-          window.location.hash =
-            actualMode === 'edit'
-              ? `#/e/${found.trip.editToken}`
-              : `#/v/${found.trip.viewToken}`
+      try {
+        if (supabaseConfigured && token) {
+          const found = await Promise.race([
+            fetchTripByToken(token),
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
+          ])
+          if (found) {
+            const actualMode =
+              forcedMode === 'view'
+                ? 'view'
+                : forcedMode === 'edit' && found.mode === 'edit'
+                  ? 'edit'
+                  : found.mode
 
+            await openTripBundle(set, get, found.trip, actualMode)
+            return
+          }
+        }
+
+        if (supabaseConfigured) {
+          const existing = await listTrips()
+          if (existing.length) {
+            if (token) {
+              set({ toast: 'Saved link not found — opened your latest trip' })
+            }
+            await openTripBundle(set, get, existing[0], 'edit')
+            return
+          }
+
+          const trip = await Promise.race([
+            createTrip({
+              name: TRIP_META.name,
+              startDate: TRIP_META.startDate,
+              endDate: TRIP_META.endDate,
+              emergency: TRIP_META.emergency,
+            }),
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
+          ])
+          if (!trip) {
+            await failLocal('Cloud slow — working offline')
+            return
+          }
+          localStorage.setItem(LOCAL_TOKEN_KEY, trip.editToken)
+          window.location.hash = `#/e/${trip.editToken}`
           set({
-            trip: found.trip,
-            mode: actualMode,
-            events: bundle.events,
-            notes: bundle.notes,
-            checklist: bundle.checklist,
-            expenses: bundle.expenses,
-            selectedDate: found.trip.startDate,
-            activeTab: loadTabForTrip(found.trip.id),
+            trip,
+            mode: 'edit',
+            events: [],
+            notes: [],
+            checklist: [],
+            expenses: [],
+            selectedDate: trip.startDate,
+            activeTab: loadTabForTrip(trip.id),
             loading: false,
           })
-
-          subscribeRealtime(found.trip.id)
-          if (bundle.events.length === 0 && actualMode === 'edit') {
-            void get().seedIfEmpty()
-          }
-          void get().flush()
+          subscribeRealtime(trip.id)
+          void get().seedIfEmpty()
           void get().refreshTrips()
           return
         }
-      }
 
-      if (supabaseConfigured) {
-        const trip = await Promise.race([
-          createTrip({
-            name: TRIP_META.name,
-            startDate: TRIP_META.startDate,
-            endDate: TRIP_META.endDate,
-            emergency: TRIP_META.emergency,
-          }),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
-        ])
-        if (!trip) {
-          await failLocal('Cloud slow — working offline')
-          return
-        }
-        localStorage.setItem(LOCAL_TOKEN_KEY, trip.editToken)
-        window.location.hash = `#/e/${trip.editToken}`
-        set({
-          trip,
-          mode: 'edit',
-          events: [],
-          notes: [],
-          checklist: [],
-          expenses: [],
-          selectedDate: trip.startDate,
-          activeTab: loadTabForTrip(trip.id),
-          loading: false,
-        })
-        subscribeRealtime(trip.id)
-        void get().seedIfEmpty()
-        void get().refreshTrips()
-        return
+        await failLocal('')
+      } catch (err) {
+        console.error(err)
+        await failLocal('Failed to load trip — using local seed')
       }
+    })()
 
-      await failLocal('')
-    } catch (err) {
-      console.error(err)
-      await failLocal('Failed to load trip — using local seed')
-    }
+    return initPromise
   },
 
   seedIfEmpty: async () => {
