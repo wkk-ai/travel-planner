@@ -40,7 +40,7 @@ import {
   upsertExpense,
   upsertNote,
 } from '../lib/supabase'
-import { addDaysIso, isoDate, minutesToTime, shiftEventsFrom, SLOT_MINUTES, timeToMinutes } from '../lib/time'
+import { addDaysIso, isoDate, minutesToTime, shiftEventsFrom, SLOT_MINUTES, timeToMinutes, tripCalendarBounds } from '../lib/time'
 import { swapEventWithBackup } from '../lib/eventBackups'
 import type { EventCategory } from '../types'
 
@@ -144,6 +144,16 @@ function queueOp(op: OfflineOp) {
   useTripStore.setState({ pendingOps: loadQueue().length })
 }
 
+async function ensureTripCoversEvents(trip: Trip, events: TripEvent[]): Promise<Trip> {
+  const bounds = tripCalendarBounds(trip.startDate, trip.endDate, events)
+  if (bounds.startDate === trip.startDate && bounds.endDate === trip.endDate) return trip
+  const updated = { ...trip, ...bounds }
+  if (supabaseConfigured && navigator.onLine) {
+    await updateTripRemote(updated)
+  }
+  return updated
+}
+
 let initPromise: Promise<void> | null = null
 
 async function openTripBundle(
@@ -157,8 +167,10 @@ async function openTripBundle(
   window.location.hash =
     mode === 'edit' ? `#/e/${trip.editToken}` : `#/v/${trip.viewToken}`
 
+  const syncedTrip = await ensureTripCoversEvents(trip, bundle.events)
+
   set({
-    trip,
+    trip: syncedTrip,
     mode,
     events: bundle.events,
     notes: bundle.notes,
@@ -550,7 +562,13 @@ export const useTripStore = create<TripState>((set, get) => ({
         spentOn: e.date,
       }))
 
-    const renamed = { ...trip, name: TRIP_META.name, emergency: TRIP_META.emergency }
+    const renamed = {
+      ...trip,
+      name: TRIP_META.name,
+      startDate: TRIP_META.startDate,
+      endDate: TRIP_META.endDate,
+      emergency: TRIP_META.emergency,
+    }
     set({ events: seeded, notes, checklist, expenses, trip: renamed })
 
     if (supabaseConfigured && navigator.onLine) {
@@ -592,6 +610,11 @@ export const useTripStore = create<TripState>((set, get) => ({
     }
     set({ events: [...get().events, ev], selectedEventId: ev.id })
     await syncEvent(ev, true)
+    const { trip: currentTrip, events: allEvents } = get()
+    if (currentTrip) {
+      const syncedTrip = await ensureTripCoversEvents(currentTrip, allEvents)
+      if (syncedTrip !== currentTrip) set({ trip: syncedTrip })
+    }
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       navigator.vibrate?.(10)
     }
@@ -605,6 +628,11 @@ export const useTripStore = create<TripState>((set, get) => ({
     set({ events })
     const updated = events.find((e) => e.id === id)
     if (updated) await syncEvent(updated, true)
+    const { trip: currentTrip } = get()
+    if (currentTrip) {
+      const syncedTrip = await ensureTripCoversEvents(currentTrip, events)
+      if (syncedTrip !== currentTrip) set({ trip: syncedTrip })
+    }
   },
 
   deleteEvent: async (id) => {
@@ -631,6 +659,11 @@ export const useTripStore = create<TripState>((set, get) => ({
       await syncEvent(updated, true)
       if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
         navigator.vibrate?.([8, 20, 8])
+      }
+      const { trip: currentTrip } = get()
+      if (currentTrip) {
+        const syncedTrip = await ensureTripCoversEvents(currentTrip, events)
+        if (syncedTrip !== currentTrip) set({ trip: syncedTrip })
       }
     }
   },

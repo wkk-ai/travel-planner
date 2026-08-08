@@ -1,7 +1,7 @@
 import { format, isToday } from 'date-fns'
 import { useTripStore } from '../store/tripStore'
 import type { TripEvent } from '../types'
-import { currentEventAt, isoDate, tripDays, cn } from '../lib/time'
+import { currentEventAt, isoDate, tripDaysIncludingEvents, cn } from '../lib/time'
 import { DayColumn, TimeGutter } from './DayColumn'
 
 interface Props {
@@ -12,10 +12,11 @@ interface Props {
 
 export function WeekGrid({ events, warnings, onSelect }: Props) {
   const trip = useTripStore((s) => s.trip)!
+  const allEvents = useTripStore((s) => s.events)
   const selectedDate = useTripStore((s) => s.selectedDate)
   const setSelectedDate = useTripStore((s) => s.setSelectedDate)
   const setView = useTripStore((s) => s.setView)
-  const days = tripDays(trip.startDate, trip.endDate)
+  const days = tripDaysIncludingEvents(trip.startDate, trip.endDate, allEvents)
   const nowEv = currentEventAt(events)
 
   return (

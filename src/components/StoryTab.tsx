@@ -6,7 +6,8 @@ import {
   daysUntil,
   isoDate,
   isEventPast,
-  tripDays,
+  tripCalendarBounds,
+  tripDaysIncludingEvents,
 } from '../lib/time'
 import { backupCount } from '../lib/eventBackups'
 import { useTripStore } from '../store/tripStore'
@@ -48,7 +49,8 @@ export function StoryTab() {
   const selectEvent = useTripStore((s) => s.selectEvent)
 
   const today = isoDate(new Date())
-  const days = tripDays(trip.startDate, trip.endDate)
+  const calendar = tripCalendarBounds(trip.startDate, trip.endDate, events)
+  const days = tripDaysIncludingEvents(trip.startDate, trip.endDate, events)
   const totalDays = days.length
   const countdown = daysUntil(trip.startDate)
   const nowEvent = currentEventAt(events)
@@ -67,7 +69,7 @@ export function StoryTab() {
     setActiveTab('schedule')
   }
 
-  const todayInTrip = today >= trip.startDate && today <= trip.endDate
+  const todayInTrip = today >= calendar.startDate && today <= calendar.endDate
   const sortedDays = [...days].sort((a, b) => {
     const aIso = isoDate(a)
     const bIso = isoDate(b)
@@ -92,7 +94,7 @@ export function StoryTab() {
           {trip.name}
         </h2>
         <p className="mt-1 text-ui-sm text-[var(--gcal-muted)]">
-          {format(parseISO(trip.startDate), 'MMM d')} – {format(parseISO(trip.endDate), 'MMM d, yyyy')}
+          {format(parseISO(calendar.startDate), 'MMM d')} – {format(parseISO(calendar.endDate), 'MMM d, yyyy')}
           <span className="mx-1.5 text-[var(--gcal-border)]">·</span>
           {tripStatus}
         </p>

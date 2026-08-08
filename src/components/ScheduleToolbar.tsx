@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { CATEGORIES } from '../data/categories'
-import { cn, isoDate, tripDays } from '../lib/time'
+import { cn, isoDate, tripDaysIncludingEvents } from '../lib/time'
 import { useTripStore } from '../store/tripStore'
 import type { EventCategory } from '../types'
 
@@ -16,7 +16,8 @@ export function ScheduleToolbar() {
   const categoryFilter = useTripStore((s) => s.categoryFilter)
   const setCategoryFilter = useTripStore((s) => s.setCategoryFilter)
 
-  const days = tripDays(trip.startDate, trip.endDate)
+  const events = useTripStore((s) => s.events)
+  const days = tripDaysIncludingEvents(trip.startDate, trip.endDate, events)
   const dayIndex = days.findIndex((d) => isoDate(d) === selectedDate)
   const selectedDay = days[Math.max(0, dayIndex)]
 

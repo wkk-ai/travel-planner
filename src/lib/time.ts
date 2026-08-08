@@ -49,10 +49,37 @@ export function eventHeightPx(startTime: string, endTime: string): number {
 }
 
 export function tripDays(startDate: string, endDate: string): Date[] {
+  if (endDate < startDate) return []
   return eachDayOfInterval({
     start: parseISO(startDate),
     end: parseISO(endDate),
   })
+}
+
+/** Widen stored trip dates so calendar views include every day that has events. */
+export function tripCalendarBounds(
+  startDate: string,
+  endDate: string,
+  events: { date: string }[],
+): { startDate: string; endDate: string } {
+  let start = startDate
+  let end = endDate
+  for (const e of events) {
+    const d = e.date?.trim()
+    if (!d) continue
+    if (d < start) start = d
+    if (d > end) end = d
+  }
+  return { startDate: start, endDate: end }
+}
+
+export function tripDaysIncludingEvents(
+  startDate: string,
+  endDate: string,
+  events: { date: string }[],
+): Date[] {
+  const bounds = tripCalendarBounds(startDate, endDate, events)
+  return tripDays(bounds.startDate, bounds.endDate)
 }
 
 export function formatDayHeader(d: Date): { date: string; weekday: string } {
