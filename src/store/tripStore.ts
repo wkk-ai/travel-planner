@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { v4 as uuid } from 'uuid'
 import type {
   AccessMode,
+  AppTab,
   CalendarView,
   ChecklistItem,
   Expense,
@@ -43,6 +44,24 @@ import { addDaysIso, isoDate, minutesToTime, shiftEventsFrom, SLOT_MINUTES, time
 import type { EventCategory } from '../types'
 
 const LOCAL_TOKEN_KEY = 'travel-planner-last-token'
+const LOCAL_TAB_KEY = 'travel-planner-tab'
+
+function loadTabForTrip(tripId: string): AppTab {
+  try {
+    const raw = localStorage.getItem(`${LOCAL_TAB_KEY}-${tripId}`)
+    return raw === 'schedule' ? 'schedule' : 'story'
+  } catch {
+    return 'story'
+  }
+}
+
+function saveTabForTrip(tripId: string, tab: AppTab) {
+  try {
+    localStorage.setItem(`${LOCAL_TAB_KEY}-${tripId}`, tab)
+  } catch {
+    /* ignore */
+  }
+}
 
 interface TripState {
   trip: Trip | null
@@ -53,6 +72,7 @@ interface TripState {
   checklist: ChecklistItem[]
   expenses: Expense[]
   mode: AccessMode
+  activeTab: AppTab
   view: CalendarView
   selectedDate: string
   selectedEventId: string | null
@@ -79,6 +99,7 @@ interface TripState {
   commitDraft: (patch: Partial<TripEvent>) => Promise<void>
   discardDraft: () => void
   setView: (v: CalendarView) => void
+  setActiveTab: (t: AppTab) => void
   setSelectedDate: (d: string) => void
   selectEvent: (id: string | null) => void
   setSearchQuery: (q: string) => void
@@ -165,6 +186,7 @@ export const useTripStore = create<TripState>((set, get) => ({
   checklist: [],
   expenses: [],
   mode: 'edit',
+  activeTab: 'story',
   view: 'week',
   selectedDate: TRIP_META.startDate,
   selectedEventId: null,
@@ -179,6 +201,11 @@ export const useTripStore = create<TripState>((set, get) => ({
   toast: null,
 
   setView: (v) => set({ view: v }),
+  setActiveTab: (t) => {
+    const trip = get().trip
+    if (trip) saveTabForTrip(trip.id, t)
+    set({ activeTab: t })
+  },
   setSelectedDate: (d) => set({ selectedDate: d }),
   selectEvent: (id) =>
     set({
@@ -274,6 +301,7 @@ export const useTripStore = create<TripState>((set, get) => ({
       checklist: [],
       expenses: [],
       selectedDate: startDate,
+      activeTab: loadTabForTrip(trip.id),
       loading: false,
       panel: 'none',
       toast: `Created “${name}”`,
@@ -360,6 +388,7 @@ export const useTripStore = create<TripState>((set, get) => ({
         trip: localTrip,
         mode: 'edit',
         selectedDate: localTrip.startDate,
+        activeTab: loadTabForTrip(localTrip.id),
         loading: false,
         toast: msg,
       })
@@ -395,6 +424,7 @@ export const useTripStore = create<TripState>((set, get) => ({
             checklist: bundle.checklist,
             expenses: bundle.expenses,
             selectedDate: found.trip.startDate,
+            activeTab: loadTabForTrip(found.trip.id),
             loading: false,
           })
 
@@ -432,6 +462,7 @@ export const useTripStore = create<TripState>((set, get) => ({
           checklist: [],
           expenses: [],
           selectedDate: trip.startDate,
+          activeTab: loadTabForTrip(trip.id),
           loading: false,
         })
         subscribeRealtime(trip.id)

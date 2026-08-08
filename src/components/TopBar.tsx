@@ -39,6 +39,7 @@ interface Props {
 
 export function TopBar({ exportRef, onQuickAdd, share }: Props) {
   const trip = useTripStore((s) => s.trip)!
+  const activeTab = useTripStore((s) => s.activeTab)
   const view = useTripStore((s) => s.view)
   const setView = useTripStore((s) => s.setView)
   const selectedDate = useTripStore((s) => s.selectedDate)
@@ -133,6 +134,8 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
           </div>
         </button>
 
+        {activeTab === 'schedule' ? (
+          <>
         <div className="flex items-center rounded-full border border-[var(--gcal-border)] bg-[var(--gcal-bg)] p-0.5 text-sm">
           <button
             type="button"
@@ -191,6 +194,8 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
             className="w-full rounded-full border border-[var(--gcal-border)] bg-white py-1.5 pl-8 pr-3 text-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe]"
           />
         </div>
+          </>
+        ) : null}
 
         <div className="ml-auto flex flex-wrap items-center gap-1">
           <StatusDot />

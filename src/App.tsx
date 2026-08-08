@@ -11,6 +11,8 @@ import {
 } from '@dnd-kit/core'
 import { shareUrls, useTripStore } from './store/tripStore'
 import { TopBar } from './components/TopBar'
+import { TabBar } from './components/TabBar'
+import { StoryTab } from './components/StoryTab'
 import { SyncBanner } from './components/SyncBanner'
 import { WeekGrid } from './components/WeekGrid'
 import { DayGrid } from './components/DayGrid'
@@ -29,6 +31,7 @@ export default function App() {
   const view = useTripStore((s) => s.view)
   const events = useTripStore((s) => s.events)
   const mode = useTripStore((s) => s.mode)
+  const activeTab = useTripStore((s) => s.activeTab)
   const selectedEventId = useTripStore((s) => s.selectedEventId)
   const selectEvent = useTripStore((s) => s.selectEvent)
   const pendingDraft = useTripStore((s) => s.pendingDraft)
@@ -134,8 +137,14 @@ export default function App() {
         share={shareUrls(trip)}
       />
       <SyncBanner />
+      <TabBar />
 
       <div className="relative flex min-h-0 flex-1">
+        {activeTab === 'story' ? (
+          <div className="cal-scroll min-h-0 min-w-0 flex-1 overflow-auto bg-[var(--gcal-bg)]">
+            <StoryTab />
+          </div>
+        ) : (
         <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
           <div ref={exportRef} className="print-area cal-scroll min-h-0 min-w-0 flex-1 overflow-auto bg-white/80 backdrop-blur-[2px]">
             {view === 'week' ? (
@@ -160,6 +169,7 @@ export default function App() {
             ) : null}
           </DragOverlay>
         </DndContext>
+        )}
 
         <SidePanel />
       </div>
