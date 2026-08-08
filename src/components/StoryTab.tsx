@@ -20,6 +20,10 @@ function dayPlace(events: TripEvent[]): string {
   return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0]
 }
 
+function uniquePlaces(events: TripEvent[]): number {
+  return new Set(events.map((e) => e.location.trim()).filter(Boolean)).size
+}
+
 function dayVibe(events: TripEvent[], dayIndex: number, totalDays: number): string {
   const cats = new Set(events.map((e) => e.category))
   if (cats.has('flight') && dayIndex === 0) return 'Departure'
@@ -48,6 +52,7 @@ export function StoryTab() {
   const totalDays = days.length
   const countdown = daysUntil(trip.startDate)
   const nowEvent = currentEventAt(events)
+  const placeCount = uniquePlaces(events)
 
   const tripStatus =
     countdown > 0
@@ -75,10 +80,17 @@ export function StoryTab() {
     return a.getTime() - b.getTime()
   })
 
+  const primaryStat =
+    countdown > 0
+      ? { value: countdown, label: 'Days left', highlight: true }
+      : { value: totalDays, label: 'Days', highlight: false }
+
   return (
     <div className="story-tab mx-auto max-w-2xl px-4 py-5 pb-12 sm:px-6 sm:py-6">
-      <header className="mb-6 border-b border-[var(--gcal-border)] pb-5">
-        <h2 className="text-ui-xl font-semibold leading-tight text-[var(--gcal-text)]">{trip.name}</h2>
+      <header className="mb-4">
+        <h2 className="text-ui-xl font-bold leading-tight tracking-tight text-[var(--gcal-text)]">
+          {trip.name}
+        </h2>
         <p className="mt-1 text-ui-sm text-[var(--gcal-muted)]">
           {format(parseISO(trip.startDate), 'MMM d')} – {format(parseISO(trip.endDate), 'MMM d, yyyy')}
           <span className="mx-1.5 text-[var(--gcal-border)]">·</span>
@@ -86,27 +98,60 @@ export function StoryTab() {
         </p>
         {nowEvent ? (
           <p className="mt-3 text-ui-base">
-            <span className="font-medium text-[var(--gcal-blue)]">Now</span>
+            <span className="font-semibold text-[var(--gcal-blue)]">Now</span>
             <span className="text-[var(--gcal-muted)]"> · </span>
             {nowEvent.title}
           </p>
         ) : null}
       </header>
 
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-ui-sm font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+      <div className="mb-5 flex gap-2">
+        <div
+          className={cn(
+            'flex-1 rounded-[10px] border border-[var(--gcal-border)] bg-white px-3 py-2.5 text-center',
+            primaryStat.highlight && 'border-[#c2d7f7] bg-[#e8f0fe]',
+          )}
+        >
+          <div
+            className={cn(
+              'text-ui-lg font-bold tabular-nums',
+              primaryStat.highlight ? 'text-[var(--gcal-blue)]' : 'text-[var(--gcal-text)]',
+            )}
+          >
+            {primaryStat.value}
+          </div>
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+            {primaryStat.label}
+          </div>
+        </div>
+        <div className="flex-1 rounded-[10px] border border-[var(--gcal-border)] bg-white px-3 py-2.5 text-center">
+          <div className="text-ui-lg font-bold tabular-nums text-[var(--gcal-text)]">{events.length}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+            Events
+          </div>
+        </div>
+        <div className="flex-1 rounded-[10px] border border-[var(--gcal-border)] bg-white px-3 py-2.5 text-center">
+          <div className="text-ui-lg font-bold tabular-nums text-[var(--gcal-text)]">{placeCount}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+            Places
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-2.5 flex items-center justify-between">
+        <h3 className="text-[12px] font-bold uppercase tracking-wide text-[var(--gcal-muted)]">
           Your days
         </h3>
         <button
           type="button"
           onClick={() => setActiveTab('schedule')}
-          className="text-ui-sm font-medium text-[var(--gcal-blue)] hover:underline"
+          className="text-ui-sm font-semibold text-[var(--gcal-blue)] hover:underline"
         >
           Full schedule
         </button>
       </div>
 
-      <ul className="divide-y divide-[var(--gcal-border)] rounded-xl border border-[var(--gcal-border)] bg-white">
+      <ul className="flex flex-col gap-2.5">
         {sortedDays.map((d) => {
           const date = isoDate(d)
           const dayEvents = events.filter((e) => e.date === date)
@@ -118,6 +163,7 @@ export function StoryTab() {
             .slice(0, 3)
           const isToday = date === today
           const isPast = date < today
+          const meta = [place, vibe].filter(Boolean).join(' · ')
 
           return (
             <li key={date}>
@@ -125,24 +171,26 @@ export function StoryTab() {
                 type="button"
                 onClick={() => openDayOnSchedule(date)}
                 className={cn(
-                  'w-full px-4 py-4 text-left transition-colors hover:bg-[var(--gcal-bg)]',
-                  isPast && 'opacity-60',
+                  'w-full rounded-[14px] border border-[var(--gcal-border)] bg-white px-4 py-3.5 text-left transition-shadow hover:shadow-sm',
+                  isToday && 'border-[#93b4f4] shadow-[0_2px_12px_rgba(26,115,232,0.08)]',
+                  isPast && 'opacity-55',
                 )}
               >
-                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <span className="text-ui-base font-semibold">{format(d, 'EEE, MMM d')}</span>
-                  {isToday ? (
-                    <span className="text-ui-xs font-semibold text-[var(--gcal-blue)]">Today</span>
-                  ) : null}
-                  {place ? (
-                    <span className="text-ui-sm text-[var(--gcal-muted)]">{place}</span>
-                  ) : null}
-                  <span className="text-ui-xs text-[var(--gcal-muted)]">· {vibe}</span>
+                <div className="mb-2.5">
+                  <div className="flex flex-wrap items-baseline gap-1.5">
+                    <span className="text-ui-base font-bold">{format(d, 'EEE, MMM d')}</span>
+                    {isToday ? (
+                      <span className="rounded-full bg-[#e8f0fe] px-2 py-0.5 text-[11px] font-bold text-[var(--gcal-blue)]">
+                        Today
+                      </span>
+                    ) : null}
+                  </div>
+                  {meta ? <p className="mt-0.5 text-ui-sm text-[var(--gcal-muted)]">{meta}</p> : null}
                 </div>
 
                 {highlights.length > 0 ? (
-                  <ul className="mt-2.5 space-y-1.5">
-                    {highlights.map((ev) => {
+                  <ul>
+                    {highlights.map((ev, i) => {
                       const cat = CATEGORIES[ev.category]
                       const backups = backupCount(ev)
                       return (
@@ -154,7 +202,8 @@ export function StoryTab() {
                               selectEvent(ev.id)
                             }}
                             className={cn(
-                              'flex w-full items-start gap-2 rounded-lg px-1 py-0.5 text-left hover:bg-[var(--gcal-bg)]',
+                              'flex w-full items-start gap-2.5 py-1.5 text-left',
+                              i > 0 && 'border-t border-[#f1f3f4]',
                               isEventPast(ev) && 'opacity-70',
                             )}
                           >
@@ -162,7 +211,7 @@ export function StoryTab() {
                               className="mt-1.5 size-2 shrink-0 rounded-full"
                               style={{ background: cat.border }}
                             />
-                            <span className="w-14 shrink-0 tabular-nums text-ui-sm text-[var(--gcal-muted)]">
+                            <span className="w-11 shrink-0 tabular-nums text-ui-sm text-[var(--gcal-muted)]">
                               {formatEventTime(ev)}
                             </span>
                             <span className="min-w-0 flex-1">
@@ -178,13 +227,13 @@ export function StoryTab() {
                       )
                     })}
                     {dayEvents.length > 3 ? (
-                      <li className="pl-6 text-ui-sm text-[var(--gcal-muted)]">
+                      <li className="border-t border-[#f1f3f4] pt-1.5 pl-[62px] text-ui-sm text-[var(--gcal-muted)]">
                         +{dayEvents.length - 3} more
                       </li>
                     ) : null}
                   </ul>
                 ) : (
-                  <p className="mt-2 text-ui-sm text-[var(--gcal-muted)]">Nothing planned</p>
+                  <p className="text-ui-sm text-[var(--gcal-muted)]">Nothing planned</p>
                 )}
               </button>
             </li>

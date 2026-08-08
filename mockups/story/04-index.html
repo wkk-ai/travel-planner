@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>04 · Index — Story list mockup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --blue:#1a73e8; --muted:#70757a; --line:#dadce0; --bg:#f8f9fa; --text:#3c4043; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:#e8eaed;min-height:100vh;padding:24px 16px;color:var(--text)}
+    a.back{display:inline-block;margin-bottom:16px;color:var(--blue);font-size:13px;font-weight:600;text-decoration:none}
+    .phone{max-width:390px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(60,64,67,.18);border:1px solid var(--line)}
+    .top{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+    .top h1{flex:1;font-size:17px;font-weight:700}
+    .tabs{display:flex;border-bottom:1px solid var(--line)}
+    .tabs span{flex:1;text-align:center;padding:14px;font-size:15px;font-weight:600;color:var(--muted)}
+    .tabs span.on{color:var(--blue);border-bottom:2px solid var(--blue)}
+    .slot{height:48px;background:var(--bg);border-bottom:1px solid var(--line);opacity:.4}
+    .body{padding:16px;background:var(--bg);min-height:560px}
+    .head{margin-bottom:16px}
+    .head h2{font-size:20px;font-weight:700}
+    .head p{font-size:14px;color:var(--muted);margin-top:4px}
+    .dash{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:16px}
+    .dash div{background:#fff;padding:12px 8px;text-align:center}
+    .dash strong{display:block;font-size:17px;font-weight:700}
+    .dash span{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+    .row-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .row-h span{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+    .row-h a{font-size:13px;color:var(--blue);font-weight:600;text-decoration:none}
+    .list{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+    .day{display:grid;grid-template-columns:52px 1fr;gap:0;border-bottom:1px solid var(--line)}
+    .day:last-child{border-bottom:0}
+    .day.today .idx{background:#e8f0fe;color:var(--blue)}
+    .day.past{opacity:.55}
+    .idx{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:14px 8px;background:var(--bg);border-right:1px solid var(--line)}
+    .idx b{font-size:20px;font-weight:700;line-height:1}
+    .idx small{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-top:2px}
+    .content{padding:12px 14px 14px}
+    .content h3{font-size:14px;font-weight:700;margin-bottom:2px}
+    .content .sub{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .ev{display:flex;gap:8px;font-size:13px;padding:4px 0}
+    .t{width:40px;flex-shrink:0;color:var(--muted);font-variant-numeric:tabular-nums}
+    .dot{width:6px;height:6px;border-radius:50%;margin-top:6px;flex-shrink:0}
+    .more{font-size:12px;color:var(--muted);margin-top:4px}
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← All story mockups</a>
+  <div class="phone">
+    <div class="top"><div style="width:36px;height:36px;border-radius:50%;background:#e8f0fe"></div><h1>BigBang US Trip 2026</h1><span style="font-size:12px;color:var(--muted)">···</span></div>
+    <div class="tabs"><span class="on">Story</span><span>Schedule</span></div>
+    <div class="slot"></div>
+    <div class="body">
+      <div class="head">
+        <h2>BigBang US Trip 2026</h2>
+        <p>Aug 29 – Sep 7 · 21 days to go</p>
+      </div>
+      <div class="dash">
+        <div><strong>10</strong><span>Days</span></div>
+        <div><strong>54</strong><span>Events</span></div>
+        <div><strong>21</strong><span>Left</span></div>
+      </div>
+      <div class="row-h"><span>Your days</span><a href="#">Full schedule</a></div>
+      <div class="list">
+        <div class="day today">
+          <div class="idx"><b>1</b><small>Today</small></div>
+          <div class="content">
+            <h3>Sat, Aug 29</h3>
+            <div class="sub">Orlando · Departure</div>
+            <div class="ev"><span class="dot" style="background:#1a73e8"></span><span class="t">08:25</span>Flight CGH → CNF</div>
+            <div class="ev"><span class="dot" style="background:#4285f4"></span><span class="t">14:00</span>Hotel check-in</div>
+            <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">19:00</span>Dinner at hotel</div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="idx"><b>2</b><small>Day</small></div>
+          <div class="content">
+            <h3>Sun, Aug 30</h3>
+            <div class="sub">Orlando · Explore</div>
+            <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">07:30</span>Breakfast at hotel</div>
+            <div class="ev"><span class="dot" style="background:#a142f4"></span><span class="t">09:30</span>Target & Best Buy</div>
+            <div class="more">+4 more</div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="idx"><b>3</b><small>Day</small></div>
+          <div class="content">
+            <h3>Mon, Aug 31</h3>
+            <div class="sub">Orlando · Explore</div>
+            <div class="ev"><span class="dot" style="background:#f9ab00"></span><span class="t">08:00</span>Magic Kingdom</div>
+            <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">13:00</span>Lunch — park</div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="idx"><b>4</b><small>Day</small></div>
+          <div class="content">
+            <h3>Tue, Sep 1</h3>
+            <div class="sub">Orlando · Explore</div>
+            <div class="ev"><span class="dot" style="background:#f9ab00"></span><span class="t">08:30</span>EPCOT</div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="idx"><b>5</b><small>Day</small></div>
+          <div class="content">
+            <h3>Wed, Sep 2</h3>
+            <div class="sub">Miami · Travel</div>
+            <div class="ev"><span class="dot" style="background:#1a73e8"></span><span class="t">10:15</span>Drive to Miami</div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="idx"><b>6</b><small>Day</small></div>
+          <div class="content">
+            <h3>Thu, Sep 3</h3>
+            <div class="sub">Miami · Explore</div>
+            <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">09:00</span>South Beach</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

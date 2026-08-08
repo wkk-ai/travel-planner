@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>02 · Rail — Story list mockup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --blue:#1a73e8; --muted:#70757a; --line:#dadce0; --bg:#f8f9fa; --text:#3c4043; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:#e8eaed;min-height:100vh;padding:24px 16px;color:var(--text)}
+    a.back{display:inline-block;margin-bottom:16px;color:var(--blue);font-size:13px;font-weight:600;text-decoration:none}
+    .phone{max-width:390px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(60,64,67,.18);border:1px solid var(--line)}
+    .top{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+    .top h1{flex:1;font-size:17px;font-weight:700}
+    .tabs{display:flex;border-bottom:1px solid var(--line)}
+    .tabs span{flex:1;text-align:center;padding:14px;font-size:15px;font-weight:600;color:var(--muted)}
+    .tabs span.on{color:var(--blue);border-bottom:2px solid var(--blue)}
+    .slot{height:48px;background:var(--bg);border-bottom:1px solid var(--line);opacity:.4}
+    .body{padding:16px;background:#fff;min-height:560px}
+    .head{padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:4px}
+    .head h2{font-size:20px;font-weight:700}
+    .head p{font-size:14px;color:var(--muted);margin-top:4px}
+    .now{margin-top:12px;font-size:14px;padding:10px 12px;background:#e8f0fe;border-radius:10px}
+    .now b{color:var(--blue)}
+    .row-h{display:flex;justify-content:space-between;align-items:center;padding:14px 0 8px}
+    .row-h span{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+    .row-h a{font-size:13px;color:var(--blue);font-weight:600;text-decoration:none}
+    .timeline{position:relative;padding-left:28px}
+    .timeline::before{content:"";position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:var(--line)}
+    .node{position:relative;padding:14px 0 18px;border-bottom:1px solid #f1f3f4}
+    .node:last-child{border-bottom:0}
+    .node::before{content:"";position:absolute;left:-22px;top:18px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--line);z-index:1}
+    .node.today::before{background:var(--blue);border-color:var(--blue);box-shadow:0 0 0 4px #e8f0fe}
+    .node.past{opacity:.5}
+    .node-h{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;margin-bottom:8px}
+    .node-h strong{font-size:15px}
+    .tag{font-size:11px;font-weight:700;color:var(--blue)}
+    .sub{font-size:13px;color:var(--muted);width:100%}
+    .ev{display:flex;gap:8px;font-size:14px;padding:5px 0}
+    .t{width:42px;flex-shrink:0;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+    .dot{width:6px;height:6px;border-radius:50%;margin-top:7px;flex-shrink:0}
+    .more{font-size:13px;color:var(--muted);padding-left:50px;margin-top:4px}
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← All story mockups</a>
+  <div class="phone">
+    <div class="top"><div style="width:36px;height:36px;border-radius:50%;background:#e8f0fe"></div><h1>BigBang US Trip 2026</h1><span style="font-size:12px;color:var(--muted)">···</span></div>
+    <div class="tabs"><span class="on">Story</span><span>Schedule</span></div>
+    <div class="slot"></div>
+    <div class="body">
+      <div class="head">
+        <h2>BigBang US Trip 2026</h2>
+        <p>Aug 29 – Sep 7, 2026 · 21 days to go</p>
+        <div class="now"><b>Now</b> · Hotel check-in</div>
+      </div>
+      <div class="row-h"><span>Your days</span><a href="#">Full schedule</a></div>
+      <div class="timeline">
+        <div class="node today">
+          <div class="node-h"><strong>Sat, Aug 29</strong><span class="tag">Today</span><span class="sub">Orlando · Departure</span></div>
+          <div class="ev"><span class="dot" style="background:#1a73e8"></span><span class="t">08:25</span>Flight CGH → CNF</div>
+          <div class="ev"><span class="dot" style="background:#4285f4"></span><span class="t">14:00</span>Hotel check-in</div>
+          <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">19:00</span>Dinner at hotel</div>
+        </div>
+        <div class="node">
+          <div class="node-h"><strong>Sun, Aug 30</strong><span class="sub">Orlando · Explore</span></div>
+          <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">07:30</span>Breakfast at hotel</div>
+          <div class="ev"><span class="dot" style="background:#a142f4"></span><span class="t">09:30</span>Target & Best Buy</div>
+          <div class="more">+4 more</div>
+        </div>
+        <div class="node">
+          <div class="node-h"><strong>Mon, Aug 31</strong><span class="sub">Orlando · Explore</span></div>
+          <div class="ev"><span class="dot" style="background:#f9ab00"></span><span class="t">08:00</span>Magic Kingdom</div>
+          <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">13:00</span>Lunch — park</div>
+        </div>
+        <div class="node">
+          <div class="node-h"><strong>Tue, Sep 1</strong><span class="sub">Orlando · Explore</span></div>
+          <div class="ev"><span class="dot" style="background:#f9ab00"></span><span class="t">08:30</span>EPCOT</div>
+        </div>
+        <div class="node">
+          <div class="node-h"><strong>Wed, Sep 2</strong><span class="sub">Miami · Travel</span></div>
+          <div class="ev"><span class="dot" style="background:#1a73e8"></span><span class="t">10:15</span>Drive to Miami</div>
+        </div>
+        <div class="node">
+          <div class="node-h"><strong>Thu, Sep 3</strong><span class="sub">Miami · Explore</span></div>
+          <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">09:00</span>South Beach</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

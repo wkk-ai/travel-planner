@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>05 · Refined — Story list mockup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --blue:#1a73e8; --muted:#70757a; --line:#dadce0; --bg:#f8f9fa; --text:#3c4043; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:#e8eaed;min-height:100vh;padding:24px 16px;color:var(--text)}
+    a.back{display:inline-block;margin-bottom:16px;color:var(--blue);font-size:13px;font-weight:600;text-decoration:none}
+    .phone{max-width:390px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(60,64,67,.18);border:1px solid var(--line)}
+    .top{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+    .top h1{flex:1;font-size:17px;font-weight:700}
+    .tabs{display:flex;border-bottom:1px solid var(--line)}
+    .tabs span{flex:1;text-align:center;padding:14px;font-size:15px;font-weight:600;color:var(--muted)}
+    .tabs span.on{color:var(--blue);border-bottom:2px solid var(--blue)}
+    .slot{height:48px;background:var(--bg);border-bottom:1px solid var(--line);opacity:.4}
+    .body{padding:20px 16px 24px;background:#fff;min-height:560px}
+    .head{padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:16px}
+    .head h2{font-size:22px;font-weight:700;letter-spacing:-.02em}
+    .head .meta{font-size:15px;color:var(--muted);margin-top:6px}
+    .head .meta span.dot-sep{color:var(--line);margin:0 6px}
+    .head .now{margin-top:14px;font-size:15px}
+    .head .now em{font-style:normal;font-weight:600;color:var(--blue)}
+    .prog{margin-bottom:18px}
+    .prog .track{height:4px;background:var(--bg);border-radius:99px;overflow:hidden}
+    .prog .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),#4285f4);border-radius:99px}
+    .prog p{font-size:12px;color:var(--muted);margin-top:6px;font-weight:500}
+    .row-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .row-h span{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+    .row-h a{font-size:14px;color:var(--blue);font-weight:600;text-decoration:none}
+    .list{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(60,64,67,.06)}
+    .day{border-bottom:1px solid var(--line);padding:16px}
+    .day:last-child{border-bottom:0}
+    .day.today{background:linear-gradient(90deg,#f8fbff 0%,#fff 100%)}
+    .day.past{opacity:.58}
+    .day-h{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
+    .day-h .date{font-size:16px;font-weight:700}
+    .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}
+    .badge.today{color:var(--blue);background:#e8f0fe}
+    .badge.vibe{color:var(--muted);background:var(--bg)}
+    .place{font-size:14px;color:var(--muted);width:100%}
+    .evs{display:flex;flex-direction:column;gap:8px}
+    .ev{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;background:var(--bg)}
+    .day.today .ev{background:#fff;border:1px solid #eef2f6}
+    .t{width:48px;flex-shrink:0;color:var(--muted);font-size:14px;font-weight:500;font-variant-numeric:tabular-nums}
+    .dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
+    .ev-body{flex:1;min-width:0}
+    .ev-body strong{display:block;font-size:15px;font-weight:600;line-height:1.3}
+    .ev-body small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+    .more{font-size:13px;color:var(--muted);padding:4px 10px 0}
+    .empty{font-size:14px;color:var(--muted);padding:4px 0}
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← All story mockups</a>
+  <div class="phone">
+    <div class="top"><div style="width:36px;height:36px;border-radius:50%;background:#e8f0fe"></div><h1>BigBang US Trip 2026</h1><span style="font-size:12px;color:var(--muted)">···</span></div>
+    <div class="tabs"><span class="on">Story</span><span>Schedule</span></div>
+    <div class="slot"></div>
+    <div class="body">
+      <div class="head">
+        <h2>BigBang US Trip 2026</h2>
+        <p class="meta">Aug 29 – Sep 7, 2026<span class="dot-sep">·</span>21 days until you go</p>
+        <p class="now"><em>Now</em> · Hotel check-in</p>
+      </div>
+      <div class="prog">
+        <div class="track"><div class="fill"></div></div>
+        <p>Trip hasn’t started yet</p>
+      </div>
+      <div class="row-h"><span>Your days</span><a href="#">Full schedule</a></div>
+      <div class="list">
+        <div class="day today">
+          <div class="day-h">
+            <span class="date">Sat, Aug 29</span>
+            <span class="badge today">Today</span>
+            <span class="badge vibe">Departure</span>
+            <span class="place">Orlando</span>
+          </div>
+          <div class="evs">
+            <div class="ev"><span class="dot" style="background:#1a73e8"></span><span class="t">08:25</span><div class="ev-body"><strong>Flight CGH → CNF</strong></div></div>
+            <div class="ev"><span class="dot" style="background:#4285f4"></span><span class="t">14:00</span><div class="ev-body"><strong>Hotel check-in</strong></div></div>
+            <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">19:00</span><div class="ev-body"><strong>Dinner at hotel</strong></div></div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="day-h">
+            <span class="date">Sun, Aug 30</span>
+            <span class="badge vibe">Explore</span>
+            <span class="place">Orlando</span>
+          </div>
+          <div class="evs">
+            <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">07:30</span><div class="ev-body"><strong>Breakfast at hotel</strong></div></div>
+            <div class="ev"><span class="dot" style="background:#a142f4"></span><span class="t">09:30</span><div class="ev-body"><strong>Target & Best Buy</strong><small>or 2 other plans</small></div></div>
+            <p class="more">+4 more</p>
+          </div>
+        </div>
+        <div class="day">
+          <div class="day-h">
+            <span class="date">Mon, Aug 31</span>
+            <span class="badge vibe">Explore</span>
+            <span class="place">Orlando</span>
+          </div>
+          <div class="evs">
+            <div class="ev"><span class="dot" style="background:#f9ab00"></span><span class="t">08:00</span><div class="ev-body"><strong>Magic Kingdom</strong></div></div>
+            <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">13:00</span><div class="ev-body"><strong>Lunch — park</strong></div></div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="day-h">
+            <span class="date">Tue, Sep 1</span>
+            <span class="badge vibe">Explore</span>
+            <span class="place">Orlando</span>
+          </div>
+          <div class="evs">
+            <div class="ev"><span class="dot" style="background:#f9ab00"></span><span class="t">08:30</span><div class="ev-body"><strong>EPCOT</strong></div></div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="day-h">
+            <span class="date">Wed, Sep 2</span>
+            <span class="badge vibe">Travel</span>
+            <span class="place">Miami</span>
+          </div>
+          <div class="evs">
+            <div class="ev"><span class="dot" style="background:#1a73e8"></span><span class="t">10:15</span><div class="ev-body"><strong>Drive to Miami</strong></div></div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="day-h">
+            <span class="date">Thu, Sep 3</span>
+            <span class="badge vibe">Explore</span>
+            <span class="place">Miami</span>
+          </div>
+          <div class="evs">
+            <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">09:00</span><div class="ev-body"><strong>South Beach</strong></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

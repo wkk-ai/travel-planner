@@ -247,7 +247,7 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1">
-              <div className="brand-serif truncate text-xl leading-none">{trip.name}</div>
+              <div className="truncate text-ui-lg font-semibold leading-tight tracking-tight">{trip.name}</div>
               <ChevronDown className="size-4 shrink-0 text-[var(--gcal-muted)]" />
             </div>
             <div className="text-[11px] text-[var(--gcal-muted)]">

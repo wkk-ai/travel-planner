@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Story tab mockups</title>
+  <title>Story tab mockups — day list</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet" />
   <style>
     :root { --ink: #3c4043; --muted: #70757a; --line: #dadce0; --bg: #f8f9fa; --blue: #1a73e8; }
@@ -34,13 +34,20 @@
       transition: box-shadow 0.15s;
     }
     a.card:hover { box-shadow: 0 8px 24px rgba(60,64,67,.1); }
-    .swatch { height: 72px; border-radius: 10px; }
-    .swatch.s1 { background: linear-gradient(135deg, #e8f0fe, #fff); border: 1px solid #c2d7f7; }
-    .swatch.s2 { background: linear-gradient(90deg, #1a73e8 0%, #1a73e8 35%, #e8eaed 35%); border-radius: 10px; }
-    .swatch.s3 { background: #fff; border: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 8px; }
-    .swatch.s3 span { background: #f1f3f4; border-radius: 4px; height: 100%; }
-    .swatch.s4 { background: linear-gradient(180deg, #1a73e8 40%, #fff 40%); border: 1px solid var(--line); }
-    .swatch.s5 { background: #fff; border-left: 3px solid #1a73e8; border: 1px solid var(--line); border-left-width: 3px; }
+    .swatch { height: 72px; border-radius: 10px; border: 1px solid var(--line); }
+    .swatch.s1 { background: #fff; display: flex; flex-direction: column; gap: 5px; padding: 8px; }
+    .swatch.s1 span { height: 12px; background: #f1f3f4; border-radius: 4px; }
+    .swatch.s1 span:nth-child(2) { border: 1px solid #c2d7f7; background: #e8f0fe; }
+    .swatch.s2 { background: #fff; position: relative; padding-left: 14px; }
+    .swatch.s2::before { content: ""; position: absolute; left: 10px; top: 8px; bottom: 8px; width: 2px; background: #dadce0; }
+    .swatch.s2::after { content: ""; position: absolute; left: 7px; top: 14px; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
+    .swatch.s3 { background: linear-gradient(180deg, #e8f0fe 0%, #e8f0fe 28%, #fff 28%); }
+    .swatch.s4 { display: grid; grid-template-columns: 22px 1fr; gap: 6px; padding: 8px; background: #fff; }
+    .swatch.s4 b { background: #e8f0fe; border-radius: 4px; }
+    .swatch.s4 span { background: #f1f3f4; border-radius: 4px; height: 10px; align-self: center; }
+    .swatch.s5 { background: #fff; padding: 6px; display: flex; flex-direction: column; gap: 3px; }
+    .swatch.s5 i { display: block; height: 8px; background: #f1f3f4; border-radius: 2px; }
+    .swatch.s5 i.on { background: #e8f0fe; border-left: 3px solid var(--blue); }
     h2 { margin: 0 0 4px; font-size: 1rem; font-weight: 700; }
     p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.4; }
   </style>
@@ -48,28 +55,28 @@
 <body>
   <main>
     <a class="back" href="../index.html">← Calendar mockups</a>
-    <h1>Story tab — 5 dashboards</h1>
-    <p class="lede">Clean, minimal, dashboard feel. Same trip data — different layout. Open on phone width to judge mobile.</p>
+    <h1>Story tab — 5 day lists</h1>
+    <p class="lede">Same idea: one scroll, every day in order. Only the look changes — stats, spacing, accents. Open narrow for phone.</p>
     <div class="grid">
-      <a class="card" href="01-pulse.html">
+      <a class="card" href="01-stack.html">
         <div class="swatch s1"></div>
-        <div><h2>01 · Pulse</h2><p>KPI tiles + vertical day timeline. Balanced dashboard.</p></div>
+        <div><h2>01 · Stack</h2><p>Small stat row, then spaced day cards (not one flat box).</p></div>
       </a>
-      <a class="card" href="02-horizon.html">
+      <a class="card" href="02-rail.html">
         <div class="swatch s2"></div>
-        <div><h2>02 · Horizon</h2><p>Trip progress arc + day cards in a grid.</p></div>
+        <div><h2>02 · Rail</h2><p>One list with a timeline spine on the left.</p></div>
       </a>
-      <a class="card" href="03-ledger.html">
+      <a class="card" href="03-band.html">
         <div class="swatch s3"></div>
-        <div><h2>03 · Ledger</h2><p>Split panel: stats left, days right (desktop).</p></div>
+        <div><h2>03 · Band</h2><p>Soft trip header band + single bordered list, today highlighted.</p></div>
       </a>
-      <a class="card" href="04-compass.html">
+      <a class="card" href="04-index.html">
         <div class="swatch s4"></div>
-        <div><h2>04 · Compass</h2><p>“Today” hero + horizontal day strip.</p></div>
+        <div><h2>04 · Index</h2><p>Day number column + events — dashboard index feel.</p></div>
       </a>
-      <a class="card" href="05-aperture.html">
+      <a class="card" href="05-refined.html">
         <div class="swatch s5"></div>
-        <div><h2>05 · Aperture</h2><p>Spine timeline + metric strip. Very quiet.</p></div>
+        <div><h2>05 · Refined</h2><p>Closest to today’s list — progress bar, chips, cleaner rows.</p></div>
       </a>
     </div>
   </main>
