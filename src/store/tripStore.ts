@@ -41,6 +41,7 @@ import {
   upsertNote,
 } from '../lib/supabase'
 import { addDaysIso, isoDate, minutesToTime, shiftEventsFrom, SLOT_MINUTES, timeToMinutes } from '../lib/time'
+import { swapEventWithBackup } from '../lib/eventBackups'
 import type { EventCategory } from '../types'
 
 const LOCAL_TOKEN_KEY = 'travel-planner-last-token'
@@ -112,6 +113,7 @@ interface TripState {
   updateEvent: (id: string, patch: Partial<TripEvent>) => Promise<void>
   deleteEvent: (id: string) => Promise<void>
   moveEvent: (id: string, date: string, startTime: string, endTime: string) => Promise<void>
+  swapWithBackup: (eventId: string, backupId: string, patch?: Partial<TripEvent>) => Promise<void>
   runningLate: (date: string, fromTime: string, minutes: number) => Promise<void>
   addNote: (partial?: Partial<TripNote>) => Promise<void>
   updateNote: (id: string, patch: Partial<TripNote>) => Promise<void>
@@ -240,6 +242,7 @@ export const useTripStore = create<TripState>((set, get) => ({
       flight: partial.flight ?? null,
       budgetCents: partial.budgetCents ?? 0,
       photoDataUrl: partial.photoDataUrl ?? null,
+      backups: partial.backups ?? [],
     }
     set({ pendingDraft: draft, selectedEventId: null })
     return draft
@@ -497,6 +500,7 @@ export const useTripStore = create<TripState>((set, get) => ({
       flight: s.flight ?? null,
       budgetCents: s.budgetCents ?? 0,
       photoDataUrl: null,
+      backups: [],
     }))
 
     const notes: TripNote[] = SEED_NOTES.map((n) => ({
@@ -567,6 +571,7 @@ export const useTripStore = create<TripState>((set, get) => ({
       flight: partial.flight ?? null,
       budgetCents: partial.budgetCents ?? 0,
       photoDataUrl: partial.photoDataUrl ?? null,
+      backups: partial.backups ?? [],
     }
     set({ events: [...get().events, ev], selectedEventId: ev.id })
     await syncEvent(ev, true)
@@ -611,6 +616,19 @@ export const useTripStore = create<TripState>((set, get) => ({
         navigator.vibrate?.([8, 20, 8])
       }
     }
+  },
+
+  swapWithBackup: async (eventId, backupId, patch) => {
+    if (get().mode !== 'edit') return
+    const current = get().events.find((e) => e.id === eventId)
+    if (!current) return
+    const merged = patch ? { ...current, ...patch } : current
+    get().pushUndo('Swap backup plan')
+    const swapped = swapEventWithBackup(merged, backupId)
+    const events = get().events.map((e) => (e.id === eventId ? swapped : e))
+    set({ events })
+    await syncEvent(swapped, true)
+    set({ toast: `Now: ${swapped.title}` })
   },
 
   runningLate: async (date, fromTime, minutes) => {

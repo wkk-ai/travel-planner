@@ -17,6 +17,22 @@ export interface FlightDetails {
   arriveLocal?: string
 }
 
+export type BackupTag = 'rain' | 'closed' | 'tired' | 'other'
+
+export interface EventBackup {
+  id: string
+  tag: BackupTag | null
+  title: string
+  category: EventCategory
+  color?: string | null
+  notes: string
+  location: string
+  mapsUrl: string
+  flight?: FlightDetails | null
+  budgetCents: number
+  photoDataUrl?: string | null
+}
+
 export interface TripEvent {
   id: string
   tripId: string
@@ -34,6 +50,7 @@ export interface TripEvent {
   photoDataUrl?: string | null
   sortOffset?: number
   updatedAt?: string
+  backups?: EventBackup[]
 }
 
 export interface TripNote {

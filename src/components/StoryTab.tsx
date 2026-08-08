@@ -16,6 +16,7 @@ import {
   isEventPast,
   tripDays,
 } from '../lib/time'
+import { backupCount } from '../lib/eventBackups'
 import { useTripStore } from '../store/tripStore'
 import type { EventCategory, TripEvent } from '../types'
 
@@ -127,6 +128,7 @@ function DayCard({
           {highlights.map((ev) => {
             const cat = CATEGORIES[ev.category]
             const past = isEventPast(ev)
+            const backups = backupCount(ev)
             return (
               <li key={ev.id}>
                 <button
@@ -144,7 +146,14 @@ function DayCard({
                   <span className="w-12 shrink-0 tabular-nums text-xs text-[var(--gcal-muted)]">
                     {formatEventTime(ev)}
                   </span>
-                  <span className="min-w-0 flex-1 truncate font-medium">{ev.title}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium">{ev.title}</span>
+                    {backups > 0 ? (
+                      <span className="block text-[10px] text-[var(--gcal-muted)]">
+                        or {backups} other plan{backups > 1 ? 's' : ''}
+                      </span>
+                    ) : null}
+                  </span>
                   {ev.category === 'flight' ? (
                     <Plane className="size-3.5 shrink-0 text-[var(--gcal-muted)]" />
                   ) : null}

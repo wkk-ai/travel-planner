@@ -4,6 +4,7 @@ import type { EventCategory, TripEvent } from '../types'
 import { CATEGORIES, eventColors } from '../data/categories'
 import { useTripStore } from '../store/tripStore'
 import { timeOptions30, cn } from '../lib/time'
+import { EventBackupsSection } from './EventBackupsSection'
 
 interface Props {
   event: TripEvent
@@ -352,6 +353,20 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
               </>
             ) : null}
           </section>
+
+          {!isDraft ? (
+            <EventBackupsSection
+              event={draft}
+              backups={draft.backups ?? []}
+              readOnly={readOnly}
+              onBackupsChange={(backups) => setDraft({ ...draft, backups })}
+              onUseBackup={async (backupId) => {
+                await useTripStore
+                  .getState()
+                  .swapWithBackup(event.id, backupId, { ...draft, backups: draft.backups ?? [] })
+              }}
+            />
+          ) : null}
         </div>
 
         <div className="flex items-center justify-between gap-2 border-t border-[var(--gcal-border)] bg-white px-4 py-3">

@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type {
   ChecklistItem,
+  EventBackup,
   Expense,
   Trip,
   TripEvent,
@@ -47,7 +48,13 @@ function mapEvent(row: Record<string, unknown>): TripEvent {
     photoDataUrl: (row.photo_data_url as string) ?? null,
     sortOffset: (row.sort_offset as number) ?? 0,
     updatedAt: row.updated_at as string,
+    backups: parseBackups(row.backups_json),
   }
+}
+
+function parseBackups(raw: unknown): EventBackup[] {
+  if (!Array.isArray(raw)) return []
+  return raw.filter((b) => b && typeof b === 'object' && 'id' in b && 'title' in b) as EventBackup[]
 }
 
 function eventToRow(e: TripEvent) {
@@ -67,6 +74,7 @@ function eventToRow(e: TripEvent) {
     budget_cents: e.budgetCents ?? 0,
     photo_data_url: e.photoDataUrl ?? null,
     sort_offset: e.sortOffset ?? 0,
+    backups_json: e.backups ?? [],
     updated_at: new Date().toISOString(),
   }
 }

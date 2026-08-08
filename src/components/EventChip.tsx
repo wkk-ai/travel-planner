@@ -44,6 +44,7 @@ export function EventChip({
   isDraft = false,
 }: Props) {
   const colors = eventColors(event.category, event.color)
+  const backupN = event.backups?.length ?? 0
   const mins = durationMinutes(event)
   const heightPx =
     typeof style?.height === 'number'
@@ -70,6 +71,7 @@ export function EventChip({
     secondary,
     warning,
     faded ? 'Past' : '',
+    backupN > 0 ? `${backupN} backup plan${backupN > 1 ? 's' : ''}` : '',
   ]
     .filter(Boolean)
     .join(' · ')
@@ -98,6 +100,7 @@ export function EventChip({
       }}
       className={cn(
         'event-block absolute inset-x-0.5 overflow-hidden rounded-[2px] text-left leading-tight border-l-[3px]',
+        backupN > 0 && 'pr-5',
         density === 'xs' ? 'px-1 py-0' : 'px-1.5 py-0.5',
         isDragging && 'opacity-40',
         isNow && 'is-now',
@@ -137,6 +140,14 @@ export function EventChip({
           {event.startTime}–{event.endTime}
           {isDraft ? ' · draft' : ''}
         </div>
+      ) : null}
+      {backupN > 0 ? (
+        <span
+          className="absolute right-0.5 top-0.5 rounded bg-white/90 px-1 text-[8px] font-bold leading-none text-[var(--gcal-blue)] shadow-sm"
+          title={`${backupN} backup plan${backupN > 1 ? 's' : ''}`}
+        >
+          +{backupN}
+        </span>
       ) : null}
     </button>
   )
