@@ -240,7 +240,7 @@ export function TimeGutter() {
       {hours.map((h) => (
         <div
           key={h}
-          className="relative border-b border-transparent text-right text-[10px] text-[var(--gcal-muted)]"
+          className="relative border-b border-transparent text-right text-ui-xs text-[var(--gcal-muted)]"
           style={{ height: HOUR_HEIGHT }}
         >
           <span className="absolute -top-2 right-2">

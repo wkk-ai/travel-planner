@@ -11,14 +11,30 @@
   --gcal-today: #1a73e8;
   --hour-height: 56px;
   --header-h: 64px;
+  /* Fluid type — floors raised for mobile + desktop readability */
+  --text-ui-xs: clamp(0.8125rem, 0.78rem + 0.15vw, 0.875rem);   /* 13–14px */
+  --text-ui-sm: clamp(0.875rem, 0.84rem + 0.18vw, 1rem);        /* 14–16px */
+  --text-ui-base: clamp(1rem, 0.95rem + 0.22vw, 1.125rem);      /* 16–18px */
+  --text-ui-lg: clamp(1.125rem, 1.05rem + 0.28vw, 1.3125rem);  /* 18–21px */
+  --text-ui-xl: clamp(1.25rem, 1.15rem + 0.35vw, 1.5rem);      /* 20–24px */
+  --text-event-xs: clamp(0.75rem, 0.72rem + 0.12vw, 0.8125rem);
+  --text-event-sm: clamp(0.8125rem, 0.78rem + 0.15vw, 0.9375rem);
+  --text-event-md: clamp(0.875rem, 0.84rem + 0.18vw, 1rem);
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-size: var(--text-ui-base);
   color: var(--gcal-text);
   background: var(--gcal-bg);
-  line-height: 1.4;
+  line-height: 1.45;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
+
+.text-ui-xs { font-size: var(--text-ui-xs); }
+.text-ui-sm { font-size: var(--text-ui-sm); }
+.text-ui-base { font-size: var(--text-ui-base); }
+.text-ui-lg { font-size: var(--text-ui-lg); }
+.text-ui-xl { font-size: var(--text-ui-xl); }
 
 * {
   box-sizing: border-box;

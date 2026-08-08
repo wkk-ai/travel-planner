@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Check, MapPin, Plus, Sparkles, Trash2, X } from 'lucide-react'
+import { Check, Plus, Trash2, X } from 'lucide-react'
 import { differenceInCalendarDays, format, parseISO } from 'date-fns'
 import { shareUrls, useTripStore } from '../store/tripStore'
 import { parseConfirmationText, currentEventAt, cn } from '../lib/time'
@@ -11,9 +11,14 @@ export function SidePanel() {
   if (panel === 'none') return null
 
   return (
-    <aside className="no-print panel-enter absolute inset-y-0 right-0 z-30 flex w-full max-w-sm flex-col border-l border-[var(--gcal-border)] bg-white shadow-xl sm:relative sm:max-w-xs">
-      <div className="flex items-center justify-between border-b border-[var(--gcal-border)] px-3 py-2.5">
-        <div className="text-sm font-semibold capitalize">{titleFor(panel)}</div>
+    <aside
+      className={cn(
+        'no-print panel-enter absolute inset-y-0 right-0 z-30 flex flex-col border-l border-[var(--gcal-border)] bg-white shadow-xl',
+        panel === 'trips' ? 'w-full max-w-none sm:max-w-sm' : 'w-full max-w-sm sm:relative sm:max-w-xs',
+      )}
+    >
+      <div className="flex items-center justify-between border-b border-[var(--gcal-border)] px-4 py-3">
+        <div className="text-ui-base font-semibold capitalize">{titleFor(panel)}</div>
         <button
           type="button"
           className="rounded-full p-1 hover:bg-[var(--gcal-bg)]"
@@ -22,7 +27,7 @@ export function SidePanel() {
           <X className="size-4" />
         </button>
       </div>
-      <div className="cal-scroll flex-1 overflow-auto p-3">
+      <div className={cn('cal-scroll flex-1 overflow-auto', panel === 'trips' ? 'flex flex-col p-0' : 'p-3')}>
         {panel === 'checklist' ? <ChecklistPanel /> : null}
         {panel === 'notes' ? <NotesPanel /> : null}
         {panel === 'budget' ? <BudgetPanel /> : null}
@@ -31,7 +36,7 @@ export function SidePanel() {
         {panel === 'import' ? <ImportPanel /> : null}
         {panel === 'whatif' ? <WhatIfPanel /> : null}
         {panel === 'recap' ? <RecapPanel /> : null}
-        {panel === 'trips' ? <TripsPanel /> : null}
+        {panel === 'trips' ? <div className="flex min-h-0 flex-1 flex-col px-2 pt-2"><TripsPanel /></div> : null}
       </div>
       <WeatherFooter />
     </aside>
@@ -421,6 +426,8 @@ function TripsPanel() {
   const [seed, setSeed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [createOpen, setCreateOpen] = useState(false)
+  const [menuId, setMenuId] = useState<string | null>(null)
 
   useEffect(() => {
     void refreshTrips()
@@ -446,21 +453,8 @@ function TripsPanel() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#e8f0fe] via-white to-[#e6f4ea] p-4 ring-1 ring-[var(--gcal-border)]">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--gcal-muted)]">
-          Your trips
-        </div>
-        <div className="brand-serif mt-1 text-2xl leading-tight text-[var(--gcal-text)]">
-          Pick where you plan next
-        </div>
-        <p className="mt-1.5 text-xs leading-relaxed text-[var(--gcal-muted)]">
-          {trips.length} trip{trips.length === 1 ? '' : 's'} saved
-          {trip ? ` · open: ${trip.name}` : ''}
-        </p>
-      </div>
-
-      <ul className="space-y-2.5">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <ul className="flex-1 space-y-1">
         {trips.map((t) => {
           const active = t.id === trip?.id
           const whatIf = Boolean(t.whatIfOf)
@@ -470,103 +464,173 @@ function TripsPanel() {
           )
           const rangeLabel = `${format(parseISO(t.startDate), 'd MMM')} – ${format(parseISO(t.endDate), 'd MMM yyyy')}`
           return (
-            <li key={t.id}>
+            <li key={t.id} className="relative">
               <div
                 className={cn(
-                  'group relative overflow-hidden rounded-2xl border bg-white transition-shadow',
-                  active
-                    ? 'border-[var(--gcal-blue)] shadow-[0_8px_24px_rgba(26,115,232,0.12)]'
-                    : 'border-[var(--gcal-border)] hover:shadow-md',
+                  'flex w-full items-center gap-1 rounded-xl transition-colors',
+                  active ? 'bg-[#e8f0fe]' : 'hover:bg-[var(--gcal-bg)]',
                 )}
               >
-                <div
-                  className={cn(
-                    'absolute inset-y-0 left-0 w-1',
-                    whatIf ? 'bg-[#f9ab00]' : active ? 'bg-[var(--gcal-blue)]' : 'bg-[#dadce0]',
-                  )}
-                />
                 <button
                   type="button"
                   disabled={mode === 'view'}
                   onClick={() => void switchTrip(t.editToken)}
-                  className="w-full py-3 pl-4 pr-3 text-left disabled:cursor-default"
+                  className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3 text-left disabled:cursor-default"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="truncate font-semibold text-[var(--gcal-text)]">{t.name}</span>
-                        {active ? (
-                          <span className="rounded-full bg-[#e8f0fe] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--gcal-blue)]">
-                            Open
-                          </span>
-                        ) : null}
-                        {whatIf ? (
-                          <span className="inline-flex items-center gap-0.5 rounded-full bg-[#fef7e0] px-1.5 py-0.5 text-[10px] font-semibold text-[#b06000]">
-                            <Sparkles className="size-2.5" /> What-if
-                          </span>
-                        ) : null}
-                      </div>
-                      <div className="mt-1 flex items-center gap-1 text-[11px] text-[var(--gcal-muted)]">
-                        <MapPin className="size-3 shrink-0" />
-                        <span>
-                          {rangeLabel}
-                          {nights > 0 ? ` · ${nights} night${nights === 1 ? '' : 's'}` : ' · same day'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                <span
+                  className={cn(
+                    'flex size-5 shrink-0 items-center justify-center rounded-full border-2',
+                    active ? 'border-[var(--gcal-blue)] bg-[var(--gcal-blue)]' : 'border-[var(--gcal-border)]',
+                  )}
+                >
+                  {active ? <Check className="size-3 text-white" /> : null}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2">
+                    <span className="truncate text-ui-base font-semibold">{t.name}</span>
+                    {whatIf ? (
+                      <span className="shrink-0 text-ui-xs font-medium text-[#b06000]">What-if</span>
+                    ) : null}
+                  </span>
+                  <span className="mt-0.5 block text-ui-sm text-[var(--gcal-muted)]">
+                    {rangeLabel}
+                    {nights > 0 ? ` · ${nights} nights` : ''}
+                  </span>
+                </span>
                 </button>
                 {mode === 'edit' ? (
-                  <div className="flex items-center justify-end border-t border-[var(--gcal-border)]/70 px-3 py-1.5">
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-[#c5221f] hover:bg-[#fce8e6]"
-                      onClick={() => setConfirmId(t.id)}
-                    >
-                      <Trash2 className="size-3" />
-                      Delete
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    className="mr-2 shrink-0 rounded-lg px-2 py-1 text-ui-sm text-[var(--gcal-muted)] hover:bg-white"
+                    onClick={() => setMenuId(menuId === t.id ? null : t.id)}
+                    aria-label="Trip options"
+                  >
+                    ···
+                  </button>
                 ) : null}
               </div>
+              {menuId === t.id && mode === 'edit' ? (
+                <div className="absolute right-2 top-full z-10 mt-1 rounded-xl border border-[var(--gcal-border)] bg-white py-1 shadow-lg">
+                  <button
+                    type="button"
+                    className="block w-full px-4 py-2 text-left text-ui-sm text-[#c5221f] hover:bg-[#fce8e6]"
+                    onClick={() => {
+                      setMenuId(null)
+                      setConfirmId(t.id)
+                    }}
+                  >
+                    Delete trip
+                  </button>
+                </div>
+              ) : null}
             </li>
           )
         })}
         {!trips.length ? (
-          <li className="rounded-2xl border border-dashed border-[var(--gcal-border)] bg-[var(--gcal-bg)]/60 px-4 py-8 text-center">
-            <MapPin className="mx-auto size-6 text-[var(--gcal-muted)]" />
-            <p className="mt-2 text-sm font-medium text-[var(--gcal-text)]">No trips yet</p>
-            <p className="mt-1 text-xs text-[var(--gcal-muted)]">Create one below to start planning.</p>
+          <li className="px-3 py-8 text-center text-ui-sm text-[var(--gcal-muted)]">
+            No trips yet. Create one below.
           </li>
         ) : null}
       </ul>
 
       {confirmTrip ? (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-4 shadow-2xl">
-            <div className="brand-serif text-xl">Delete trip?</div>
-            <p className="mt-2 text-sm text-[var(--gcal-muted)]">
-              Permanently delete <strong>{confirmTrip.name}</strong> and all its events, notes,
-              checklist, and expenses. This cannot be undone.
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl">
+            <div className="text-ui-lg font-semibold">Delete trip?</div>
+            <p className="mt-2 text-ui-sm text-[var(--gcal-muted)]">
+              Permanently delete <strong>{confirmTrip.name}</strong> and all its data. Cannot undo.
             </p>
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
-                className="rounded-xl px-3 py-2 text-sm font-medium hover:bg-[var(--gcal-bg)]"
+                className="rounded-xl px-3 py-2 text-ui-sm font-medium hover:bg-[var(--gcal-bg)]"
                 onClick={() => setConfirmId(null)}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="rounded-xl bg-[#c5221f] px-3 py-2 text-sm font-semibold text-white"
+                className="rounded-xl bg-[#c5221f] px-3 py-2 text-ui-sm font-semibold text-white"
                 onClick={async () => {
                   const id = confirmTrip.id
                   setConfirmId(null)
                   await deleteTrip(id)
                 }}
               >
-                Yes, delete
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {createOpen ? (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4">
+          <div className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-2xl sm:rounded-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-ui-lg font-semibold">New trip</h3>
+              <button type="button" className="rounded-full p-1 hover:bg-[var(--gcal-bg)]" onClick={() => setCreateOpen(false)}>
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <label className="block">
+                <span className="mb-1 block text-ui-sm font-medium text-[var(--gcal-muted)]">Name</span>
+                <input
+                  className="w-full rounded-xl border border-[var(--gcal-border)] px-3 py-2.5 text-ui-base outline-none focus:border-[var(--gcal-blue)]"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Japan spring 2027"
+                />
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="block">
+                  <span className="mb-1 block text-ui-sm font-medium text-[var(--gcal-muted)]">Start</span>
+                  <input
+                    type="date"
+                    className="w-full rounded-xl border border-[var(--gcal-border)] px-2 py-2 text-ui-sm"
+                    value={startDate}
+                    onChange={(e) => onStartChange(e.target.value)}
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-ui-sm font-medium text-[var(--gcal-muted)]">End</span>
+                  <input
+                    type="date"
+                    min={startDate}
+                    className="w-full rounded-xl border border-[var(--gcal-border)] px-2 py-2 text-ui-sm"
+                    value={endDate}
+                    onChange={(e) => onEndChange(e.target.value)}
+                  />
+                </label>
+              </div>
+              {datesOk ? (
+                <p className="text-ui-sm text-[var(--gcal-muted)]">
+                  {nightCount === 0 ? 'Same day' : `${nightCount} nights`}
+                </p>
+              ) : (
+                <p className="text-ui-sm text-[#c5221f]">End before start</p>
+              )}
+              <label className="flex items-start gap-2 text-ui-sm">
+                <input type="checkbox" className="mt-1" checked={seed} onChange={(e) => setSeed(e.target.checked)} />
+                <span>Prefill BigBang sample itinerary</span>
+              </label>
+              <button
+                type="button"
+                disabled={busy || !name.trim() || !datesOk}
+                className="w-full rounded-xl bg-[var(--gcal-blue)] py-3 text-ui-base font-semibold text-white disabled:opacity-40"
+                onClick={async () => {
+                  if (!datesOk) return
+                  setBusy(true)
+                  try {
+                    await createNewTrip({ name: name.trim(), startDate, endDate, seedBigBang: seed })
+                    setCreateOpen(false)
+                  } finally {
+                    setBusy(false)
+                  }
+                }}
+              >
+                Create trip
               </button>
             </div>
           </div>
@@ -574,114 +638,18 @@ function TripsPanel() {
       ) : null}
 
       {mode === 'edit' ? (
-        <div className="overflow-hidden rounded-2xl border border-[var(--gcal-border)] bg-white shadow-sm">
-          <div className="border-b border-[var(--gcal-border)] bg-[var(--gcal-bg)]/80 px-4 py-3">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex size-7 items-center justify-center rounded-full bg-[var(--gcal-blue)] text-white">
-                <Plus className="size-3.5" />
-              </span>
-              <div>
-                <div className="text-sm font-semibold text-[var(--gcal-text)]">New trip</div>
-                <div className="text-[11px] text-[var(--gcal-muted)]">Name it, set dates, go</div>
-              </div>
-            </div>
-          </div>
-          <div className="space-y-3 p-4">
-            <label className="block">
-              <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
-                Trip name
-              </span>
-              <input
-                className="w-full rounded-xl border border-[var(--gcal-border)] bg-white px-3 py-2.5 text-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe]"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Japan spring 2027"
-              />
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="block">
-                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
-                  Start
-                </span>
-                <input
-                  type="date"
-                  className="w-full rounded-xl border border-[var(--gcal-border)] px-2.5 py-2 text-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe]"
-                  value={startDate}
-                  onChange={(e) => onStartChange(e.target.value)}
-                />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
-                  End
-                </span>
-                <input
-                  type="date"
-                  min={startDate}
-                  className={cn(
-                    'w-full rounded-xl border px-2.5 py-2 text-sm outline-none focus:ring-2',
-                    datesOk
-                      ? 'border-[var(--gcal-border)] focus:border-[var(--gcal-blue)] focus:ring-[#e8f0fe]'
-                      : 'border-[#c5221f] focus:border-[#c5221f] focus:ring-[#fce8e6]',
-                  )}
-                  value={endDate}
-                  onChange={(e) => onEndChange(e.target.value)}
-                />
-              </label>
-            </div>
-            {!datesOk ? (
-              <p className="text-[11px] font-medium text-[#c5221f]">
-                End date cannot be before start date.
-              </p>
-            ) : (
-              <p className="text-[11px] text-[var(--gcal-muted)]">
-                {nightCount === 0
-                  ? 'Same-day trip'
-                  : `${nightCount} night${nightCount === 1 ? '' : 's'} · ${nightCount + 1} days`}
-              </p>
-            )}
-            <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-[var(--gcal-border)] bg-[var(--gcal-bg)]/50 px-3 py-2.5">
-              <input
-                type="checkbox"
-                className="mt-0.5"
-                checked={seed}
-                onChange={(e) => setSeed(e.target.checked)}
-              />
-              <span>
-                <span className="block text-xs font-medium text-[var(--gcal-text)]">
-                  Prefill BigBang US Trip 2026
-                </span>
-                <span className="mt-0.5 block text-[11px] text-[var(--gcal-muted)]">
-                  Copies the full seeded itinerary into this new trip.
-                </span>
-              </span>
-            </label>
-            <button
-              type="button"
-              disabled={busy || !name.trim() || !datesOk}
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--gcal-blue)] py-2.5 text-sm font-semibold text-white hover:bg-[var(--gcal-blue-hover)] disabled:opacity-40"
-              onClick={async () => {
-                if (!datesOk) return
-                setBusy(true)
-                try {
-                  await createNewTrip({
-                    name: name.trim(),
-                    startDate,
-                    endDate,
-                    seedBigBang: seed,
-                  })
-                } finally {
-                  setBusy(false)
-                }
-              }}
-            >
-              <Plus className="size-4" />
-              Create trip
-            </button>
-          </div>
+        <div className="shrink-0 border-t border-[var(--gcal-border)] p-3">
+          <button
+            type="button"
+            onClick={() => setCreateOpen(true)}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--gcal-border)] py-3 text-ui-base font-semibold text-[var(--gcal-blue)] hover:bg-[#e8f0fe]"
+          >
+            <Plus className="size-5" /> New trip
+          </button>
         </div>
       ) : (
-        <p className="rounded-xl bg-[var(--gcal-bg)] px-3 py-2 text-xs text-[var(--gcal-muted)]">
-          View-only — open an edit link to manage trips.
+        <p className="shrink-0 border-t border-[var(--gcal-border)] p-3 text-ui-sm text-[var(--gcal-muted)]">
+          View-only — need edit link to manage trips.
         </p>
       )}
     </div>

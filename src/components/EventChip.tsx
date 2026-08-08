@@ -157,9 +157,9 @@ export function EventChip({
       <div
         className={cn(
           'flex min-w-0 items-center gap-0.5 font-semibold',
-          density === 'xs' ? 'h-full text-[10px]' : 'text-[10px]',
-          density === 'lg' && 'text-[11px]',
+          density === 'xs' ? 'h-full' : '',
         )}
+        style={{ fontSize: density === 'xs' ? 'var(--text-event-xs)' : density === 'sm' ? 'var(--text-event-sm)' : 'var(--text-event-md)' }}
       >
         {showIcon ? <Plane className="size-2.5 shrink-0 opacity-90" /> : null}
         <span className={density === 'xs' ? 'truncate' : 'line-clamp-2'}>{event.title}</span>
@@ -167,21 +167,22 @@ export function EventChip({
       </div>
 
       {showPlace ? (
-        <div className="mt-px flex min-w-0 items-center gap-0.5 text-[9px] leading-snug opacity-80">
+        <div className="mt-px flex min-w-0 items-center gap-0.5 leading-snug opacity-80" style={{ fontSize: 'var(--text-event-xs)' }}>
           {event.location && !event.flight ? <MapPin className="size-2 shrink-0" /> : null}
           <span className="truncate">{secondary}</span>
         </div>
       ) : null}
 
       {showTime ? (
-        <div className="mt-px text-[8px] leading-snug opacity-55">
+        <div className="mt-px leading-snug opacity-55" style={{ fontSize: 'var(--text-event-xs)' }}>
           {event.startTime}–{event.endTime}
           {isDraft ? ' · draft' : ''}
         </div>
       ) : null}
       {backupN > 0 ? (
         <span
-          className="absolute right-0.5 top-0.5 rounded bg-white/90 px-1 text-[8px] font-bold leading-none text-[var(--gcal-blue)] shadow-sm"
+          className="absolute right-0.5 top-0.5 rounded bg-white/90 px-1 font-bold leading-none text-[var(--gcal-blue)] shadow-sm"
+          style={{ fontSize: 'var(--text-event-xs)' }}
           title={`${backupN} backup plan${backupN > 1 ? 's' : ''}`}
         >
           +{backupN}

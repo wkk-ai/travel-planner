@@ -12,6 +12,7 @@ import {
 import { shareUrls, useTripStore } from './store/tripStore'
 import { TopBar } from './components/TopBar'
 import { TabBar } from './components/TabBar'
+import { ScheduleToolbar } from './components/ScheduleToolbar'
 import { StoryTab } from './components/StoryTab'
 import { SyncBanner } from './components/SyncBanner'
 import { WeekGrid } from './components/WeekGrid'
@@ -145,8 +146,9 @@ export default function App() {
         onQuickAdd={() => setQuickOpen(true)}
         share={shareUrls(trip)}
       />
-      <SyncBanner />
       <TabBar />
+      <ScheduleToolbar />
+      <SyncBanner />
 
       <div className="relative flex min-h-0 flex-1">
         {activeTab === 'story' ? (

@@ -4,14 +4,11 @@ import {
   Camera,
   CheckSquare,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   CloudSun,
   Copy,
   Ellipsis,
   FileDown,
   FileText,
-  Filter,
   FolderOpen,
   Link2,
   ListTodo,
@@ -28,10 +25,8 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { useTripStore } from '../store/tripStore'
-import { daysUntil, tripDays, isoDate, timeToMinutes, cn } from '../lib/time'
+import { daysUntil, isoDate, timeToMinutes, cn } from '../lib/time'
 import { exportCalendarImage, exportCalendarPdf, exportExpensesCsv } from '../lib/export'
-import { CATEGORIES } from '../data/categories'
-import type { EventCategory } from '../types'
 import { useEffect, useRef, useState } from 'react'
 
 interface Props {
@@ -43,17 +38,12 @@ interface Props {
 export function TopBar({ exportRef, onQuickAdd, share }: Props) {
   const trip = useTripStore((s) => s.trip)!
   const activeTab = useTripStore((s) => s.activeTab)
-  const view = useTripStore((s) => s.view)
-  const setView = useTripStore((s) => s.setView)
   const selectedDate = useTripStore((s) => s.selectedDate)
-  const setSelectedDate = useTripStore((s) => s.setSelectedDate)
   const mode = useTripStore((s) => s.mode)
   const undo = useTripStore((s) => s.undo)
   const undoStack = useTripStore((s) => s.undoStack)
   const searchQuery = useTripStore((s) => s.searchQuery)
   const setSearchQuery = useTripStore((s) => s.setSearchQuery)
-  const categoryFilter = useTripStore((s) => s.categoryFilter)
-  const setCategoryFilter = useTripStore((s) => s.setCategoryFilter)
   const setPanel = useTripStore((s) => s.setPanel)
   const panel = useTripStore((s) => s.panel)
   const runningLate = useTripStore((s) => s.runningLate)
@@ -62,9 +52,6 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
   const [menu, setMenu] = useState<'none' | 'plan' | 'tools' | 'share' | 'more'>('none')
   const [searchOpen, setSearchOpen] = useState(false)
 
-  const days = tripDays(trip.startDate, trip.endDate)
-  const dayIndex = days.findIndex((d) => isoDate(d) === selectedDate)
-  const selectedDay = days[Math.max(0, dayIndex)]
   const countdown = daysUntil(trip.startDate)
   const bigbang = daysUntil('2026-09-04')
 
@@ -74,14 +61,6 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
       : countdown === 0
         ? 'Starts today'
         : `Day ${Math.abs(countdown) + 1}`
-
-  function prevDay() {
-    if (dayIndex > 0) setSelectedDate(isoDate(days[dayIndex - 1]))
-  }
-
-  function nextDay() {
-    if (dayIndex >= 0 && dayIndex < days.length - 1) setSelectedDate(isoDate(days[dayIndex + 1]))
-  }
 
   async function doExportImage() {
     if (!exportRef.current) return
@@ -147,8 +126,8 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
               openPanel('trips')
             }}
           >
-            <div className="truncate text-base font-semibold leading-tight">{trip.name}</div>
-            <div className="truncate text-xs text-[var(--gcal-muted)]">
+            <div className="truncate text-ui-lg font-semibold leading-tight">{trip.name}</div>
+            <div className="truncate text-ui-sm text-[var(--gcal-muted)]">
               {tripStatus}
               {bigbang > 0 && trip.name.toLowerCase().includes('bigbang') ? ` · BB ${bigbang}d` : ''}
             </div>
@@ -236,63 +215,6 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
           </MenuButton>
         </div>
 
-        {activeTab === 'schedule' ? (
-          <div className="flex items-center gap-2 border-t border-[var(--gcal-border)] bg-[var(--gcal-bg)] px-2 py-2">
-            <div className="flex shrink-0 rounded-lg bg-white p-0.5 shadow-sm ring-1 ring-[var(--gcal-border)]">
-              <button
-                type="button"
-                className={cn('rounded-md px-2.5 py-1 text-xs font-semibold', view === 'day' && 'bg-[var(--gcal-blue)] text-white')}
-                onClick={() => setView('day')}
-              >
-                Day
-              </button>
-              <button
-                type="button"
-                className={cn('rounded-md px-2.5 py-1 text-xs font-semibold', view === 'week' && 'bg-[var(--gcal-blue)] text-white')}
-                onClick={() => setView('week')}
-              >
-                Week
-              </button>
-            </div>
-
-            <div className="flex min-w-0 flex-1 items-center justify-center gap-1">
-              <button
-                type="button"
-                disabled={dayIndex <= 0}
-                onClick={prevDay}
-                className="flex size-9 items-center justify-center rounded-full text-[var(--gcal-muted)] hover:bg-white disabled:opacity-30"
-                aria-label="Previous day"
-              >
-                <ChevronLeft className="size-5" />
-              </button>
-              <div className="min-w-0 text-center">
-                <div className="truncate text-sm font-semibold">{format(selectedDay, 'EEE, MMM d')}</div>
-              </div>
-              <button
-                type="button"
-                disabled={dayIndex < 0 || dayIndex >= days.length - 1}
-                onClick={nextDay}
-                className="flex size-9 items-center justify-center rounded-full text-[var(--gcal-muted)] hover:bg-white disabled:opacity-30"
-                aria-label="Next day"
-              >
-                <ChevronRight className="size-5" />
-              </button>
-            </div>
-
-            <select
-              className="max-w-[5rem] shrink-0 rounded-full border-0 bg-white py-1 pl-2 pr-6 text-[10px] font-semibold shadow-sm ring-1 ring-[var(--gcal-border)]"
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value as EventCategory | 'all')}
-              aria-label="Filter by category"
-            >
-              <option value="all">All</option>
-              {Object.entries(CATEGORIES).map(([k, v]) => (
-                <option key={k} value={k}>{v.label}</option>
-              ))}
-            </select>
-          </div>
-        ) : null}
-
         {searchOpen ? (
           <div className="border-t border-[var(--gcal-border)] px-3 py-2">
             <div className="relative">
@@ -342,66 +264,16 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
         </button>
 
         {activeTab === 'schedule' ? (
-          <>
-        <div className="flex items-center rounded-full border border-[var(--gcal-border)] bg-[var(--gcal-bg)] p-0.5 text-sm">
-          <button
-            type="button"
-            className={cn('rounded-full px-3 py-1.5 font-medium', view === 'day' && 'bg-white shadow-sm')}
-            onClick={() => setView('day')}
-            title="Day view"
-          >
-            Day
-          </button>
-          <button
-            type="button"
-            className={cn('rounded-full px-3 py-1.5 font-medium', view === 'week' && 'bg-white shadow-sm')}
-            onClick={() => setView('week')}
-            title="Week view"
-          >
-            Week
-          </button>
-        </div>
-
-        <select
-          className="rounded-lg border border-[var(--gcal-border)] bg-white px-2 py-1.5 text-sm"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          title="Jump to day"
-        >
-          {days.map((d) => (
-            <option key={isoDate(d)} value={isoDate(d)}>
-              {format(d, 'EEE dd/MM')}
-            </option>
-          ))}
-        </select>
-
-        <label className="flex items-center gap-1 rounded-lg border border-[var(--gcal-border)] bg-white px-2 py-1.5 text-sm" title="Filter by category">
-          <Filter className="size-3.5 text-[var(--gcal-muted)]" />
-          <select
-            className="max-w-[120px] bg-transparent outline-none"
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value as EventCategory | 'all')}
-          >
-            <option value="all">All categories</option>
-            {Object.entries(CATEGORIES).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <div className="relative min-w-[120px] flex-1 max-w-xs">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--gcal-muted)]" />
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search…"
-            title="Search events"
-            className="w-full rounded-full border border-[var(--gcal-border)] bg-white py-1.5 pl-8 pr-3 text-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe]"
-          />
-        </div>
-          </>
+          <div className="relative min-w-[120px] flex-1 max-w-xs">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--gcal-muted)]" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search…"
+              title="Search events"
+              className="w-full rounded-full border border-[var(--gcal-border)] bg-white py-2 pl-8 pr-3 text-ui-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe]"
+            />
+          </div>
         ) : null}
 
         <div className="ml-auto flex flex-wrap items-center gap-1">
