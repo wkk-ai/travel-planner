@@ -12,6 +12,7 @@ import {
   cn,
   eventHeightPx,
   eventTopPx,
+  isEventPast,
   minutesToTime,
   snapMinutes,
 } from '../lib/time'
@@ -178,6 +179,7 @@ export function DayColumn({
             event={ev}
             draggable={mode === 'edit'}
             isNow={ev.id === nowEventId}
+            isPast={isEventPast(ev)}
             warning={warn}
             onClick={() => onSelect(ev)}
             style={{

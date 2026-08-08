@@ -25,7 +25,7 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { useTripStore } from '../store/tripStore'
-import { daysUntil, tripDays, isoDate, cn } from '../lib/time'
+import { daysUntil, tripDays, isoDate, timeToMinutes, cn } from '../lib/time'
 import { exportCalendarImage, exportCalendarPdf, exportExpensesCsv } from '../lib/export'
 import { CATEGORIES } from '../data/categories'
 import type { EventCategory } from '../types'
@@ -253,9 +253,18 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
             >
               <MenuItem
                 icon={<Redo2 className="size-4" />}
-                hint="Push today’s remaining events later by 30 minutes when you fall behind."
+                hint="Push remaining events later by 30 minutes (today from now, or the day you are viewing)."
                 onClick={() => {
-                  void runningLate(selectedDate, format(new Date(), 'HH:mm'), 30)
+                  const today = isoDate(new Date())
+                  const nowTime = format(new Date(), 'HH:mm')
+                  const state = useTripStore.getState()
+                  const nowMins = new Date().getHours() * 60 + new Date().getMinutes()
+                  const todayRemaining = state.events.some(
+                    (e) => e.date === today && timeToMinutes(e.startTime) >= nowMins,
+                  )
+                  // Prefer real today; otherwise the day currently open in the calendar.
+                  const date = todayRemaining ? today : selectedDate
+                  void runningLate(date, nowTime, 30)
                   setMenu('none')
                 }}
               >

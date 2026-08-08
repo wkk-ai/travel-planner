@@ -133,6 +133,18 @@ export function currentEventAt(
   )
 }
 
+/** True when the event has already ended (date+end before now). */
+export function isEventPast(event: TripEvent, now = new Date()): boolean {
+  const today = isoDate(now)
+  if (event.date < today) return true
+  if (event.date > today) return false
+  const nowMins = now.getHours() * 60 + now.getMinutes()
+  const start = timeToMinutes(event.startTime)
+  let end = timeToMinutes(event.endTime)
+  if (end <= start) end += 24 * 60
+  return end <= nowMins
+}
+
 export function shiftEventsFrom(
   events: TripEvent[],
   date: string,

@@ -39,7 +39,7 @@ import {
   upsertExpense,
   upsertNote,
 } from '../lib/supabase'
-import { addDaysIso, minutesToTime, shiftEventsFrom, SLOT_MINUTES, timeToMinutes } from '../lib/time'
+import { addDaysIso, isoDate, minutesToTime, shiftEventsFrom, SLOT_MINUTES, timeToMinutes } from '../lib/time'
 import type { EventCategory } from '../types'
 
 const LOCAL_TOKEN_KEY = 'travel-planner-last-token'
@@ -584,13 +584,27 @@ export const useTripStore = create<TripState>((set, get) => ({
 
   runningLate: async (date, fromTime, minutes) => {
     if (get().mode !== 'edit') return
+    const before = get().events
+    const events = shiftEventsFrom(before, date, fromTime, minutes)
+    const shifted = before.filter((e) => {
+      const next = events.find((x) => x.id === e.id)
+      return next && (next.startTime !== e.startTime || next.endTime !== e.endTime)
+    }).length
+    if (!shifted) {
+      set({
+        toast:
+          date === isoDate(new Date())
+            ? 'No remaining events today to push'
+            : 'No events left to push on this day',
+      })
+      return
+    }
     get().pushUndo('Running late')
-    const events = shiftEventsFrom(get().events, date, fromTime, minutes)
     set({ events })
     for (const e of events.filter((x) => x.date === date)) {
       await syncEvent(e, true)
     }
-    set({ toast: `Shifted remaining events +${minutes}m` })
+    set({ toast: `Pushed ${shifted} event${shifted === 1 ? '' : 's'} +${minutes}m` })
   },
 
   addNote: async (partial = {}) => {

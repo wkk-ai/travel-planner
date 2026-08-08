@@ -9,6 +9,7 @@ interface Props {
   style?: React.CSSProperties
   compact?: boolean
   isNow?: boolean
+  isPast?: boolean
   warning?: string
   onClick?: () => void
   draggable?: boolean
@@ -36,6 +37,7 @@ export function EventChip({
   style,
   compact,
   isNow,
+  isPast,
   warning,
   onClick,
   draggable = false,
@@ -50,6 +52,7 @@ export function EventChip({
         ? parseFloat(style.height)
         : eventHeightPx(event.startTime, event.endTime)
   const density = compact ? 'xs' : densityFor(mins, heightPx)
+  const faded = Boolean(isPast) && !isNow && !isDraft
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: event.id,
     disabled: !draggable || isDraft,
@@ -66,6 +69,7 @@ export function EventChip({
     `${event.startTime}–${event.endTime}`,
     secondary,
     warning,
+    faded ? 'Past' : '',
   ]
     .filter(Boolean)
     .join(' · ')
@@ -79,6 +83,7 @@ export function EventChip({
       type="button"
       data-event-chip
       data-density={density}
+      data-past={faded ? '1' : undefined}
       ref={setNodeRef}
       {...attributes}
       onClick={(e) => {
@@ -96,6 +101,7 @@ export function EventChip({
         density === 'xs' ? 'px-1 py-0' : 'px-1.5 py-0.5',
         isDragging && 'opacity-40',
         isNow && 'is-now',
+        faded && 'is-past',
         isDraft && 'border-2 border-dashed border-[var(--gcal-blue)] opacity-90',
         compact && 'relative left-0 right-0',
       )}

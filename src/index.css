@@ -68,12 +68,20 @@ textarea {
 }
 
 .event-block {
-  transition: box-shadow 120ms ease, transform 120ms ease;
+  transition: box-shadow 120ms ease, transform 120ms ease, opacity 160ms ease, filter 160ms ease;
   touch-action: none;
 }
 .event-block:hover {
   box-shadow: 0 1px 4px rgba(60, 64, 67, 0.18);
   z-index: 5;
+}
+.event-block.is-past {
+  opacity: 0.48;
+  filter: saturate(0.65) brightness(0.92);
+}
+.event-block.is-past:hover {
+  opacity: 0.7;
+  filter: saturate(0.8) brightness(0.95);
 }
 .event-block.is-now {
   outline: 2px solid var(--gcal-blue);
