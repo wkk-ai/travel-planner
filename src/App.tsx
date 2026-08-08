@@ -21,6 +21,8 @@ import { SidePanel } from './components/SidePanel'
 import { QuickAdd } from './components/QuickAdd'
 import { EventChip } from './components/EventChip'
 import { Toast } from './components/Toast'
+import { useIsMobile } from './lib/useMedia'
+import { Plus } from 'lucide-react'
 import { minutesToTime, snapMinutes, timeToMinutes, travelBufferWarnings, SLOT_MINUTES } from './lib/time'
 import { parseSlotId } from './components/DayColumn'
 import type { TripEvent } from './types'
@@ -42,6 +44,8 @@ export default function App() {
   const toast = useTripStore((s) => s.toast)
   const setToast = useTripStore((s) => s.setToast)
   const trip = useTripStore((s) => s.trip)
+  const setView = useTripStore((s) => s.setView)
+  const isMobile = useIsMobile()
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [quickOpen, setQuickOpen] = useState(false)
@@ -52,14 +56,19 @@ export default function App() {
   }, [init])
 
   useEffect(() => {
+    if (!trip || !isMobile) return
+    setView('day')
+  }, [trip?.id, isMobile, setView])
+
+  useEffect(() => {
     if (!toast) return
     const t = setTimeout(() => setToast(null), 2800)
     return () => clearTimeout(t)
   }, [toast, setToast])
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 12 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 450, tolerance: 8 } }),
   )
 
   const filtered = useMemo(() => {
@@ -191,8 +200,19 @@ export default function App() {
 
       {toast ? <Toast message={toast} /> : null}
 
+      {mode === 'edit' && isMobile ? (
+        <button
+          type="button"
+          onClick={() => setQuickOpen(true)}
+          className="mobile-fab no-print fixed bottom-5 right-4 z-50 flex size-14 items-center justify-center rounded-2xl bg-[var(--gcal-blue)] text-white shadow-lg hover:bg-[var(--gcal-blue-hover)] active:scale-95"
+          aria-label="Add event"
+        >
+          <Plus className="size-7" />
+        </button>
+      ) : null}
+
       {mode === 'view' ? (
-        <div className="no-print fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-full bg-[#3c4043] px-4 py-2 text-xs font-medium text-white shadow-lg">
+        <div className="no-print fixed bottom-4 left-1/2 z-40 max-w-[90vw] -translate-x-1/2 rounded-full bg-[#3c4043] px-4 py-2 text-center text-xs font-medium text-white shadow-lg sm:max-w-none">
           View-only — ask for the edit link to make changes
         </div>
       ) : null}

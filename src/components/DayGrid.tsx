@@ -19,22 +19,25 @@ export function DayGrid({ events, warnings, onSelect }: Props) {
 
   return (
     <div>
-      <div className="sticky top-0 z-30 border-b border-[var(--gcal-border)] bg-white/95 px-4 py-3 backdrop-blur">
-        <div className="text-[11px] font-semibold tracking-wide text-[var(--gcal-muted)]">
-          {format(d, 'EEEE').toUpperCase()}
+      <div className="sticky top-0 z-30 border-b border-[var(--gcal-border)] bg-white/95 px-3 py-2 backdrop-blur sm:px-4 sm:py-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-[10px] font-bold tracking-wide text-[var(--gcal-muted)] sm:text-[11px]">
+            {format(d, 'EEEE').toUpperCase()}
+          </div>
+          <div className="text-xs text-[var(--gcal-muted)] sm:hidden">{dayEvents.length} events</div>
         </div>
-        <div className="mt-1 flex items-center gap-3">
+        <div className="mt-0.5 flex items-center gap-2 sm:mt-1 sm:gap-3">
           <div
             className={cn(
-              'flex size-12 items-center justify-center rounded-full text-2xl font-semibold',
+              'flex size-10 shrink-0 items-center justify-center rounded-full text-xl font-semibold sm:size-12 sm:text-2xl',
               today && 'bg-[var(--gcal-blue)] text-white',
             )}
           >
             {format(d, 'd')}
           </div>
-          <div>
-            <div className="brand-serif text-2xl">{format(d, 'MMMM yyyy')}</div>
-            <div className="text-sm text-[var(--gcal-muted)]">{dayEvents.length} events</div>
+          <div className="min-w-0">
+            <div className="truncate text-lg font-semibold sm:brand-serif sm:text-2xl">{format(d, 'MMMM yyyy')}</div>
+            <div className="hidden text-sm text-[var(--gcal-muted)] sm:block">{dayEvents.length} events</div>
           </div>
         </div>
       </div>

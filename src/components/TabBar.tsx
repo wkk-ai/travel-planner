@@ -14,26 +14,28 @@ export function TabBar() {
 
   return (
     <nav
-      className="no-print flex shrink-0 gap-1 border-b border-[var(--gcal-border)] bg-white/95 px-3 py-1.5 sm:px-4"
+      className="no-print shrink-0 border-b border-[var(--gcal-border)] bg-white px-3 py-2 sm:px-4"
       aria-label="Trip views"
     >
-      {TABS.map(({ id, label, icon: Icon }) => (
-        <button
-          key={id}
-          type="button"
-          onClick={() => setActiveTab(id)}
-          className={cn(
-            'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
-            activeTab === id
-              ? 'bg-[var(--gcal-blue)] text-white shadow-sm'
-              : 'text-[var(--gcal-muted)] hover:bg-[var(--gcal-bg)] hover:text-[var(--gcal-text)]',
-          )}
-          aria-current={activeTab === id ? 'page' : undefined}
-        >
-          <Icon className="size-4" />
-          {label}
-        </button>
-      ))}
+      <div className="flex gap-1 rounded-xl bg-[var(--gcal-bg)] p-1 sm:inline-flex sm:rounded-none sm:bg-transparent sm:p-0">
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setActiveTab(id)}
+            className={cn(
+              'flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-semibold transition-colors sm:flex-none sm:rounded-full sm:px-3.5 sm:py-1.5 sm:font-medium',
+              activeTab === id
+                ? 'bg-white text-[var(--gcal-blue)] shadow-sm sm:bg-[var(--gcal-blue)] sm:text-white'
+                : 'text-[var(--gcal-muted)] hover:text-[var(--gcal-text)] sm:hover:bg-[var(--gcal-bg)]',
+            )}
+            aria-current={activeTab === id ? 'page' : undefined}
+          >
+            <Icon className="size-4" />
+            {label}
+          </button>
+        ))}
+      </div>
     </nav>
   )
 }

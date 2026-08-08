@@ -1,8 +1,11 @@
+import { useEffect, useRef, useState } from 'react'
 import type { TripEvent } from '../types'
 import { eventColors } from '../data/categories'
 import { cn, eventHeightPx, timeToMinutes } from '../lib/time'
 import { useDraggable } from '@dnd-kit/core'
 import { Plane, MapPin, AlertTriangle } from 'lucide-react'
+
+const LONG_PRESS_MS = 450
 
 interface Props {
   event: TripEvent
@@ -60,6 +63,37 @@ export function EventChip({
     data: { event },
   })
 
+  const [lifted, setLifted] = useState(false)
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (isDragging) setLifted(true)
+    else setLifted(false)
+  }, [isDragging])
+
+  function clearPressTimer() {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current)
+      pressTimer.current = null
+    }
+  }
+
+  function onPressStart() {
+    if (!draggable || isDraft) return
+    clearPressTimer()
+    pressTimer.current = setTimeout(() => {
+      setLifted(true)
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        navigator.vibrate?.(10)
+      }
+    }, LONG_PRESS_MS)
+  }
+
+  function onPressEnd() {
+    clearPressTimer()
+    if (!isDragging) setLifted(false)
+  }
+
   const secondary =
     event.flight
       ? `${event.flight.airline ?? ''} ${event.flight.flightNumber ?? ''}`.trim()
@@ -72,6 +106,7 @@ export function EventChip({
     warning,
     faded ? 'Past' : '',
     backupN > 0 ? `${backupN} backup plan${backupN > 1 ? 's' : ''}` : '',
+    draggable ? 'Hold to move' : '',
   ]
     .filter(Boolean)
     .join(' · ')
@@ -87,22 +122,25 @@ export function EventChip({
       data-density={density}
       data-past={faded ? '1' : undefined}
       ref={setNodeRef}
+      {...(draggable && !isDraft ? listeners : {})}
       {...attributes}
       onClick={(e) => {
         e.stopPropagation()
         onClick?.()
       }}
       onPointerDown={(e) => {
-        e.stopPropagation()
-        if (draggable && !isDraft && listeners?.onPointerDown) {
-          listeners.onPointerDown(e)
-        }
+        if (draggable && !isDraft) onPressStart()
+        else e.stopPropagation()
       }}
+      onPointerUp={onPressEnd}
+      onPointerCancel={onPressEnd}
+      onPointerLeave={onPressEnd}
       className={cn(
-        'event-block absolute inset-x-0.5 overflow-hidden rounded-[2px] text-left leading-tight border-l-[3px]',
+        'event-block absolute inset-x-0.5 overflow-hidden rounded-md text-left leading-tight border-l-[3px]',
         backupN > 0 && 'pr-5',
         density === 'xs' ? 'px-1 py-0' : 'px-1.5 py-0.5',
-        isDragging && 'opacity-40',
+        isDragging && 'opacity-50',
+        lifted && 'event-lift',
         isNow && 'is-now',
         faded && 'is-past',
         isDraft && 'border-2 border-dashed border-[var(--gcal-blue)] opacity-90',

@@ -68,8 +68,16 @@ textarea {
 }
 
 .event-block {
-  transition: box-shadow 120ms ease, transform 120ms ease, opacity 160ms ease, filter 160ms ease;
+  transition: box-shadow 180ms ease, transform 180ms ease, opacity 160ms ease, filter 160ms ease;
+  touch-action: pan-x pan-y;
+}
+.event-block.event-lift {
   touch-action: none;
+  transform: scale(1.04);
+  box-shadow:
+    0 4px 12px rgba(60, 64, 67, 0.22),
+    0 12px 28px rgba(60, 64, 67, 0.12);
+  z-index: 15;
 }
 .event-block:hover {
   box-shadow: 0 1px 4px rgba(60, 64, 67, 0.18);
@@ -135,6 +143,26 @@ textarea {
 }
 .fab:active {
   transform: scale(0.97);
+}
+
+.mobile-fab {
+  box-shadow:
+    0 2px 6px rgba(26, 115, 232, 0.35),
+    0 8px 24px rgba(60, 64, 67, 0.2);
+}
+
+@media (max-width: 639px) {
+  :root {
+    --hour-height: 64px;
+  }
+
+  body {
+    background: var(--gcal-bg);
+  }
+
+  .cal-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .panel-enter {
