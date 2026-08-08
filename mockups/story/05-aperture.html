@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>05 · Aperture — Story mockup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --blue:#1a73e8; --muted:#70757a; --line:#dadce0; --bg:#fff; --text:#202124; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:#f1f3f4;min-height:100vh;padding:24px 16px;color:var(--text)}
+    a.back{display:inline-block;margin-bottom:16px;color:var(--blue);font-size:13px;font-weight:600;text-decoration:none}
+    .phone{max-width:390px;margin:0 auto;background:var(--bg);border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(60,64,67,.12);border:1px solid var(--line)}
+    .top{padding:14px 16px;border-bottom:1px solid var(--line);font-size:17px;font-weight:700}
+    .tabs{display:flex;border-bottom:1px solid var(--line)}
+    .tabs span{flex:1;text-align:center;padding:14px;font-size:15px;font-weight:600;color:var(--muted)}
+    .tabs span.on{color:var(--blue);border-bottom:2px solid var(--blue)}
+    .slot{height:48px;background:#f8f9fa;border-bottom:1px solid var(--line);opacity:.4}
+    .metrics{display:flex;border-bottom:1px solid var(--line)}
+    .metrics div{flex:1;text-align:center;padding:14px 8px;border-right:1px solid var(--line)}
+    .metrics div:last-child{border-right:0}
+    .metrics .n{font-size:18px;font-weight:700}
+    .metrics .l{font-size:11px;color:var(--muted);margin-top:2px}
+    .content{padding:20px 16px 24px}
+    .content h2{font-size:16px;font-weight:700;margin-bottom:4px}
+    .content .sub{font-size:14px;color:var(--muted);margin-bottom:20px}
+    .timeline{position:relative;padding-left:20px}
+    .timeline::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--line)}
+    .node{position:relative;padding-bottom:22px}
+    .node::before{content:"";position:absolute;left:-17px;top:6px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--line)}
+    .node.today::before{border-color:var(--blue);background:var(--blue)}
+    .node .date{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:4px}
+    .node.today .date{color:var(--blue)}
+    .node h3{font-size:16px;font-weight:600;margin-bottom:6px}
+    .node p{font-size:14px;color:var(--muted);line-height:1.45}
+    .hint{font-size:12px;color:var(--muted);margin-top:4px}
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← All story mockups</a>
+  <div class="phone">
+    <div class="top">BigBang US Trip 2026</div>
+    <div class="tabs"><span class="on">Story</span><span>Schedule</span></div>
+    <div class="slot"></div>
+    <div class="metrics">
+      <div><div class="n">21</div><div class="l">days</div></div>
+      <div><div class="n">54</div><div class="l">events</div></div>
+      <div><div class="n">10</div><div class="l">pack</div></div>
+    </div>
+    <div class="content">
+      <h2>Aug 29 – Sep 7</h2>
+      <p class="sub">Orlando · 10-day trip</p>
+      <div class="timeline">
+        <div class="node today">
+          <div class="date">DAY 1 · SAT AUG 29</div>
+          <h3>Departure</h3>
+          <p>Flight CGH → CNF · Hotel check-in Orlando</p>
+          <div class="hint">2 more on schedule</div>
+        </div>
+        <div class="node">
+          <div class="date">DAY 2 · SUN AUG 30</div>
+          <h3>Explore & shop</h3>
+          <p>Target, Walmart, meals around hotel</p>
+        </div>
+        <div class="node">
+          <div class="date">DAY 3 · MON AUG 31</div>
+          <h3>Busch Gardens</h3>
+          <p>Full park day · 1 backup plan</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

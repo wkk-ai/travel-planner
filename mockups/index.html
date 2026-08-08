@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Travel Planner — Calendar mockups</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --ink: #1c1917;
+        --muted: #78716c;
+        --line: #e7e5e4;
+        --bg: #fafaf9;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "DM Sans", system-ui, sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(900px 500px at 0% 0%, #e0f2fe 0%, transparent 50%),
+          radial-gradient(800px 400px at 100% 0%, #dcfce7 0%, transparent 45%),
+          var(--bg);
+        min-height: 100vh;
+      }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 48px 24px 80px;
+      }
+      h1 {
+        font-family: Fraunces, Georgia, serif;
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 700;
+        margin: 0 0 8px;
+        letter-spacing: -0.02em;
+      }
+      .lede {
+        color: var(--muted);
+        font-size: 1.05rem;
+        max-width: 36rem;
+        line-height: 1.5;
+        margin-bottom: 40px;
+      }
+      .grid {
+        display: grid;
+        gap: 20px;
+      }
+      @media (min-width: 720px) {
+        .grid { grid-template-columns: 1fr 1fr; }
+      }
+      a.card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: #fff;
+        transition: transform 160ms ease, box-shadow 160ms ease;
+      }
+      a.card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(28, 25, 23, 0.1);
+      }
+      .preview {
+        height: 140px;
+        position: relative;
+      }
+      .meta { padding: 18px 20px 22px; }
+      .meta h2 {
+        margin: 0 0 6px;
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+      .meta p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.45;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 8px;
+        color: var(--muted);
+      }
+      /* mini previews */
+      .p1 { background: linear-gradient(180deg, #e8f0fe 0%, #fff 60%); }
+      .p1 .bars { display: flex; gap: 6px; padding: 28px 16px 0; height: 100%; }
+      .p1 .col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+      .p1 .b { border-radius: 4px; border-left: 3px solid; padding: 4px; font-size: 7px; color: #fff; }
+      .p2 { background: #f4f1ea; background-image: linear-gradient(#d6d3d1 1px, transparent 1px), linear-gradient(90deg, #d6d3d1 1px, transparent 1px); background-size: 24px 24px; }
+      .p2 .stamp { position: absolute; left: 20px; top: 24px; width: 56px; height: 56px; border: 2px solid #3f3f46; border-radius: 50%; display: grid; place-items: center; font-family: Fraunces, serif; font-size: 1.4rem; transform: rotate(-8deg); background: rgba(255,255,255,0.85); }
+      .p3 { background: #0b1f33; }
+      .p3 .row { display: flex; gap: 8px; padding: 36px 16px; }
+      .p3 .chip { flex: 1; background: #12324d; border-left: 3px solid #f5c542; color: #e2e8f0; font-size: 8px; padding: 8px; border-radius: 2px; font-family: ui-monospace, monospace; }
+      .p4 { background: linear-gradient(160deg, #ecfdf5, #f0fdfa 40%, #fff); }
+      .p4 .soft { position: absolute; left: 18px; right: 18px; top: 32px; height: 72px; border-radius: 14px; background: #bbf7d0; border-left: 4px solid #16a34a; opacity: 0.9; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Calendar design mockups</h1>
+      <p class="lede">Four directions for the trip planner week view. Open each, pick a vibe — we can fold the winner into the live app.</p>
+      <p style="margin-bottom: 24px;"><a href="./story/index.html" style="color:#1a73e8;font-weight:600;text-decoration:none;font-size:1rem">→ Story tab dashboards (5 mockups)</a></p>
+      <div class="grid">
+        <a class="card" href="./01-skyline.html">
+          <div class="preview p1">
+            <div class="bars">
+              <div class="col"><div class="b" style="background:#1a73e8;border-color:#174ea6;height:28px">Flight</div><div class="b" style="background:#34a853;border-color:#137333;height:18px">Meal</div></div>
+              <div class="col"><div class="b" style="background:#a142f4;border-color:#7627bb;height:40px;margin-top:12px">Shop</div></div>
+              <div class="col"><div class="b" style="background:#ea4335;border-color:#c5221f;height:56px">Park</div></div>
+              <div class="col"><div class="b" style="background:#fbbc04;border-color:#e37400;height:36px;margin-top:20px;color:#3c4043">Show</div></div>
+            </div>
+          </div>
+          <div class="meta">
+            <div class="tag">A · Familiar</div>
+            <h2>Skyline</h2>
+            <p>Google Calendar cousin — white grid, blue chrome, soft colored blocks. Clearest for power users.</p>
+          </div>
+        </a>
+        <a class="card" href="./02-atlas.html">
+          <div class="preview p2"><div class="stamp">29</div></div>
+          <div class="meta">
+            <div class="tag">B · Editorial</div>
+            <h2>Atlas</h2>
+            <p>Map-grid paper, stamped day numbers, ink headings. Feels like a travel notebook, not a SaaS dashboard.</p>
+          </div>
+        </a>
+        <a class="card" href="./03-terminal.html">
+          <div class="preview p3">
+            <div class="row">
+              <div class="chip">CGH→CNF<br/>07:55</div>
+              <div class="chip">BUSCH<br/>10:30</div>
+              <div class="chip">BIGBANG<br/>19:30</div>
+            </div>
+          </div>
+          <div class="meta">
+            <div class="tag">C · Transit</div>
+            <h2>Terminal</h2>
+            <p>Airport departure-board energy — navy, amber highlights, monospace times. Built for flights + tight connections.</p>
+          </div>
+        </a>
+        <a class="card" href="./04-garden.html">
+          <div class="preview p4"><div class="soft"></div></div>
+          <div class="meta">
+            <div class="tag">D · Soft</div>
+            <h2>Garden</h2>
+            <p>Airy mint and soft blocks, calm hierarchy. Gentler for browsing the trip on a phone between parks.</p>
+          </div>
+        </a>
+      </div>
+    </main>
+  </body>
+</html>

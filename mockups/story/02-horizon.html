@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>02 · Horizon — Story mockup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet" />
+  <style>
+    :root { --blue:#1a73e8; --muted:#70757a; --line:#dadce0; --bg:#f8f9fa; --text:#3c4043; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:#e8eaed;min-height:100vh;padding:24px 16px;color:var(--text)}
+    a.back{display:inline-block;margin-bottom:16px;color:var(--blue);font-size:13px;font-weight:600;text-decoration:none}
+    .phone{max-width:390px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(60,64,67,.18)}
+    .top{padding:14px 16px;border-bottom:1px solid var(--line);font-size:17px;font-weight:700}
+    .tabs{display:flex;border-bottom:1px solid var(--line)}
+    .tabs span{flex:1;text-align:center;padding:14px;font-size:15px;font-weight:600;color:var(--muted)}
+    .tabs span.on{color:var(--blue);border-bottom:2px solid var(--blue)}
+    .slot{height:48px;background:var(--bg);border-bottom:1px solid var(--line);opacity:.4}
+    .hero{background:linear-gradient(160deg,#1a73e8 0%,#4285f4 55%,#7baaf7 100%);color:#fff;padding:20px 18px 24px}
+    .hero h2{font-family:"Instrument Serif",Georgia,serif;font-size:26px;font-weight:400;line-height:1.15}
+    .hero p{font-size:14px;opacity:.9;margin-top:6px}
+    .progress{margin-top:18px}
+    .progress .labels{display:flex;justify-content:space-between;font-size:11px;opacity:.85;margin-bottom:6px}
+    .bar{height:6px;background:rgba(255,255,255,.3);border-radius:99px;overflow:hidden}
+    .bar i{display:block;height:100%;width:0%;background:#fff;border-radius:99px}
+    .chips{display:flex;gap:8px;margin-top:14px;overflow-x:auto;padding-bottom:4px}
+    .chip{flex-shrink:0;font-size:12px;font-weight:600;padding:6px 12px;border-radius:99px;background:rgba(255,255,255,.2)}
+    .chip.on{background:#fff;color:var(--blue)}
+    .body{padding:14px;background:var(--bg)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;min-height:108px}
+    .card.wide{grid-column:1/-1}
+    .card .d{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase}
+    .card h3{font-size:15px;font-weight:700;margin:4px 0 8px}
+    .card ul{list-style:none;font-size:13px;color:var(--muted);line-height:1.5}
+    .card.today{outline:2px solid var(--blue);outline-offset:-1px}
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← All story mockups</a>
+  <div class="phone">
+    <div class="top">BigBang US Trip 2026</div>
+    <div class="tabs"><span class="on">Story</span><span>Schedule</span></div>
+    <div class="slot"></div>
+    <div class="hero">
+      <h2>BigBang US Trip 2026</h2>
+      <p>Aug 29 – Sep 7 · Day 1 of 10 not started</p>
+      <div class="progress">
+        <div class="labels"><span>Departure</span><span>Orlando</span><span>Home</span></div>
+        <div class="bar"><i style="width:0%"></i></div>
+      </div>
+      <div class="chips">
+        <span class="chip on">All days</span>
+        <span class="chip">Travel</span>
+        <span class="chip">Parks</span>
+        <span class="chip">Rest</span>
+      </div>
+    </div>
+    <div class="body">
+      <div class="grid">
+        <div class="card today wide">
+          <div class="d">Day 1 · Departure</div>
+          <h3>Saturday Aug 29</h3>
+          <ul><li>08:25 Flight to Orlando</li><li>14:00 Hotel check-in</li></ul>
+        </div>
+        <div class="card">
+          <div class="d">Day 2</div>
+          <h3>Sun 30</h3>
+          <ul><li>Shopping</li><li>3 meals</li></ul>
+        </div>
+        <div class="card">
+          <div class="d">Day 3</div>
+          <h3>Mon 31</h3>
+          <ul><li>Busch Gardens</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

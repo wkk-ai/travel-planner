@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mockup C · Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0b1220;
+      --panel: #121a2b;
+      --line: #1e293b;
+      --amber: #fbbf24;
+      --mint: #34d399;
+      --sky: #38bdf8;
+      --rose: #fb7185;
+      --hour: 44px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      background: var(--navy);
+      color: #e2e8f0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a.back { color: var(--amber); text-decoration: none; font-size: 12px; font-weight: 700; font-family: "IBM Plex Mono", monospace; }
+    header {
+      display: flex; align-items: center; gap: 20px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #151f33, var(--navy));
+    }
+    .brand { font-family: "IBM Plex Mono", monospace; font-weight: 600; letter-spacing: .04em; }
+    .brand small { display: block; color: #64748b; font-size: 10px; letter-spacing: .12em; margin-top: 2px; }
+    .board-tag {
+      margin-left: auto;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11px;
+      color: var(--amber);
+      border: 1px solid rgba(251,191,36,.35);
+      padding: 6px 10px;
+      border-radius: 2px;
+    }
+    .wrap { flex: 1; overflow: auto; }
+    .days {
+      display: grid;
+      grid-template-columns: 64px repeat(5, 1fr);
+      position: sticky; top: 0; z-index: 2;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    .dayh {
+      padding: 12px 8px;
+      text-align: center;
+      border-right: 1px solid var(--line);
+      font-family: "IBM Plex Mono", monospace;
+    }
+    .dayh small { display: block; color: #64748b; font-size: 10px; letter-spacing: .1em; }
+    .dayh .n { font-size: 22px; font-weight: 600; color: var(--amber); margin-top: 4px; }
+    .dayh.active { background: #1a2438; box-shadow: inset 0 -2px 0 var(--amber); }
+    .grid { display: grid; grid-template-columns: 64px repeat(5, 1fr); }
+    .gutter .slot {
+      height: var(--hour);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 10px;
+      color: #64748b;
+      text-align: right;
+      padding: 0 10px;
+      border-bottom: 1px solid rgba(30,41,59,.8);
+    }
+    .col { position: relative; border-right: 1px solid var(--line); background: repeating-linear-gradient(180deg, transparent, transparent calc(var(--hour) - 1px), rgba(30,41,59,.9) calc(var(--hour) - 1px), rgba(30,41,59,.9) var(--hour)); min-height: calc(var(--hour)*12); }
+    .ev {
+      position: absolute; left: 4px; right: 4px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11px;
+      padding: 6px 8px;
+      border-left: 3px solid;
+      background: #0f172a;
+      line-height: 1.3;
+    }
+    .ev span { display: block; color: #94a3b8; font-size: 10px; margin-top: 2px; }
+    .flight { border-color: var(--sky); color: var(--sky); }
+    .meal { border-color: var(--mint); color: var(--mint); }
+    .shop { border-color: #c084fc; color: #c084fc; }
+    .park { border-color: var(--rose); color: var(--rose); }
+    footer {
+      padding: 10px 20px;
+      font-size: 11px;
+      color: #64748b;
+      border-top: 1px solid var(--line);
+      font-family: "IBM Plex Mono", monospace;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back" href="./index.html">← MOCKUPS</a>
+    <div class="brand">BIGBANG US TRIP 2026<small>DEPARTURES BOARD · MOCK C</small></div>
+    <div class="board-tag">STATUS: ON TIME</div>
+  </header>
+  <div class="wrap">
+    <div class="days">
+      <div></div>
+      <div class="dayh active"><small>SAT</small><div class="n">29</div></div>
+      <div class="dayh"><small>SUN</small><div class="n">30</div></div>
+      <div class="dayh"><small>MON</small><div class="n">31</div></div>
+      <div class="dayh"><small>TUE</small><div class="n">01</div></div>
+      <div class="dayh"><small>WED</small><div class="n">02</div></div>
+    </div>
+    <div class="grid">
+      <div class="gutter">
+        <div class="slot">07:00</div><div class="slot">08:00</div><div class="slot">09:00</div><div class="slot">10:00</div>
+        <div class="slot">11:00</div><div class="slot">12:00</div><div class="slot">13:00</div><div class="slot">14:00</div>
+        <div class="slot">15:00</div><div class="slot">16:00</div><div class="slot">17:00</div><div class="slot">18:00</div>
+      </div>
+      <div class="col">
+        <div class="ev flight" style="top:0;height:calc(var(--hour)*2)">CGH→CNF<span>AD4214 · GATE B</span></div>
+        <div class="ev flight" style="top:calc(var(--hour)*5);height:calc(var(--hour)*6)">CNF→MCO<span>AD8730 · LONG HAUL</span></div>
+      </div>
+      <div class="col">
+        <div class="ev flight" style="top:calc(var(--hour)*3);height:calc(var(--hour)*7)">VCP→MCO<span>AD8705 · ARRIVAL</span></div>
+        <div class="ev shop" style="top:calc(var(--hour)*10.5);height:calc(var(--hour)*1.5)">WALMART<span>SUPPLY RUN</span></div>
+      </div>
+      <div class="col">
+        <div class="ev meal" style="top:calc(var(--hour)*0.5);height:var(--hour)">BREAKFAST</div>
+        <div class="ev shop" style="top:calc(var(--hour)*2);height:calc(var(--hour)*4)">TARGET / BEST BUY</div>
+        <div class="ev meal" style="top:calc(var(--hour)*6.5);height:var(--hour)">PUBLIX</div>
+      </div>
+      <div class="col">
+        <div class="ev park" style="top:calc(var(--hour)*3);height:calc(var(--hour)*8)">BUSCH GARDENS<span>TAMPA · FULL DAY</span></div>
+      </div>
+      <div class="col">
+        <div class="ev park" style="top:calc(var(--hour)*2);height:calc(var(--hour)*9)">EPIC UNIVERSE<span>UNIVERSAL ORLANDO</span></div>
+      </div>
+    </div>
+  </div>
+  <footer>C · TERMINAL — airport board energy. Bold for travel; may feel dark on long planning sessions.</footer>
+</body>
+</html>

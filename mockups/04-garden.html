@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mockup D · Garden</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --leaf: #0f766e;
+      --mint: #ecfdf5;
+      --foam: #f0fdfa;
+      --ink: #134e4a;
+      --soft: #99f6e4;
+      --hour: 46px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Nunito, system-ui, sans-serif;
+      color: var(--ink);
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse 80% 50% at 10% 0%, #ccfbf1 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 90% 10%, #a5f3fc 0%, transparent 45%),
+        linear-gradient(180deg, #f0fdfa, #ecfeff 40%, #f8fafc);
+    }
+    a.back { color: var(--leaf); font-weight: 800; text-decoration: none; font-size: 13px; }
+    header {
+      display: flex; align-items: center; gap: 18px;
+      padding: 20px 24px 12px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.6rem;
+      margin: 0;
+      font-weight: 700;
+    }
+    .sub { font-size: 13px; color: #0f766e; opacity: .75; font-weight: 600; }
+    .pill {
+      margin-left: auto;
+      background: #fff;
+      border: 1px solid var(--soft);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--leaf);
+      box-shadow: 0 8px 24px rgba(15,118,110,.08);
+    }
+    .frame {
+      max-width: 1200px;
+      margin: 0 auto 24px;
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(153,246,228,.7);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(15,118,110,.1);
+      min-height: calc(100vh - 120px);
+      display: flex;
+      flex-direction: column;
+    }
+    .days {
+      display: grid;
+      grid-template-columns: 56px repeat(5, 1fr);
+      background: var(--mint);
+      border-bottom: 1px solid var(--soft);
+      padding: 8px 8px 0;
+    }
+    .dayh { text-align: center; padding: 10px 4px 14px; }
+    .dayh small { display: block; font-size: 10px; font-weight: 800; letter-spacing: .08em; color: #0d9488; }
+    .bubble {
+      width: 40px; height: 40px; margin: 6px auto 0;
+      border-radius: 16px;
+      display: grid; place-items: center;
+      font-family: Fraunces, serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      background: #fff;
+      color: var(--leaf);
+    }
+    .dayh.today .bubble { background: var(--leaf); color: #fff; }
+    .wrap { flex: 1; overflow: auto; }
+    .grid { display: grid; grid-template-columns: 56px repeat(5, 1fr); padding: 0 8px 16px; }
+    .gutter .slot { height: var(--hour); font-size: 10px; color: #5eead4; text-align: right; padding-right: 8px; font-weight: 700; }
+    .col { position: relative; border-left: 1px solid #ccfbf1; min-height: calc(var(--hour)*12); }
+    .slotline { height: var(--hour); border-bottom: 1px dashed #e0f2fe; }
+    .ev {
+      position: absolute; left: 6px; right: 6px;
+      border-radius: 16px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.25;
+      box-shadow: 0 6px 16px rgba(15,118,110,.08);
+    }
+    .ev span { display: block; font-weight: 600; opacity: .75; font-size: 11px; margin-top: 2px; }
+    .flight { background: #cffafe; color: #0e7490; }
+    .meal { background: #d1fae5; color: #047857; }
+    .shop { background: #ede9fe; color: #6d28d9; }
+    .park { background: #fecdd3; color: #be123c; }
+    footer {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 24px;
+      font-size: 12px;
+      color: #0f766e;
+      opacity: .8;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <a class="back" href="./index.html">← Mockups</a>
+      <h1>BigBang US Trip 2026</h1>
+      <div class="sub">Garden · soft week view</div>
+    </div>
+    <div class="pill">+ New plan</div>
+  </header>
+  <div class="frame">
+    <div class="days">
+      <div></div>
+      <div class="dayh today"><small>SAT</small><div class="bubble">29</div></div>
+      <div class="dayh"><small>SUN</small><div class="bubble">30</div></div>
+      <div class="dayh"><small>MON</small><div class="bubble">31</div></div>
+      <div class="dayh"><small>TUE</small><div class="bubble">1</div></div>
+      <div class="dayh"><small>WED</small><div class="bubble">2</div></div>
+    </div>
+    <div class="wrap">
+      <div class="grid">
+        <div class="gutter">
+          <div class="slot">07:00</div><div class="slot">08:00</div><div class="slot">09:00</div><div class="slot">10:00</div>
+          <div class="slot">11:00</div><div class="slot">12:00</div><div class="slot">13:00</div><div class="slot">14:00</div>
+          <div class="slot">15:00</div><div class="slot">16:00</div><div class="slot">17:00</div><div class="slot">18:00</div>
+        </div>
+        <div class="col">
+          <div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div>
+          <div class="ev flight" style="top:0;height:calc(var(--hour)*2)">Flight CGH→CNF<span>Morning hop</span></div>
+          <div class="ev flight" style="top:calc(var(--hour)*5);height:calc(var(--hour)*6)">Flight CNF→MCO<span>To Orlando</span></div>
+        </div>
+        <div class="col">
+          <div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div>
+          <div class="ev flight" style="top:calc(var(--hour)*3);height:calc(var(--hour)*7)">Flight VCP→MCO<span>Companion</span></div>
+        </div>
+        <div class="col">
+          <div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div>
+          <div class="ev meal" style="top:calc(var(--hour)*0.5);height:var(--hour)">Breakfast</div>
+          <div class="ev shop" style="top:calc(var(--hour)*2);height:calc(var(--hour)*4)">Target & Best Buy</div>
+          <div class="ev meal" style="top:calc(var(--hour)*6.5);height:var(--hour)">Publix lunch</div>
+        </div>
+        <div class="col">
+          <div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div>
+          <div class="ev park" style="top:calc(var(--hour)*3);height:calc(var(--hour)*8)">Busch Gardens<span>Full park day</span></div>
+        </div>
+        <div class="col">
+          <div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div><div class="slotline"></div>
+          <div class="ev park" style="top:calc(var(--hour)*2);height:calc(var(--hour)*9)">Epic Universe</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>D · Garden — calm vacation feel. Softest of the four; great if calendar should feel like a holiday, not work.</footer>
+</body>
+</html>

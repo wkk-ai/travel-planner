@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mockup B · Atlas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1e293b;
+      --rule: #cbd5e1;
+      --paper: #f8fafc;
+      --accent: #0e7490;
+      --hour: 46px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Source Sans 3", system-ui, sans-serif;
+      color: var(--ink);
+      background: #e2e8f0;
+      min-height: 100vh;
+      background-image:
+        linear-gradient(rgba(148,163,184,.35) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,.35) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .sheet {
+      max-width: 1100px;
+      margin: 24px auto;
+      background: var(--paper);
+      border: 1px solid #94a3b8;
+      box-shadow: 0 20px 50px rgba(15,23,42,.15);
+      min-height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 28px 32px 18px;
+      border-bottom: 2px solid var(--ink);
+      display: flex;
+      align-items: flex-end;
+      gap: 24px;
+    }
+    a.back { color: var(--accent); font-weight: 700; font-size: 13px; text-decoration: none; }
+    h1 {
+      font-family: "Libre Baskerville", Georgia, serif;
+      font-size: 1.75rem;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+    .meta { margin-left: auto; text-align: right; font-size: 13px; color: #64748b; }
+    .wrap { flex: 1; overflow: auto; padding: 0 16px 24px; }
+    .days {
+      display: grid;
+      grid-template-columns: 52px repeat(5, 1fr);
+      position: sticky; top: 0; background: var(--paper); z-index: 2;
+      padding-top: 12px;
+    }
+    .dayh { text-align: center; padding: 8px; border-bottom: 1px solid var(--rule); }
+    .stamp {
+      width: 48px; height: 48px; margin: 0 auto;
+      border: 2px solid var(--ink); border-radius: 50%;
+      display: grid; place-items: center;
+      font-family: "Libre Baskerville", serif;
+      font-size: 1.25rem;
+      transform: rotate(-6deg);
+      background: #fff;
+    }
+    .dayh small { display: block; margin-top: 6px; font-size: 10px; font-weight: 700; letter-spacing: .08em; }
+    .grid { display: grid; grid-template-columns: 52px repeat(5, 1fr); }
+    .gutter .t { height: var(--hour); font-size: 10px; color: #64748b; text-align: right; padding: 0 8px; font-variant-numeric: tabular-nums; }
+    .col { position: relative; border-left: 1px dashed var(--rule); min-height: calc(var(--hour) * 12); }
+    .line { height: var(--hour); border-bottom: 1px solid #e2e8f0; }
+    .ev {
+      position: absolute; left: 6px; right: 6px;
+      border: 1.5px solid var(--ink);
+      background: #fff;
+      padding: 6px 8px;
+      font-size: 12px;
+      box-shadow: 3px 3px 0 rgba(14,116,144,.2);
+    }
+    .ev em { display: block; font-family: "Libre Baskerville", serif; font-style: italic; font-size: 11px; color: var(--accent); margin-top: 2px; }
+    .ev.flight { background: #ecfeff; }
+    .ev.park { background: #fff7ed; }
+    .ev.shop { background: #f5f3ff; }
+    .ev.meal { background: #f0fdf4; }
+    footer { padding: 12px 32px; font-size: 12px; border-top: 1px solid var(--rule); color: #64748b; }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <header>
+      <div>
+        <a class="back" href="./index.html">← Mockups</a>
+        <div class="eyebrow">Itinerary folio · B</div>
+        <h1>BigBang US Trip 2026</h1>
+      </div>
+      <div class="meta">29 Aug – 7 Sep<br/>Orlando → San Francisco</div>
+    </header>
+    <div class="wrap">
+      <div class="days">
+        <div></div>
+        <div class="dayh"><div class="stamp">29</div><small>SATURDAY</small></div>
+        <div class="dayh"><div class="stamp" style="transform:rotate(4deg)">30</div><small>SUNDAY</small></div>
+        <div class="dayh"><div class="stamp" style="transform:rotate(-3deg)">31</div><small>MONDAY</small></div>
+        <div class="dayh"><div class="stamp" style="transform:rotate(5deg)">1</div><small>TUESDAY</small></div>
+        <div class="dayh"><div class="stamp">2</div><small>WEDNESDAY</small></div>
+      </div>
+      <div class="grid">
+        <div class="gutter">
+          <div class="t">07:00</div><div class="t">08:00</div><div class="t">09:00</div><div class="t">10:00</div>
+          <div class="t">11:00</div><div class="t">12:00</div><div class="t">13:00</div><div class="t">14:00</div>
+          <div class="t">15:00</div><div class="t">16:00</div><div class="t">17:00</div><div class="t">18:00</div>
+        </div>
+        <div class="col">
+          <div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div>
+          <div class="ev flight" style="top:0;height:calc(var(--hour)*2)">CGH → CNF<em>Azul 4214 · dawn hop</em></div>
+          <div class="ev flight" style="top:calc(var(--hour)*5);height:calc(var(--hour)*6)">CNF → MCO<em>Long haul to Orlando</em></div>
+        </div>
+        <div class="col">
+          <div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div>
+          <div class="ev flight" style="top:calc(var(--hour)*3);height:calc(var(--hour)*7)">VCP → MCO<em>Companion arrives</em></div>
+        </div>
+        <div class="col">
+          <div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div>
+          <div class="ev meal" style="top:calc(var(--hour)*0.5);height:var(--hour)">Hotel breakfast</div>
+          <div class="ev shop" style="top:calc(var(--hour)*2);height:calc(var(--hour)*4)">Target & Best Buy<em>Errands run</em></div>
+        </div>
+        <div class="col">
+          <div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div>
+          <div class="ev park" style="top:calc(var(--hour)*3);height:calc(var(--hour)*8)">Busch Gardens<em>Tampa full day</em></div>
+        </div>
+        <div class="col">
+          <div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div>
+          <div class="ev park" style="top:calc(var(--hour)*2);height:calc(var(--hour)*9)">Epic Universe<em>Universal</em></div>
+        </div>
+      </div>
+    </div>
+    <footer>B · Atlas — notebook / map vibe. Strong brand personality; slightly less “productivity tool.”</footer>
+  </div>
+</body>
+</html>

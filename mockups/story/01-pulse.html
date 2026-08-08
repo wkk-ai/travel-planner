@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>01 · Pulse — Story mockup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --blue:#1a73e8; --muted:#70757a; --line:#dadce0; --bg:#f8f9fa; --text:#3c4043; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:#e8eaed;min-height:100vh;padding:24px 16px;color:var(--text)}
+    a.back{display:inline-block;margin-bottom:16px;color:var(--blue);font-size:13px;font-weight:600;text-decoration:none}
+    .phone{max-width:390px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(60,64,67,.18);border:1px solid var(--line)}
+    .top{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+    .top h1{flex:1;font-size:17px;font-weight:700}
+    .tabs{display:flex;border-bottom:1px solid var(--line)}
+    .tabs span{flex:1;text-align:center;padding:14px;font-size:15px;font-weight:600;color:var(--muted)}
+    .tabs span.on{color:var(--blue);border-bottom:2px solid var(--blue)}
+    .slot{height:48px;background:var(--bg);border-bottom:1px solid var(--line);opacity:.4}
+    .body{padding:16px;background:var(--bg);min-height:520px}
+    .head{margin-bottom:16px}
+    .head h2{font-size:20px;font-weight:700}
+    .head p{font-size:14px;color:var(--muted);margin-top:4px}
+    .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+    .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+    .kpi .v{font-size:22px;font-weight:700;color:var(--text)}
+    .kpi .l{font-size:12px;color:var(--muted);margin-top:2px;font-weight:500}
+    .kpi.accent{border-color:#c2d7f7;background:#e8f0fe}
+    .kpi.accent .v{color:var(--blue)}
+    .section{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
+    .day{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+    .day.today{border-color:var(--blue);box-shadow:0 0 0 1px #e8f0fe}
+    .day-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+    .day-h strong{font-size:15px}
+    .day-h em{font-size:12px;color:var(--muted);font-style:normal}
+    .ev{display:flex;gap:10px;font-size:14px;padding:6px 0;border-top:1px solid #f1f3f4}
+    .ev:first-of-type{border-top:0;padding-top:0}
+    .t{color:var(--muted);width:44px;flex-shrink:0;font-size:13px}
+    .dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← All story mockups</a>
+  <div class="phone">
+    <div class="top"><div style="width:36px;height:36px;border-radius:50%;background:#e8f0fe"></div><h1>BigBang US Trip 2026</h1><span style="font-size:12px;color:var(--muted)">···</span></div>
+    <div class="tabs"><span class="on">Story</span><span>Schedule</span></div>
+    <div class="slot"></div>
+    <div class="body">
+      <div class="head">
+        <h2>21 days to go</h2>
+        <p>Aug 29 – Sep 7 · Orlando</p>
+      </div>
+      <div class="kpis">
+        <div class="kpi accent"><div class="v">21</div><div class="l">Days left</div></div>
+        <div class="kpi"><div class="v">54</div><div class="l">Events</div></div>
+        <div class="kpi"><div class="v">10</div><div class="l">To pack</div></div>
+        <div class="kpi"><div class="v">$790</div><div class="l">Spent</div></div>
+      </div>
+      <div class="section">Your days</div>
+      <div class="day today">
+        <div class="day-h"><strong>Sat, Aug 29</strong><em>Departure · Orlando</em></div>
+        <div class="ev"><span class="dot" style="background:#1a73e8"></span><span class="t">08:25</span>Flight CGH → CNF</div>
+        <div class="ev"><span class="dot" style="background:#4285f4"></span><span class="t">14:00</span>Hotel check-in</div>
+      </div>
+      <div class="day">
+        <div class="day-h"><strong>Sun, Aug 30</strong><em>Explore</em></div>
+        <div class="ev"><span class="dot" style="background:#34a853"></span><span class="t">07:30</span>Breakfast at hotel</div>
+        <div class="ev"><span class="dot" style="background:#a142f4"></span><span class="t">09:30</span>Target & Best Buy</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
