@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>04 · Float</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --blue:#1a73e8; --muted:#70757a; --line:#dadce0; --bg:#eef1f5; --text:#3c4043; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:#e8eaed;padding:24px 16px;color:var(--text)}
+    a.back{display:inline-block;margin-bottom:16px;color:var(--blue);font-size:13px;font-weight:600;text-decoration:none}
+    .phone{max-width:390px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(60,64,67,.18);border:1px solid var(--line)}
+    .tabs{display:flex;border-bottom:1px solid var(--line)} .tabs span{flex:1;text-align:center;padding:14px;font-size:15px;font-weight:600;color:var(--muted)} .tabs span.on{color:var(--blue);border-bottom:2px solid var(--blue)}
+    .body{padding:20px 18px;background:var(--bg);min-height:560px}
+    .meta{font-size:14px;color:var(--muted);margin-bottom:16px;text-align:center}
+    .stats{display:flex;gap:10px;margin-bottom:20px}
+    .stat{flex:1;background:#fff;border-radius:14px;padding:12px 8px;text-align:center;box-shadow:0 2px 8px rgba(60,64,67,.06)}
+    .stat.hi{box-shadow:0 4px 14px rgba(26,115,232,.15)} .stat strong{display:block;font-size:20px;font-weight:700} .stat.hi strong{color:var(--blue)}
+    .stat span{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted)}
+    .row-h{display:flex;justify-content:space-between;margin-bottom:14px;font-size:14px;font-weight:600;padding:0 4px}
+    .row-h a{color:var(--blue);text-decoration:none}
+    .day{border-radius:20px;padding:16px 18px;margin-bottom:14px;box-shadow:0 6px 20px rgba(26,115,232,.12)}
+    .day h3{font-size:16px;font-weight:700;color:#174ea6}
+    .day .sub{font-size:13px;color:#3c5a80;margin:4px 0 12px}
+    .ev{display:flex;gap:10px;font-size:14px;padding:8px 10px;background:rgba(255,255,255,.75);border-radius:10px;margin-bottom:6px}
+    .ev:last-child{margin:0}
+    .t{width:44px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+    .more{text-align:center;font-size:13px;font-weight:600;color:var(--blue);margin-top:8px}
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← Round 2 mockups</a>
+  <div class="phone">
+    <div class="tabs"><span class="on">Story</span><span>Schedule</span></div>
+    <div class="body">
+      <p class="meta">Aug 29 – Sep 7 · 21 days until you go</p>
+      <div class="stats">
+        <div class="stat hi"><strong>21</strong><span>Until trip</span></div>
+        <div class="stat"><strong>10</strong><span>Trip days</span></div>
+        <div class="stat"><strong>54</strong><span>Events</span></div>
+      </div>
+      <div class="row-h"><span>Upcoming days</span><a href="#">Full schedule</a></div>
+      <div class="day" style="background:#9fc3f5"><h3>Sat, Aug 29</h3><div class="sub">Orlando · Departure · in 21d</div><div class="ev"><span class="t">08:25</span>Flight CGH → CNF</div><div class="ev"><span class="t">14:00</span>Hotel check-in</div></div>
+      <div class="day" style="background:#b4d0f8"><h3>Sun, Aug 30</h3><div class="sub">Orlando · Explore</div><div class="ev"><span class="t">07:30</span>Breakfast</div><div class="more">+4 more events</div></div>
+      <div class="day" style="background:#c2dafb"><h3>Mon, Aug 31</h3><div class="sub">Magic Kingdom</div><div class="ev"><span class="t">08:00</span>Magic Kingdom</div></div>
+      <div class="day" style="background:#d0e3fc"><h3>Tue, Sep 1</h3><div class="ev"><span class="t">08:30</span>EPCOT</div></div>
+    </div>
+  </div>
+</body>
+</html>

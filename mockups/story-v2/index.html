@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Story tab — design round 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --ink: #3c4043; --muted: #70757a; --line: #dadce0; --bg: #f8f9fa; --blue: #1a73e8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Plus Jakarta Sans", system-ui, sans-serif; color: var(--ink); background: var(--bg); min-height: 100vh; }
+    main { max-width: 720px; margin: 0 auto; padding: 40px 20px 64px; }
+    h1 { font-size: 1.75rem; font-weight: 700; margin: 0 0 8px; }
+    .lede { color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+    .note { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    a.back { color: var(--blue); font-size: 14px; font-weight: 600; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+    .grid { display: grid; gap: 12px; }
+    a.card {
+      display: grid; grid-template-columns: 88px 1fr; gap: 14px; align-items: center;
+      padding: 14px 16px; background: #fff; border: 1px solid var(--line); border-radius: 14px;
+      text-decoration: none; color: inherit; transition: box-shadow .15s;
+    }
+    a.card:hover { box-shadow: 0 8px 24px rgba(60,64,67,.1); }
+    .swatch { height: 68px; border-radius: 8px; overflow: hidden; }
+    h2 { margin: 0 0 4px; font-size: 1rem; font-weight: 700; }
+    p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.4; }
+    .swatch.a { display: flex; flex-direction: column; }
+    .swatch.a i { flex: 1; }
+    .swatch.a i:nth-child(1) { background: #b4d0f8; }
+    .swatch.a i:nth-child(2) { background: #d0e3fc; }
+    .swatch.a i:nth-child(3) { background: #f2f7fe; }
+    .swatch.b { background: #eef2f6; padding: 6px; display: flex; flex-direction: column; gap: 3px; }
+    .swatch.b span { height: 14px; border-radius: 3px; background: #b4d0f8; }
+    .swatch.b span:nth-child(2) { background: #d0e3fc; opacity: .9; }
+    .swatch.b span:nth-child(3) { background: #e8f0fe; }
+    .swatch.c { display: grid; grid-template-columns: 28px 1fr; gap: 4px; padding: 6px; background: #fff; }
+    .swatch.c b { background: #9fc3f5; border-radius: 4px; }
+    .swatch.c span { background: #dce9fd; border-radius: 4px; height: 12px; margin: 2px 0; }
+    .swatch.d { background: #f0f2f5; padding: 8px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+    .swatch.d i { width: 70%; height: 12px; border-radius: 6px; background: #c2dafb; box-shadow: 0 2px 6px rgba(26,115,232,.12); }
+    .swatch.d i:nth-child(2) { background: #e8f0fe; width: 65%; }
+    .swatch.e { background: #fff; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+    .swatch.e i { display: block; height: 14px; }
+    .swatch.e i:nth-child(1) { background: #b4d0f8; }
+    .swatch.e i:nth-child(2) { background: #d0e3fc; }
+    .swatch.e i:nth-child(3) { background: #f8fbff; }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="../index.html">← All mockups</a>
+    <h1>Story — round 2</h1>
+    <p class="lede">Same rules: upcoming days only, solid blue per card, darker → lighter down the list.</p>
+    <p class="note">Open on phone width. Pick a number — we build it in the app.</p>
+    <div class="grid">
+      <a class="card" href="01-stripe.html"><div class="swatch a"><i></i><i></i><i></i></div><div><h2>01 · Stripe</h2><p>White cards, bold left color bar steps blue.</p></div></a>
+      <a class="card" href="02-flush.html"><div class="swatch b"></div><div><h2>02 · Flush</h2><p>Stacked bands, no gaps — one continuous block.</p></div></a>
+      <a class="card" href="03-giant.html"><div class="swatch c"><b></b><span></span><span></span></div><div><h2>03 · Giant date</h2><p>Big day number + events on solid blue.</p></div></a>
+      <a class="card" href="04-float.html"><div class="swatch d"><i></i><i></i></div><div><h2>04 · Float</h2><p>Floating cards, shadow, more air.</p></div></a>
+      <a class="card" href="05-ledger.html"><div class="swatch e"><i></i><i></i><i></i></div><div><h2>05 · Ledger</h2><p>One rounded shell, days as bands inside.</p></div></a>
+    </div>
+  </main>
+</body>
+</html>
