@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { format, parseISO } from 'date-fns'
-import { Plus, Receipt, Trash2, TrendingDown, TrendingUp, Wallet } from 'lucide-react'
+import { Plus, Receipt, Trash2 } from 'lucide-react'
 import { CATEGORIES } from '../data/categories'
 import {
   dayPlannedCents,
@@ -15,31 +15,29 @@ import { cn, isoDate, tripDaysIncludingEvents } from '../lib/time'
 import { useTripStore } from '../store/tripStore'
 import type { EventCategory, Expense } from '../types'
 
-function CategoryChart({
-  rows,
-}: {
-  rows: { key: string; label: string; color: string; border: string; planned: number; spent: number }[]
-}) {
+type BarRow = { key: string; label: string; color: string; border: string; planned: number; spent: number }
+
+function CompareBars({ rows }: { rows: BarRow[] }) {
   const max = Math.max(...rows.map((r) => Math.max(r.planned, r.spent)), 1)
   return (
-    <div className="space-y-3">
+    <div className="space-y-3.5">
       {rows.map((r) => (
         <div key={r.key}>
-          <div className="mb-1 flex items-center justify-between gap-2 text-ui-xs">
-            <span className="flex items-center gap-1.5 font-semibold" style={{ color: r.color }}>
-              <span className="size-2 rounded-full" style={{ background: r.border }} />
-              {r.label}
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <span className="flex min-w-0 items-center gap-1.5 text-ui-sm font-semibold text-[var(--gcal-text)]">
+              <span className="size-2 shrink-0 rounded-full" style={{ background: r.border }} />
+              <span className="truncate">{r.label}</span>
             </span>
-            <span className="tabular-nums text-[var(--gcal-muted)]">
-              {formatUsd(r.spent)}
+            <span className="shrink-0 text-ui-xs tabular-nums text-[var(--gcal-muted)]">
+              <span className="font-bold text-[var(--gcal-text)]">{formatUsd(r.spent)}</span>
               {r.planned > 0 ? ` / ${formatUsd(r.planned)}` : ''}
             </span>
           </div>
-          <div className="relative h-2.5 overflow-hidden rounded-full bg-[var(--gcal-bg)]">
+          <div className="relative h-3 overflow-hidden rounded-full bg-[var(--gcal-bg)]">
             {r.planned > 0 ? (
               <div
-                className="absolute inset-y-0 left-0 rounded-full opacity-25"
-                style={{ width: `${(r.planned / max) * 100}%`, background: r.border }}
+                className="absolute inset-y-0 left-0 rounded-full bg-[#dadce0]"
+                style={{ width: `${(r.planned / max) * 100}%` }}
               />
             ) : null}
             <div
@@ -47,43 +45,6 @@ function CategoryChart({
               style={{ width: `${(r.spent / max) * 100}%`, background: r.border }}
             />
           </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function DailySpendChart({
-  days,
-}: {
-  days: { iso: string; shortLabel: string; spent: number; planned: number }[]
-}) {
-  const max = Math.max(...days.map((d) => Math.max(d.spent, d.planned)), 1)
-  return (
-    <div className="flex h-36 items-end gap-1.5">
-      {days.map((d) => (
-        <div key={d.iso} className="flex min-w-0 flex-1 flex-col items-center gap-1">
-          <div className="flex w-full flex-1 items-end justify-center gap-0.5">
-            {d.planned > 0 ? (
-              <div
-                className="w-[42%] rounded-t-sm bg-[var(--gcal-border)]"
-                style={{
-                  height: `${Math.max(4, (d.planned / max) * 100)}%`,
-                }}
-                title={`Planned ${formatUsd(d.planned)}`}
-              />
-            ) : null}
-            <div
-              className="w-[42%] rounded-t-sm bg-[var(--gcal-blue)]"
-              style={{
-                height: `${Math.max(d.spent > 0 ? 4 : 0, (d.spent / max) * 100)}%`,
-              }}
-              title={`Spent ${formatUsd(d.spent)}`}
-            />
-          </div>
-          <span className="w-full truncate text-center text-[9px] font-semibold text-[var(--gcal-muted)]">
-            {d.shortLabel}
-          </span>
         </div>
       ))}
     </div>
@@ -109,11 +70,7 @@ function ExpenseRow({
   const dollars = expense.amountCents / 100
   return (
     <li className="grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-[#eef0f2] px-4 py-3 last:border-0">
-      <span
-        className="size-2.5 shrink-0 rounded-full"
-        style={{ background: cat.border }}
-        aria-hidden
-      />
+      <span className="size-2.5 shrink-0 rounded-full" style={{ background: cat.border }} aria-hidden />
       <div className="min-w-0">
         <div className="text-ui-base font-semibold text-[var(--gcal-text)]">{expense.label}</div>
         <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-ui-xs text-[var(--gcal-muted)]">
@@ -134,21 +91,18 @@ function ExpenseRow({
         {readOnly ? (
           <span className="text-ui-base font-bold tabular-nums">{formatUsd(expense.amountCents)}</span>
         ) : (
-          <div className="flex items-center gap-1.5">
-            <span className="shrink-0 text-sm text-[var(--gcal-muted)]">$</span>
-            <input
-              type="number"
-              min={0}
-              step={10}
-              className="field w-20 text-right text-ui-sm font-bold tabular-nums"
-              value={dollars}
-              onChange={(e) => {
-                const n = snapExpenseDollars(parseFloat(e.target.value || '0'))
-                onAmountChange(dollarsToExpenseCents(n))
-              }}
-              aria-label="Amount in dollars"
-            />
-          </div>
+          <input
+            type="number"
+            min={0}
+            step={10}
+            className="field w-[4.5rem] text-right text-ui-sm font-bold tabular-nums"
+            value={dollars}
+            onChange={(e) => {
+              const n = snapExpenseDollars(parseFloat(e.target.value || '0'))
+              onAmountChange(dollarsToExpenseCents(n))
+            }}
+            aria-label="Amount in dollars"
+          />
         )}
         {!readOnly ? (
           <button
@@ -162,6 +116,14 @@ function ExpenseRow({
         ) : null}
       </div>
     </li>
+  )
+}
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+      {children}
+    </div>
   )
 }
 
@@ -188,7 +150,7 @@ export function WalletTab() {
   const diff = planned - spent
   const over = spent > planned && planned > 0
 
-  const byCategory = useMemo(() => {
+  const byCategory = useMemo((): BarRow[] => {
     const map = new Map<string, { planned: number; spent: number }>()
     for (const e of events) {
       const cur = map.get(e.category) ?? { planned: 0, spent: 0 }
@@ -209,33 +171,28 @@ export function WalletTab() {
       .sort((a, b) => b.spent - a.spent)
   }, [events, expenses])
 
-  const byDay = useMemo(() => {
+  const byDay = useMemo((): BarRow[] => {
     return days
       .map((d) => {
         const iso = isoDate(d)
-        const p = dayPlannedCents(iso, events)
-        const s = daySpentCents(iso, expenses)
         return {
-          iso,
-          label: format(d, 'EEE MMM d'),
-          shortLabel: format(d, 'EEE'),
-          planned: p,
-          spent: s,
+          key: iso,
+          label: format(d, 'EEE, MMM d'),
+          color: 'var(--gcal-text)',
+          border: 'var(--gcal-blue)',
+          planned: dayPlannedCents(iso, events),
+          spent: daySpentCents(iso, expenses),
         }
       })
       .filter((d) => d.planned > 0 || d.spent > 0)
   }, [days, events, expenses])
 
-  const spentShare = useMemo(() => {
-    const total = spent || 1
-    return byCategory.map((c) => ({
-      ...c,
-      pct: Math.round((c.spent / total) * 100),
-    }))
-  }, [byCategory, spent])
-
   const eventTitle = (eventId: string | null) =>
     eventId ? events.find((e) => e.id === eventId)?.title : undefined
+
+  const spentDollars = Math.round(spent / 100)
+  const plannedDollars = Math.round(planned / 100)
+  const diffDollars = Math.abs(Math.round(diff / 100))
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-5 pb-24">
@@ -246,82 +203,88 @@ export function WalletTab() {
         </p>
       </header>
 
-      <div className="mb-5 overflow-hidden rounded-2xl border border-[var(--gcal-border)] bg-white shadow-sm">
-        <div className="bg-gradient-to-br from-[#e8f0fe] to-[#e6f4ea] px-5 py-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="text-ui-xs font-bold uppercase tracking-wide text-[var(--gcal-muted)]">
-                Trip total
-              </div>
-              <div className="mt-1 flex items-baseline gap-3">
-                <span className="text-3xl font-bold text-[var(--gcal-text)]">{formatUsd(spent)}</span>
-                <span className="text-ui-sm text-[var(--gcal-muted)]">of {formatUsd(planned)} planned</span>
-              </div>
-            </div>
-            <Wallet className="size-8 text-[var(--gcal-blue)]/60" />
+      <div className="mb-5 grid grid-cols-3 gap-2">
+        <div className="rounded-2xl border border-[#c2d7f7] bg-[#e8f0fe] p-3 shadow-sm">
+          <div className="text-ui-xs font-semibold uppercase tracking-wide text-[var(--gcal-blue)]">
+            Spent
           </div>
-          {planned > 0 ? (
-            <div className="mt-4">
-              <div className="h-2.5 overflow-hidden rounded-full bg-white/70">
-                <div
-                  className={cn('h-full rounded-full transition-all', over ? 'bg-[#ea4335]' : 'bg-[#34a853]')}
-                  style={{ width: `${Math.min(100, (spent / planned) * 100)}%` }}
-                />
-              </div>
-              <div
-                className={cn(
-                  'mt-2 flex items-center gap-1 text-ui-sm font-semibold',
-                  over ? 'text-[#c5221f]' : 'text-[#137333]',
-                )}
-              >
-                {over ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
-                {over
-                  ? `${formatUsd(spent - planned)} over plan`
-                  : diff >= 0
-                    ? `${formatUsd(diff)} under plan`
-                    : 'On plan'}
-              </div>
-            </div>
-          ) : null}
+          <div className="mt-1 text-2xl font-bold tabular-nums text-[#0d47a1]">{spentDollars}</div>
+          <div className="text-[10px] font-medium text-[var(--gcal-muted)]">USD</div>
+        </div>
+        <div className="rounded-2xl border border-[var(--gcal-border)] bg-white p-3 shadow-sm">
+          <div className="text-ui-xs font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+            Planned
+          </div>
+          <div className="mt-1 text-2xl font-bold tabular-nums text-[var(--gcal-text)]">
+            {plannedDollars}
+          </div>
+          <div className="text-[10px] font-medium text-[var(--gcal-muted)]">USD</div>
+        </div>
+        <div
+          className={cn(
+            'rounded-2xl border p-3 shadow-sm',
+            over ? 'border-[#f5c2c0] bg-[#fce8e6]' : 'border-[#ceead6] bg-[#e6f4ea]',
+          )}
+        >
+          <div
+            className={cn(
+              'text-ui-xs font-semibold uppercase tracking-wide',
+              over ? 'text-[#c5221f]' : 'text-[#137333]',
+            )}
+          >
+            {over ? 'Over' : 'Left'}
+          </div>
+          <div
+            className={cn(
+              'mt-1 text-2xl font-bold tabular-nums',
+              over ? 'text-[#c5221f]' : 'text-[#137333]',
+            )}
+          >
+            {diffDollars}
+          </div>
+          <div className="text-[10px] font-medium text-[var(--gcal-muted)]">USD</div>
         </div>
       </div>
 
-      {(byCategory.length > 0 || byDay.length > 0) ? (
-        <section className="mb-5 grid gap-3 sm:grid-cols-2">
-          {byCategory.length > 0 ? (
-            <div className="rounded-2xl border border-[var(--gcal-border)] bg-white p-4 shadow-sm">
-              <h2 className="mb-3 text-ui-sm font-bold uppercase tracking-wide text-[var(--gcal-muted)]">
-                By category
-              </h2>
-              <CategoryChart rows={byCategory} />
-              {spentShare.length > 0 ? (
-                <div className="mt-4 flex h-3 overflow-hidden rounded-full">
-                  {spentShare.map((s) => (
-                    <div
-                      key={s.key}
-                      style={{ width: `${s.pct}%`, background: s.border, minWidth: s.pct > 0 ? 4 : 0 }}
-                      title={`${s.label} ${s.pct}%`}
-                    />
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-          {byDay.length > 0 ? (
-            <div className="rounded-2xl border border-[var(--gcal-border)] bg-white p-4 shadow-sm">
-              <h2 className="mb-1 text-ui-sm font-bold uppercase tracking-wide text-[var(--gcal-muted)]">
-                By day
-              </h2>
-              <p className="mb-3 text-[10px] text-[var(--gcal-muted)]">Gray = planned · Blue = spent</p>
-              <DailySpendChart days={byDay} />
-            </div>
-          ) : null}
+      {planned > 0 ? (
+        <div className="mb-5 rounded-2xl border border-[var(--gcal-border)] bg-white px-4 py-3 shadow-sm">
+          <div className="mb-2 flex justify-between text-ui-xs text-[var(--gcal-muted)]">
+            <span>Trip progress</span>
+            <span className="font-semibold tabular-nums">
+              {Math.min(100, Math.round((spent / planned) * 100))}% of plan
+            </span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-[var(--gcal-bg)]">
+            <div
+              className={cn('h-full rounded-full', over ? 'bg-[#ea4335]' : 'bg-[#34a853]')}
+              style={{ width: `${Math.min(100, (spent / planned) * 100)}%` }}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {byCategory.length > 0 ? (
+        <section className="mb-4 rounded-2xl border border-[var(--gcal-border)] bg-white p-4 shadow-sm">
+          <h2 className="mb-3 text-ui-sm font-bold uppercase tracking-wide text-[var(--gcal-muted)]">
+            By category
+          </h2>
+          <CompareBars rows={byCategory} />
+        </section>
+      ) : null}
+
+      {byDay.length > 0 ? (
+        <section className="mb-5 rounded-2xl border border-[var(--gcal-border)] bg-white p-4 shadow-sm">
+          <h2 className="mb-1 text-ui-sm font-bold uppercase tracking-wide text-[var(--gcal-muted)]">
+            By day
+          </h2>
+          <p className="mb-3 text-[10px] text-[var(--gcal-muted)]">Gray = planned · Color = spent</p>
+          <CompareBars rows={byDay} />
         </section>
       ) : null}
 
       {!readOnly ? (
         <form
-          className="mb-5 rounded-2xl border border-[var(--gcal-border)] bg-white p-4 shadow-sm"
+          className="mb-5 overflow-hidden rounded-2xl border border-[var(--gcal-border)] bg-white shadow-sm"
           onSubmit={(e) => {
             e.preventDefault()
             const cents = dollarsToExpenseCents(parseFloat(amount || '0'))
@@ -336,49 +299,55 @@ export function WalletTab() {
             setAmount('')
           }}
         >
-          <h2 className="mb-1 text-ui-sm font-bold text-[var(--gcal-text)]">Log expense</h2>
-          <p className="mb-3 text-ui-xs text-[var(--gcal-muted)]">
-            For {format(parseISO(selectedDate), 'EEEE, MMM d')} · amounts in $10 steps
-          </p>
-          <div className="flex flex-col gap-2">
-            <input
-              className="field"
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              placeholder="What did you buy?"
-            />
-            <select
-              className="field"
-              value={category}
-              onChange={(e) => setCategory(e.target.value as EventCategory)}
-              aria-label="Expense category"
-            >
-              {Object.entries(CATEGORIES).map(([key, meta]) => (
-                <option key={key} value={key}>
-                  {meta.label}
-                </option>
-              ))}
-            </select>
-            <div className="flex gap-2">
-              <div className="flex min-w-0 flex-1 items-center gap-2">
-                <span className="shrink-0 text-sm font-medium text-[var(--gcal-muted)]">$</span>
-                <input
-                  className="field min-w-0 flex-1"
-                  type="number"
-                  min={0}
-                  step={10}
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0"
-                />
-              </div>
-              <button
-                type="submit"
-                className="field inline-flex shrink-0 items-center justify-center gap-1 border-dashed bg-[var(--gcal-bg)] px-4 text-ui-sm font-semibold text-[var(--gcal-blue)] hover:border-[var(--gcal-blue)] hover:bg-[#e8f0fe]"
-              >
-                <Plus className="size-4" /> Add
-              </button>
+          <div className="border-b border-[#eef0f2] bg-[#e8f0fe] px-4 py-3">
+            <h2 className="text-ui-sm font-bold text-[#0d47a1]">Log expense</h2>
+            <p className="mt-0.5 text-ui-xs text-[var(--gcal-muted)]">
+              {format(parseISO(selectedDate), 'EEEE, MMM d')} · round to nearest $10
+            </p>
+          </div>
+          <div className="space-y-4 p-4">
+            <div>
+              <FieldLabel>What did you buy?</FieldLabel>
+              <input
+                className="field"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                placeholder="e.g. Lunch at Pier 39"
+              />
             </div>
+            <div>
+              <FieldLabel>Category</FieldLabel>
+              <select
+                className="field"
+                value={category}
+                onChange={(e) => setCategory(e.target.value as EventCategory)}
+              >
+                {Object.entries(CATEGORIES).map(([key, meta]) => (
+                  <option key={key} value={key}>
+                    {meta.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <FieldLabel>Amount (USD)</FieldLabel>
+              <input
+                className="field"
+                type="number"
+                min={0}
+                step={10}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="50"
+              />
+            </div>
+            <button
+              type="submit"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--gcal-blue)] py-3 text-ui-sm font-semibold text-white hover:bg-[var(--gcal-blue-hover)]"
+            >
+              <Plus className="size-4" />
+              Add expense
+            </button>
           </div>
         </form>
       ) : null}
@@ -390,7 +359,7 @@ export function WalletTab() {
         {expenses.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-[var(--gcal-border)] bg-white px-6 py-10 text-center">
             <p className="text-ui-sm text-[var(--gcal-muted)]">
-              No expenses logged yet. Add from here or from an event.
+              No expenses yet — log one above or from an event.
             </p>
           </div>
         ) : (
@@ -404,9 +373,7 @@ export function WalletTab() {
                     expense={ex}
                     eventTitle={eventTitle(ex.eventId)}
                     readOnly={readOnly}
-                    onSelectEvent={
-                      ex.eventId ? () => selectEvent(ex.eventId) : undefined
-                    }
+                    onSelectEvent={ex.eventId ? () => selectEvent(ex.eventId) : undefined}
                     onDelete={() => void deleteExpense(ex.id)}
                     onAmountChange={(cents) => void updateExpense(ex.id, { amountCents: cents })}
                   />
