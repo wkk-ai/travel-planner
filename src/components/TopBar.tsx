@@ -226,20 +226,20 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
             openPanel('trips')
           }}
         >
-          <div className="flex size-9 items-center justify-center rounded-lg bg-[var(--gcal-blue)] text-white">
-            <CalendarDays className="size-5" />
+          <div className="flex size-8 items-center justify-center rounded-lg bg-[var(--gcal-blue)] text-white">
+            <CalendarDays className="size-4" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1">
-              <div className="truncate text-ui-lg font-semibold leading-tight tracking-tight">{trip.name}</div>
-              <ChevronDown className="size-4 shrink-0 text-[var(--gcal-muted)]" />
+              <div className="truncate text-ui-base font-semibold leading-tight tracking-tight">{trip.name}</div>
+              <ChevronDown className="size-3.5 shrink-0 text-[var(--gcal-muted)]" />
             </div>
-            <div className="text-[11px] text-[var(--gcal-muted)]">
+            <div className="text-[10px] text-[var(--gcal-muted)]">
               {countdown > 0
-                ? `${countdown} days until departure`
+                ? `${countdown}d to go`
                 : countdown === 0
-                  ? 'Trip starts today'
-                  : `Day ${Math.abs(countdown) + 1} of trip`}
+                  ? 'Starts today'
+                  : `Day ${Math.abs(countdown) + 1}`}
               {concertCountdown > 0 && trip.name.toLowerCase().includes('bigbang')
                 ? ` · Concert in ${concertCountdown}d`
                 : ''}
