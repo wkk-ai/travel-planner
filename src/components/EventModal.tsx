@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Camera, ExternalLink, Trash2, X } from 'lucide-react'
 import type { EventCategory, TripEvent } from '../types'
-import { CATEGORIES } from '../data/categories'
+import { CATEGORIES, eventColors } from '../data/categories'
 import { useTripStore } from '../store/tripStore'
 import { timeOptions30, cn } from '../lib/time'
 import { EventBackupsSection } from './EventBackupsSection'
+import { FormRow } from './FormRow'
 
 interface Props {
   event: TripEvent
@@ -85,6 +86,8 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
   }
 
   const headerTitle = draft.title.trim() || (isDraft ? 'New event' : 'Untitled event')
+  const colors = eventColors(draft.category, draft.color)
+  const onCustomColor = Boolean(draft.color)
 
   return (
     <div
@@ -95,7 +98,13 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
         className="panel-enter flex max-h-[94vh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative border-b border-[#c2d7f7] bg-[#e8f0fe] px-5 py-4">
+        <div
+          className="relative px-5 py-4"
+          style={{
+            background: colors.bg,
+            borderBottom: `3px solid ${colors.border}`,
+          }}
+        >
           <button
             type="button"
             onClick={handleClose}
@@ -104,17 +113,30 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
           >
             <X className="size-4 text-[var(--gcal-muted)]" />
           </button>
-          <h2 className="pr-10 text-lg font-bold text-[#0d47a1]">Event details</h2>
-          <p className="mt-0.5 truncate pr-10 text-xs text-[var(--gcal-muted)]">{headerTitle}</p>
+          <h2
+            className="pr-10 text-lg font-bold"
+            style={{ color: onCustomColor ? '#fff' : colors.color }}
+          >
+            Event details
+          </h2>
+          <p
+            className="mt-0.5 truncate pr-10 text-xs"
+            style={{ color: onCustomColor ? 'rgba(255,255,255,0.85)' : 'var(--gcal-muted)' }}
+          >
+            {headerTitle}
+          </p>
           {isDraft ? (
-            <p className="mt-1 text-[11px] text-[var(--gcal-muted)]">
+            <p
+              className="mt-1 text-[11px]"
+              style={{ color: onCustomColor ? 'rgba(255,255,255,0.75)' : 'var(--gcal-muted)' }}
+            >
               Close without saving discards this draft
             </p>
           ) : null}
         </div>
 
         <div className="cal-scroll flex-1 overflow-auto">
-          <Row label="Title" hint="Name on schedule">
+          <FormRow label="Title" hint="Name on schedule">
             <input
               disabled={readOnly}
               className="field"
@@ -123,9 +145,9 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
               onChange={(e) => setDraft({ ...draft, title: e.target.value })}
               autoFocus={isDraft}
             />
-          </Row>
+          </FormRow>
 
-          <Row label="Date" hint="Day of trip">
+          <FormRow label="Date" hint="Day of trip">
             <input
               type="date"
               disabled={readOnly}
@@ -133,9 +155,9 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
               value={draft.date}
               onChange={(e) => setDraft({ ...draft, date: e.target.value })}
             />
-          </Row>
+          </FormRow>
 
-          <Row label="Time" hint="Start and end">
+          <FormRow label="Time" hint="Start and end">
             <div className="grid grid-cols-2 gap-2">
               <select
                 disabled={readOnly}
@@ -164,9 +186,9 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
                 ))}
               </select>
             </div>
-          </Row>
+          </FormRow>
 
-          <Row label="Category" hint="Color on calendar">
+          <FormRow label="Category" hint="Color on calendar">
             <div className="flex flex-wrap gap-1.5">
               {Object.entries(CATEGORIES).map(([key, meta]) => {
                 const active = draft.category === key && !draft.color
@@ -217,9 +239,9 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
                 </button>
               ) : null}
             </div>
-          </Row>
+          </FormRow>
 
-          <Row label="Location" hint="Venue or address">
+          <FormRow label="Location" hint="Venue or address">
             <input
               disabled={readOnly}
               className="field"
@@ -227,9 +249,9 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
               onChange={(e) => setDraft({ ...draft, location: e.target.value })}
               placeholder="Place name"
             />
-          </Row>
+          </FormRow>
 
-          <Row label="Maps" hint="Open in Google Maps">
+          <FormRow label="Maps" hint="Open in Google Maps">
             <div className="flex gap-2">
               <input
                 disabled={readOnly}
@@ -249,10 +271,10 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
                 </a>
               ) : null}
             </div>
-          </Row>
+          </FormRow>
 
           {draft.category === 'flight' ? (
-            <Row label="Flight" hint="Airline details">
+            <FormRow label="Flight" hint="Airline details">
               <div className="grid grid-cols-2 gap-2">
                 <input
                   disabled={readOnly}
@@ -294,10 +316,10 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
                   }
                 />
               </div>
-            </Row>
+            </FormRow>
           ) : null}
 
-          <Row label="Notes" hint="Private details">
+          <FormRow label="Notes" hint="Private details">
             <textarea
               disabled={readOnly}
               className="field min-h-[72px] resize-none"
@@ -305,9 +327,9 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
               onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
               placeholder="Extra details…"
             />
-          </Row>
+          </FormRow>
 
-          <Row label="Budget" hint="Estimated cost">
+          <FormRow label="Budget" hint="Estimated cost">
             <div className="flex items-center gap-2">
               <span className="text-sm text-[var(--gcal-muted)]">$</span>
               <input
@@ -323,9 +345,9 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
                 }}
               />
             </div>
-          </Row>
+          </FormRow>
 
-          <Row label="Photo" hint="Optional image">
+          <FormRow label="Photo" hint="Optional image">
             {draft.photoDataUrl ? (
               <img
                 src={draft.photoDataUrl}
@@ -355,10 +377,16 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
             ) : draft.photoDataUrl ? null : (
               <p className="py-2 text-sm text-[var(--gcal-muted)]">No photo</p>
             )}
-          </Row>
+          </FormRow>
 
           {!isDraft ? (
-            <Row label="Backups" hint="Plan B same slot" noBorder>
+            <div className="border-t border-[#eef0f2]">
+              <div className="px-5 py-3.5">
+                <div className="text-[13px] font-semibold text-[var(--gcal-text)]">Backups</div>
+                <p className="mt-0.5 text-[11px] font-medium text-[var(--gcal-muted)]">
+                  Plan B same slot · {draft.startTime}–{draft.endTime}
+                </p>
+              </div>
               <EventBackupsSection
                 event={draft}
                 backups={draft.backups ?? []}
@@ -369,9 +397,8 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
                     .getState()
                     .swapWithBackup(event.id, backupId, { ...draft, backups: draft.backups ?? [] })
                 }}
-                compact
               />
-            </Row>
+            </div>
           ) : null}
         </div>
 
@@ -436,57 +463,6 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
           </div>
         </div>
       </div>
-
-      <style>{`
-        .field {
-          width: 100%;
-          border: 1px solid var(--gcal-border);
-          border-radius: 0.625rem;
-          padding: 0.625rem 0.75rem;
-          background: white;
-          outline: none;
-          font-size: 0.875rem;
-        }
-        .field:focus {
-          border-color: var(--gcal-blue);
-          box-shadow: 0 0 0 3px #e8f0fe;
-        }
-        .field:disabled {
-          background: #f8f9fa;
-          color: #70757a;
-        }
-      `}</style>
-    </div>
-  )
-}
-
-function Row({
-  label,
-  hint,
-  children,
-  noBorder,
-}: {
-  label: string
-  hint?: string
-  children: React.ReactNode
-  noBorder?: boolean
-}) {
-  return (
-    <div
-      className={cn(
-        'grid grid-cols-[110px_1fr] items-start gap-3 px-5 py-3.5',
-        !noBorder && 'border-b border-[#eef0f2]',
-      )}
-    >
-      <div className="pt-2.5 text-[13px] font-semibold text-[var(--gcal-text)]">
-        {label}
-        {hint ? (
-          <small className="mt-0.5 block text-[11px] font-medium text-[var(--gcal-muted)]">
-            {hint}
-          </small>
-        ) : null}
-      </div>
-      <div className="min-w-0">{children}</div>
     </div>
   )
 }

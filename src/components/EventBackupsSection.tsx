@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, ExternalLink, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, ExternalLink, Plus, Trash2 } from 'lucide-react'
 import type { EventBackup, EventCategory, TripEvent } from '../types'
 import { CATEGORIES, eventColors } from '../data/categories'
 import { BACKUP_TAGS, backupTagLabel, newEmptyBackup } from '../lib/eventBackups'
 import { useTripStore } from '../store/tripStore'
 import { cn } from '../lib/time'
+import { FormRow } from './FormRow'
 
 interface Props {
   event: TripEvent
@@ -12,7 +13,6 @@ interface Props {
   readOnly: boolean
   onBackupsChange: (backups: EventBackup[]) => void
   onUseBackup?: (backupId: string) => void | Promise<void>
-  compact?: boolean
 }
 
 export function EventBackupsSection({
@@ -21,7 +21,6 @@ export function EventBackupsSection({
   readOnly,
   onBackupsChange,
   onUseBackup,
-  compact = false,
 }: Props) {
   const swapWithBackup = useTripStore((s) => s.swapWithBackup)
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -42,58 +41,29 @@ export function EventBackupsSection({
   }
 
   return (
-    <section
-      className={cn(
-        compact
-          ? 'rounded-xl border border-dashed border-[var(--gcal-border)] bg-[var(--gcal-bg)] p-3'
-          : 'rounded-xl border border-[#dadce0] bg-[#f8f9fa]/80 p-3',
-      )}
-    >
-      {!compact ? (
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
-              Backup plans
-            </div>
-            <p className="mt-0.5 text-[11px] text-[var(--gcal-muted)]">
-              Same time slot ({event.startTime}–{event.endTime}). Swap on trip day if plans change.
-            </p>
-          </div>
-          {!readOnly ? (
-            <button
-              type="button"
-              onClick={addBackup}
-              className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--gcal-blue)] shadow-sm ring-1 ring-[var(--gcal-border)] hover:bg-[#e8f0fe]"
-            >
-              <Plus className="size-3.5" /> Add backup
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-
+    <div>
       {backups.length === 0 ? (
-        <div className={compact ? 'space-y-2' : undefined}>
-          <p className={cn('text-xs text-[var(--gcal-muted)]', !compact && 'rounded-lg bg-white px-3 py-2')}>
-            {compact ? 'None yet' : 'No backups yet — add an indoor option, shorter plan, or rain-day alternative.'}
-          </p>
+        <div className="px-5 py-4">
+          <p className="text-sm text-[var(--gcal-muted)]">None yet — add a rain-day or indoor alternative.</p>
           {!readOnly ? (
             <button
               type="button"
               onClick={addBackup}
-              className="text-xs font-semibold text-[var(--gcal-blue)] hover:underline"
+              className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-[var(--gcal-blue)] hover:underline"
             >
-              + Add backup
+              <Plus className="size-4" /> Add backup
             </button>
           ) : null}
         </div>
       ) : (
-        <ul className="space-y-2">
-          {backups.map((backup) => (
+        <ul>
+          {backups.map((backup, index) => (
             <BackupCard
               key={backup.id}
               backup={backup}
               expanded={expandedId === backup.id}
               readOnly={readOnly}
+              isLast={index === backups.length - 1}
               onToggle={() => setExpandedId(expandedId === backup.id ? null : backup.id)}
               onChange={(patch) => updateBackup(backup.id, patch)}
               onDelete={() => removeBackup(backup.id)}
@@ -105,16 +75,18 @@ export function EventBackupsSection({
           ))}
         </ul>
       )}
-      {compact && !readOnly && backups.length > 0 ? (
-        <button
-          type="button"
-          onClick={addBackup}
-          className="mt-2 text-xs font-semibold text-[var(--gcal-blue)] hover:underline"
-        >
-          + Add backup
-        </button>
+      {!readOnly && backups.length > 0 ? (
+        <div className="border-t border-[#eef0f2] px-5 py-3">
+          <button
+            type="button"
+            onClick={addBackup}
+            className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--gcal-blue)] hover:underline"
+          >
+            <Plus className="size-4" /> Add backup
+          </button>
+        </div>
       ) : null}
-    </section>
+    </div>
   )
 }
 
@@ -122,6 +94,7 @@ function BackupCard({
   backup,
   expanded,
   readOnly,
+  isLast,
   onToggle,
   onChange,
   onDelete,
@@ -130,6 +103,7 @@ function BackupCard({
   backup: EventBackup
   expanded: boolean
   readOnly: boolean
+  isLast: boolean
   onToggle: () => void
   onChange: (patch: Partial<EventBackup>) => void
   onDelete: () => void
@@ -137,37 +111,60 @@ function BackupCard({
 }) {
   const colors = eventColors(backup.category, backup.color)
   const tagLabel = backupTagLabel(backup.tag)
+  const onCustom = Boolean(backup.color)
 
   return (
-    <li className="overflow-hidden rounded-xl border border-[var(--gcal-border)] bg-white">
+    <li className={cn(!isLast && 'border-b border-[#eef0f2]')}>
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-[var(--gcal-bg)]"
+        className="flex w-full items-center gap-3 px-5 py-3 text-left transition-colors hover:brightness-[0.98]"
+        style={{
+          background: colors.bg,
+          borderBottom: expanded ? `3px solid ${colors.border}` : undefined,
+        }}
       >
         <span
-          className="size-2 shrink-0 rounded-full"
+          className="size-2.5 shrink-0 rounded-full"
           style={{ background: colors.border }}
         />
         <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-medium">{backup.title || 'Untitled backup'}</div>
+          <div
+            className="truncate text-sm font-semibold"
+            style={{ color: onCustom ? '#fff' : colors.color }}
+          >
+            {backup.title || 'Untitled backup'}
+          </div>
           {backup.location ? (
-            <div className="truncate text-[11px] text-[var(--gcal-muted)]">{backup.location}</div>
+            <div
+              className="truncate text-[11px]"
+              style={{ color: onCustom ? 'rgba(255,255,255,0.85)' : 'var(--gcal-muted)' }}
+            >
+              {backup.location}
+            </div>
           ) : null}
         </div>
         {tagLabel ? (
-          <span className="rounded-full bg-[#e8f0fe] px-2 py-0.5 text-[10px] font-semibold text-[var(--gcal-blue)]">
+          <span
+            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+            style={{
+              background: onCustom ? 'rgba(255,255,255,0.2)' : '#fff',
+              color: onCustom ? '#fff' : colors.color,
+            }}
+          >
             {tagLabel}
           </span>
         ) : null}
-        {expanded ? <ChevronUp className="size-4 shrink-0" /> : <ChevronDown className="size-4 shrink-0" />}
+        <ChevronDown
+          className={cn('size-4 shrink-0 transition-transform', expanded && 'rotate-180')}
+          style={{ color: onCustom ? '#fff' : colors.color }}
+        />
       </button>
 
       {expanded ? (
-        <div className="space-y-3 border-t border-[var(--gcal-border)] px-3 py-3">
-          <div>
-            <FieldLabel>Why (optional)</FieldLabel>
-            <div className="mt-1 flex flex-wrap gap-1">
+        <div className="bg-white">
+          <FormRow label="Why" hint="Optional reason" inset>
+            <div className="flex flex-wrap gap-1.5">
               {BACKUP_TAGS.map((t) => (
                 <button
                   key={t.id}
@@ -175,160 +172,166 @@ function BackupCard({
                   disabled={readOnly}
                   onClick={() => onChange({ tag: backup.tag === t.id ? null : t.id })}
                   className={cn(
-                    'rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                    'rounded-full px-3 py-1 text-xs font-semibold',
                     backup.tag === t.id
                       ? 'bg-[var(--gcal-blue)] text-white'
-                      : 'bg-[var(--gcal-bg)] text-[var(--gcal-muted)]',
+                      : 'border border-[var(--gcal-border)] bg-white text-[var(--gcal-muted)]',
                   )}
                 >
                   {t.label}
                 </button>
               ))}
             </div>
-          </div>
+          </FormRow>
 
-          <div>
-            <FieldLabel>Title</FieldLabel>
+          <FormRow label="Title" hint="Name on schedule" inset>
             <input
               disabled={readOnly}
-              className="mt-1 w-full rounded-xl border border-[var(--gcal-border)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe] disabled:bg-[#f8f9fa]"
+              className="field"
               value={backup.title}
               onChange={(e) => onChange({ title: e.target.value })}
             />
-          </div>
+          </FormRow>
 
-          <div>
-            <FieldLabel>Category</FieldLabel>
-            <div className="mt-1 flex flex-wrap gap-1">
-              {Object.entries(CATEGORIES).map(([key, meta]) => (
-                <button
-                  key={key}
-                  type="button"
-                  disabled={readOnly}
-                  onClick={() => onChange({ category: key as EventCategory, color: null })}
-                  className={cn(
-                    'rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                    backup.category === key && !backup.color && 'ring-2 ring-offset-1',
-                  )}
-                  style={{
-                    background: meta.bg,
-                    color: meta.color,
-                    outlineColor: meta.border,
-                  }}
-                >
-                  {meta.label}
-                </button>
-              ))}
+          <FormRow label="Category" hint="Color on calendar" inset>
+            <div className="flex flex-wrap gap-1.5">
+              {Object.entries(CATEGORIES).map(([key, meta]) => {
+                const active = backup.category === key && !backup.color
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    disabled={readOnly}
+                    onClick={() => onChange({ category: key as EventCategory, color: null })}
+                    className={cn(
+                      'rounded-full px-3 py-1 text-xs font-semibold',
+                      active && 'outline outline-2 outline-offset-1',
+                    )}
+                    style={{
+                      background: meta.bg,
+                      color: meta.color,
+                      outlineColor: active ? meta.border : undefined,
+                    }}
+                  >
+                    {meta.label}
+                  </button>
+                )
+              })}
             </div>
-          </div>
+          </FormRow>
 
-          <div>
-            <FieldLabel>Location</FieldLabel>
+          <FormRow label="Location" hint="Venue or address" inset>
             <input
               disabled={readOnly}
-              className="mt-1 w-full rounded-xl border border-[var(--gcal-border)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe] disabled:bg-[#f8f9fa]"
+              className="field"
               value={backup.location}
               onChange={(e) => onChange({ location: e.target.value })}
+              placeholder="Place name"
             />
-          </div>
+          </FormRow>
 
-          <div>
-            <FieldLabel>Maps link</FieldLabel>
-            <div className="mt-1 flex gap-2">
+          <FormRow label="Maps" hint="Open in Google Maps" inset>
+            <div className="flex gap-2">
               <input
                 disabled={readOnly}
-                className="mt-1 w-full flex-1 rounded-xl border border-[var(--gcal-border)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe] disabled:bg-[#f8f9fa]"
+                className="field min-w-0 flex-1"
                 value={backup.mapsUrl}
                 onChange={(e) => onChange({ mapsUrl: e.target.value })}
+                placeholder="Paste URL"
               />
               {backup.mapsUrl ? (
                 <a
                   href={backup.mapsUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--gcal-border)]"
+                  className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-[var(--gcal-border)] hover:bg-[var(--gcal-bg)]"
                 >
-                  <ExternalLink className="size-3.5" />
+                  <ExternalLink className="size-4" />
                 </a>
               ) : null}
             </div>
-          </div>
+          </FormRow>
 
           {backup.category === 'flight' ? (
-            <div className="grid grid-cols-2 gap-2 rounded-lg border border-[#d2e3fc] bg-[#e8f0fe]/50 p-2">
-              <input
-                disabled={readOnly}
-                className="rounded-lg border border-[var(--gcal-border)] bg-white px-2 py-1.5 text-xs"
-                placeholder="Airline"
-                value={backup.flight?.airline ?? ''}
-                onChange={(e) =>
-                  onChange({ flight: { ...backup.flight, airline: e.target.value } })
-                }
-              />
-              <input
-                disabled={readOnly}
-                className="rounded-lg border border-[var(--gcal-border)] bg-white px-2 py-1.5 text-xs"
-                placeholder="Flight #"
-                value={backup.flight?.flightNumber ?? ''}
-                onChange={(e) =>
-                  onChange({ flight: { ...backup.flight, flightNumber: e.target.value } })
-                }
-              />
-              <input
-                disabled={readOnly}
-                className="rounded-lg border border-[var(--gcal-border)] bg-white px-2 py-1.5 text-xs"
-                placeholder="From"
-                value={backup.flight?.from ?? ''}
-                onChange={(e) => onChange({ flight: { ...backup.flight, from: e.target.value } })}
-              />
-              <input
-                disabled={readOnly}
-                className="rounded-lg border border-[var(--gcal-border)] bg-white px-2 py-1.5 text-xs"
-                placeholder="To"
-                value={backup.flight?.to ?? ''}
-                onChange={(e) => onChange({ flight: { ...backup.flight, to: e.target.value } })}
-              />
-            </div>
+            <FormRow label="Flight" hint="Airline details" inset>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  disabled={readOnly}
+                  className="field"
+                  placeholder="Airline"
+                  value={backup.flight?.airline ?? ''}
+                  onChange={(e) =>
+                    onChange({ flight: { ...backup.flight, airline: e.target.value } })
+                  }
+                />
+                <input
+                  disabled={readOnly}
+                  className="field"
+                  placeholder="Flight #"
+                  value={backup.flight?.flightNumber ?? ''}
+                  onChange={(e) =>
+                    onChange({ flight: { ...backup.flight, flightNumber: e.target.value } })
+                  }
+                />
+                <input
+                  disabled={readOnly}
+                  className="field"
+                  placeholder="From"
+                  value={backup.flight?.from ?? ''}
+                  onChange={(e) => onChange({ flight: { ...backup.flight, from: e.target.value } })}
+                />
+                <input
+                  disabled={readOnly}
+                  className="field"
+                  placeholder="To"
+                  value={backup.flight?.to ?? ''}
+                  onChange={(e) => onChange({ flight: { ...backup.flight, to: e.target.value } })}
+                />
+              </div>
+            </FormRow>
           ) : null}
 
-          <div>
-            <FieldLabel>Notes</FieldLabel>
+          <FormRow label="Notes" hint="Private details" inset>
             <textarea
               disabled={readOnly}
-              className="mt-1 min-h-[56px] w-full rounded-xl border border-[var(--gcal-border)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe] disabled:bg-[#f8f9fa]"
+              className="field min-h-[72px] resize-none"
               value={backup.notes}
               onChange={(e) => onChange({ notes: e.target.value })}
             />
-          </div>
+          </FormRow>
 
-          <div>
-            <FieldLabel>Budget (USD)</FieldLabel>
-            <input
-              type="number"
-              min={0}
-              step={10}
-              disabled={readOnly}
-              className="mt-1 w-full rounded-xl border border-[var(--gcal-border)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe] disabled:bg-[#f8f9fa]"
-              value={Number((backup.budgetCents / 100).toFixed(2))}
-              onChange={(e) => {
-                const n = Math.max(0, parseFloat(e.target.value || '0'))
-                onChange({ budgetCents: Math.round(n * 100) })
-              }}
-            />
-          </div>
+          <FormRow label="Budget" hint="Estimated cost" inset>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-[var(--gcal-muted)]">$</span>
+              <input
+                type="number"
+                min={0}
+                step={10}
+                disabled={readOnly}
+                className="field"
+                value={Number((backup.budgetCents / 100).toFixed(2))}
+                onChange={(e) => {
+                  const n = Math.max(0, parseFloat(e.target.value || '0'))
+                  onChange({ budgetCents: Math.round(n * 100) })
+                }}
+              />
+            </div>
+          </FormRow>
 
           {backup.photoDataUrl ? (
-            <img src={backup.photoDataUrl} alt="" className="max-h-28 w-full rounded-lg object-cover" />
+            <FormRow label="Photo" hint="Attached image" inset>
+              <img src={backup.photoDataUrl} alt="" className="max-h-36 w-full rounded-xl object-cover" />
+            </FormRow>
           ) : null}
 
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#eef0f2] px-5 py-3">
             {!readOnly ? (
               <button
                 type="button"
                 onClick={onDelete}
-                className="inline-flex items-center gap-1 text-xs font-medium text-[#c5221f]"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-[#c5221f] hover:underline"
               >
-                <Trash2 className="size-3.5" /> Remove
+                <Trash2 className="size-4" /> Remove
               </button>
             ) : (
               <span />
@@ -337,7 +340,7 @@ function BackupCard({
               <button
                 type="button"
                 onClick={onUse}
-                className="rounded-lg bg-[var(--gcal-blue)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--gcal-blue-hover)]"
+                className="rounded-xl bg-[var(--gcal-blue)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--gcal-blue-hover)]"
               >
                 Use this instead
               </button>
@@ -347,8 +350,4 @@ function BackupCard({
       ) : null}
     </li>
   )
-}
-
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <div className="text-[10px] font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">{children}</div>
 }

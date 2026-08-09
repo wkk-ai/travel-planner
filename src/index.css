@@ -222,3 +222,21 @@ textarea {
     height: auto !important;
   }
 }
+
+.field {
+  width: 100%;
+  border: 1px solid var(--gcal-border);
+  border-radius: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  background: white;
+  outline: none;
+  font-size: 0.875rem;
+}
+.field:focus {
+  border-color: var(--gcal-blue);
+  box-shadow: 0 0 0 3px #e8f0fe;
+}
+.field:disabled {
+  background: #f8f9fa;
+  color: #70757a;
+}
