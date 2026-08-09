@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wallet tab mockups</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    body { background: var(--bg); padding: 40px 20px 64px; }
+    main { max-width: 640px; margin: 0 auto; }
+    a.back { color: var(--blue-deep); font-size: 14px; font-weight: 600; text-decoration: none; }
+    h1 { font-size: 1.75rem; font-weight: 700; margin: 16px 0 8px; }
+    .lede { color: var(--muted); line-height: 1.5; margin-bottom: 28px; font-size: 14px; }
+    .hero {
+      display: block;
+      padding: 18px 20px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      text-decoration: none;
+      color: inherit;
+      margin-bottom: 20px;
+      transition: box-shadow 0.15s;
+    }
+    .hero:hover { box-shadow: 0 8px 24px rgba(60,64,67,.08); }
+    .hero b { display: block; font-size: 1rem; margin-bottom: 4px; }
+    .hero span { font-size: 13px; color: var(--muted); }
+    .grid { display: grid; gap: 12px; }
+    a.card {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow 0.15s;
+    }
+    a.card:hover { box-shadow: 0 6px 20px rgba(60,64,67,.08); }
+    .swatch {
+      height: 64px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      overflow: hidden;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="../index.html">← All mockups</a>
+    <h1>Wallet — 5 chart directions</h1>
+    <p class="lede">Softer, dusty colors. Each option uses different graph types so category and day views don’t repeat the same horizontal bar.</p>
+
+    <a class="hero" href="all.html">
+      <b>View all 5 on one scrollable page →</b>
+      <span>Best for comparing side by side on phone width.</span>
+    </a>
+
+    <div class="grid">
+      <a class="card" href="all.html#a">
+        <div class="swatch" style="display:flex;align-items:center;justify-content:center">
+          <svg width="48" height="48" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="12" fill="none" stroke="#eef0f2" stroke-width="4"/>
+            <circle cx="18" cy="18" r="12" fill="none" stroke="#7a9e87" stroke-width="4" stroke-dasharray="25 50" transform="rotate(-90 18 18)"/>
+            <circle cx="18" cy="18" r="12" fill="none" stroke="#b87d78" stroke-width="4" stroke-dasharray="25 50" stroke-dashoffset="-25" transform="rotate(-90 18 18)"/>
+          </svg>
+        </div>
+        <div>
+          <div class="mock-tag">A</div>
+          <div class="mock-title" style="font-size:14px;margin:0">Donut + area trend</div>
+          <p class="mock-desc" style="margin:4px 0 0">Split ring for categories, soft line for daily flow.</p>
+        </div>
+      </a>
+
+      <a class="card" href="all.html#b">
+        <div class="swatch" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:6px">
+          <div style="grid-row:span 2;background:#eef4f0;border-radius:4px"></div>
+          <div style="background:#f6eeed;border-radius:4px"></div>
+          <div style="background:#f6f1e8;border-radius:4px"></div>
+        </div>
+        <div>
+          <div class="mock-tag">B</div>
+          <div class="mock-title" style="font-size:14px;margin:0">Treemap + column pairs</div>
+          <p class="mock-desc" style="margin:4px 0 0">Proportional tiles + paired day columns.</p>
+        </div>
+      </a>
+
+      <a class="card" href="all.html#c">
+        <div class="swatch" style="padding:8px;display:grid;gap:4px">
+          <div style="height:3px;background:#e4e7ea;border-radius:99px;position:relative"><div style="position:absolute;right:20%;top:-3px;width:8px;height:8px;border-radius:50%;background:#7a9e87"></div></div>
+          <div style="height:3px;background:#e4e7ea;border-radius:99px;position:relative"><div style="position:absolute;right:0;top:-3px;width:8px;height:8px;border-radius:50%;background:#b87d78"></div></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:4px">
+            <div style="aspect-ratio:1;background:#dce5ec;border-radius:4px"></div>
+            <div style="aspect-ratio:1;background:#b8c8d6;border-radius:4px"></div>
+            <div style="aspect-ratio:1;background:#e0e7ee;border-radius:4px"></div>
+            <div style="aspect-ratio:1;background:#e8edf2;border-radius:4px"></div>
+          </div>
+        </div>
+        <div>
+          <div class="mock-tag">C</div>
+          <div class="mock-title" style="font-size:14px;margin:0">Lollipop + heat calendar</div>
+          <p class="mock-desc" style="margin:4px 0 0">Rank dots on lines, week as color intensity grid.</p>
+        </div>
+      </a>
+
+      <a class="card" href="all.html#d">
+        <div class="swatch" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:6px">
+          <svg width="72" height="32" viewBox="0 0 72 32"><path d="M4,28 A32,32 0 0 1 68,28" fill="none" stroke="#c4928e" stroke-width="6" stroke-linecap="round"/></svg>
+          <div style="display:flex;gap:4px;align-items:flex-end;height:24px;width:100%;justify-content:center">
+            <div style="width:8px;height:8px;border-radius:50%;background:#8fad96"></div>
+            <div style="width:14px;height:14px;border-radius:50%;background:#8fad96"></div>
+            <div style="width:20px;height:20px;border-radius:50%;background:#c4928e"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#8fad96"></div>
+          </div>
+        </div>
+        <div>
+          <div class="mock-tag">D</div>
+          <div class="mock-title" style="font-size:14px;margin:0">Arc gauge + bubble timeline</div>
+          <p class="mock-desc" style="margin:4px 0 0">Half-ring budget meter, sized dots per day.</p>
+        </div>
+      </a>
+
+      <a class="card" href="all.html#e">
+        <div class="swatch" style="display:flex;align-items:flex-end;gap:4px;padding:8px">
+          <div style="flex:1;height:30%;background:#7a9e87;border-radius:3px 3px 0 0"></div>
+          <div style="flex:1;height:60%;background:#b87d78;border-radius:3px 3px 0 0"></div>
+          <div style="flex:1;height:90%;background:#b89a62;border-radius:3px 3px 0 0"></div>
+        </div>
+        <div>
+          <div class="mock-tag">E</div>
+          <div class="mock-title" style="font-size:14px;margin:0">Waterfall + sparkline</div>
+          <p class="mock-desc" style="margin:4px 0 0">Stepped running total, minimal daily line.</p>
+        </div>
+      </a>
+    </div>
+  </main>
+</body>
+</html>
