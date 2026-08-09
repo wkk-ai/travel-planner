@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>06 · Giant date + black card</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --blue:#1a73e8; --muted:#70757a; --line:#dadce0; --bg:#f8f9fa; --text:#3c4043; --black:#1a1d21; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:#e8eaed;padding:24px 16px;color:var(--text)}
+    a.back{display:inline-block;margin-bottom:16px;color:var(--blue);font-size:13px;font-weight:600;text-decoration:none}
+    .phone{max-width:390px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(60,64,67,.18);border:1px solid var(--line)}
+    .tabs{display:flex;border-bottom:1px solid var(--line)} .tabs span{flex:1;text-align:center;padding:14px;font-size:15px;font-weight:600;color:var(--muted)} .tabs span.on{color:var(--blue);border-bottom:2px solid var(--blue)}
+    .body{padding:16px;background:var(--bg);min-height:560px}
+    .meta{font-size:14px;color:var(--muted);margin-bottom:14px}
+    .stats{display:flex;gap:8px;margin-bottom:16px}
+    .stat{flex:1;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+    .stat.hi{background:#e8f0fe;border-color:#c2d7f7} .stat strong{display:block;font-size:18px;font-weight:700} .stat.hi strong{color:var(--blue)}
+    .stat span{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted)}
+    .row-h{display:flex;justify-content:space-between;margin-bottom:10px;font-size:14px;font-weight:600}
+    .row-h a{color:var(--blue);text-decoration:none}
+    .day{border-radius:16px;margin-bottom:10px;padding:6px}
+    .day-inner{display:grid;grid-template-columns:52px 1fr;gap:6px;align-items:stretch}
+    .num{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;color:#0d3b7a;font-weight:800}
+    .num b{font-size:26px;line-height:1}
+    .num small{font-size:9px;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;opacity:.85}
+    .card{background:var(--black);border-radius:12px;padding:12px 14px;color:#f1f3f4;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+    .card h3{font-size:14px;font-weight:700;color:#fff}
+    .card .sub{font-size:12px;color:#9aa0a6;margin:3px 0 10px}
+    .card .badge{display:inline-block;font-size:10px;font-weight:700;color:#8ab4f8;margin-left:6px}
+    .ev{display:flex;gap:8px;font-size:13px;padding:7px 0;border-top:1px solid #2d3136}
+    .ev:first-of-type{border:0;padding-top:0}
+    .dot{width:6px;height:6px;border-radius:50%;margin-top:6px;flex-shrink:0}
+    .t{width:38px;font-size:12px;color:#9aa0a6;font-variant-numeric:tabular-nums}
+    .more{font-size:12px;font-weight:600;color:#8ab4f8;margin-top:6px}
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← Round 2 mockups</a>
+  <div class="phone">
+    <div class="tabs"><span class="on">Story</span><span>Schedule</span></div>
+    <div class="body">
+      <p class="meta">Aug 29 – Sep 7 · 21 days until you go</p>
+      <div class="stats">
+        <div class="stat hi"><strong>21</strong><span>Until trip</span></div>
+        <div class="stat"><strong>10</strong><span>Trip days</span></div>
+        <div class="stat"><strong>54</strong><span>Events</span></div>
+      </div>
+      <div class="row-h"><span>Upcoming days</span><a href="#">Full schedule</a></div>
+
+      <div class="day" style="background:#9fc3f5">
+        <div class="day-inner">
+          <div class="num"><b>29</b><small>Aug</small></div>
+          <div class="card">
+            <h3>Saturday<span class="badge">in 21d</span></h3>
+            <div class="sub">Orlando · Departure</div>
+            <div class="ev"><span class="dot" style="background:#8ab4f8"></span><span class="t">08:25</span>Flight CGH → CNF</div>
+            <div class="ev"><span class="dot" style="background:#669df6"></span><span class="t">14:00</span>Hotel check-in</div>
+            <div class="ev"><span class="dot" style="background:#81c995"></span><span class="t">19:00</span>Dinner at hotel</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="day" style="background:#b4d0f8">
+        <div class="day-inner">
+          <div class="num"><b>30</b><small>Aug</small></div>
+          <div class="card">
+            <h3>Sunday</h3>
+            <div class="sub">Orlando · Explore</div>
+            <div class="ev"><span class="dot" style="background:#81c995"></span><span class="t">07:30</span>Breakfast at hotel</div>
+            <div class="ev"><span class="dot" style="background:#c58af9"></span><span class="t">09:30</span>Target & Best Buy</div>
+            <div class="more">+4 more</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="day" style="background:#c2dafb">
+        <div class="day-inner">
+          <div class="num"><b>31</b><small>Aug</small></div>
+          <div class="card">
+            <h3>Monday</h3>
+            <div class="sub">Magic Kingdom day</div>
+            <div class="ev"><span class="dot" style="background:#f9ab00"></span><span class="t">08:00</span>Magic Kingdom</div>
+            <div class="ev"><span class="dot" style="background:#81c995"></span><span class="t">13:00</span>Lunch — park</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="day" style="background:#d0e3fc">
+        <div class="day-inner">
+          <div class="num"><b>1</b><small>Sep</small></div>
+          <div class="card">
+            <h3>Tuesday</h3>
+            <div class="sub">On trip</div>
+            <div class="ev"><span class="dot" style="background:#f9ab00"></span><span class="t">08:30</span>EPCOT</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="day" style="background:#dce9fd">
+        <div class="day-inner">
+          <div class="num"><b>2</b><small>Sep</small></div>
+          <div class="card">
+            <h3>Wednesday</h3>
+            <div class="sub">Miami · Travel</div>
+            <div class="ev"><span class="dot" style="background:#8ab4f8"></span><span class="t">10:15</span>Drive to Miami</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
