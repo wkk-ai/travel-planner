@@ -2,12 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   Camera,
   Check,
+  FileDown,
   FileText,
   ListTodo,
   Plus,
   Settings,
   Share2,
   Shield,
+  Sparkles,
   Trash2,
   Wallet,
   X,
@@ -87,6 +89,12 @@ function PlanHubPanel() {
     { id: 'notes' as const, label: 'Notes', icon: FileText, desc: 'Trip journal' },
     { id: 'budget' as const, label: 'Budget', icon: Wallet, desc: 'Spending tracker' },
     { id: 'emergency' as const, label: 'Emergency', icon: Shield, desc: 'Contacts & hotel' },
+    ...(mode === 'edit'
+      ? [
+          { id: 'import' as const, label: 'Import confirmation', icon: FileDown, desc: 'Paste booking email' },
+          { id: 'whatif' as const, label: 'What-if copy', icon: Sparkles, desc: 'Sandbox duplicate trip' },
+        ]
+      : []),
     { id: 'share' as const, label: 'Share', icon: Share2, desc: 'Edit & view links' },
     { id: 'recap' as const, label: 'Trip recap', icon: Camera, desc: 'Photos & highlights' },
     { id: 'settings' as const, label: 'Trip settings', icon: Settings, desc: 'Dates & name' },

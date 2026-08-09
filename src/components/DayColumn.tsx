@@ -1,5 +1,5 @@
 import { useDroppable } from '@dnd-kit/core'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { isToday, parseISO } from 'date-fns'
 import { useTripStore } from '../store/tripStore'
 import type { TripEvent } from '../types'
@@ -13,6 +13,7 @@ import {
   eventHeightPx,
   eventTopPx,
   isEventPast,
+  layoutDayEvents,
   minutesToTime,
   snapMinutes,
 } from '../lib/time'
@@ -67,6 +68,7 @@ export function DayColumn({
 
   const hours = Array.from({ length: GRID_END - GRID_START }, (_, i) => GRID_START + i)
   const today = isToday(parseISO(date))
+  const eventLayout = useMemo(() => layoutDayEvents(events), [events])
 
   const setDraftBoth = (d: DraftRange | null) => {
     draftRef.current = d
@@ -168,11 +170,16 @@ export function DayColumn({
           style={{
             top: eventTopPx(pendingDraft.startTime),
             height: eventHeightPx(pendingDraft.startTime, pendingDraft.endTime),
+            left: '2px',
+            width: 'calc(100% - 4px)',
           }}
         />
       ) : null}
       {events.map((ev) => {
         const warn = warnings.find((w) => w.eventId === ev.id)?.message
+        const slot = eventLayout.get(ev.id) ?? { column: 0, columnCount: 1 }
+        const widthPct = 100 / slot.columnCount
+        const leftPct = slot.column * widthPct
         return (
           <EventChip
             key={ev.id}
@@ -185,6 +192,8 @@ export function DayColumn({
             style={{
               top: eventTopPx(ev.startTime),
               height: eventHeightPx(ev.startTime, ev.endTime),
+              left: `calc(${leftPct}% + 2px)`,
+              width: `calc(${widthPct}% - 4px)`,
             }}
           />
         )

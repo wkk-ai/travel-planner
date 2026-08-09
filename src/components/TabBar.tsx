@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { format, isToday } from 'date-fns'
+import { format, isToday, parseISO } from 'date-fns'
 import { CalendarDays, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react'
 import { CATEGORIES } from '../data/categories'
 import { cn, isoDate, tripDaysIncludingEvents } from '../lib/time'
@@ -173,7 +173,9 @@ export function TabBar() {
             </div>
           </>
         ) : (
-          <div className="min-h-8 flex-1" aria-hidden />
+          <p className="ml-auto hidden truncate text-ui-sm text-[var(--gcal-muted)] sm:block">
+            {format(parseISO(trip.startDate), 'MMM d')} – {format(parseISO(trip.endDate), 'MMM d, yyyy')}
+          </p>
         )}
       </div>
 

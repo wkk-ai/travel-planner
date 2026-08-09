@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { differenceInCalendarDays, format, parseISO } from 'date-fns'
-import { Calendar, Plus } from 'lucide-react'
+import { Calendar, ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import { CATEGORIES } from '../data/categories'
 import {
   cn,
@@ -42,6 +43,133 @@ function formatEventTime(ev: TripEvent): string {
   return ev.startTime
 }
 
+function StoryDayCard({
+  date,
+  proximityIndex,
+  allDays,
+  totalDays,
+  today,
+  countdown,
+  dayEvents,
+  onOpenDay,
+  onSelectEvent,
+  muted,
+}: {
+  date: string
+  proximityIndex: number
+  allDays: Date[]
+  totalDays: number
+  today: string
+  countdown: number
+  dayEvents: TripEvent[]
+  onOpenDay: (date: string) => void
+  onSelectEvent: (id: string) => void
+  muted?: boolean
+}) {
+  const d = parseISO(date)
+  const dayNumber = allDays.findIndex((x) => isoDate(x) === date) + 1
+  const place = dayPlace(dayEvents)
+  const vibe = dayVibe(dayEvents, dayNumber - 1, totalDays)
+  const highlights = [...dayEvents].sort((a, b) => a.startTime.localeCompare(b.startTime)).slice(0, 3)
+  const isToday = date === today
+  const meta = [place, vibe].filter(Boolean).join(' · ')
+  const { stripe, numColumn } = storyStripeGiantStyle(proximityIndex)
+  const daysUntilDay = differenceInCalendarDays(parseISO(date), parseISO(today))
+
+  return (
+    <li>
+      <article
+        className={cn(
+          'flex overflow-hidden rounded-[14px] border border-[var(--gcal-border)] bg-white shadow-sm transition-shadow hover:shadow-md',
+          isToday && 'ring-2 ring-[var(--gcal-blue)]/25',
+          muted && 'opacity-90',
+        )}
+      >
+        <div className="w-1.5 shrink-0" style={{ background: stripe }} aria-hidden />
+        <div
+          className="flex w-[54px] shrink-0 flex-col items-center border-r border-[#f1f3f4] px-1.5 py-3.5"
+          style={{ background: numColumn }}
+        >
+          <span className="text-[26px] font-extrabold leading-none text-[#0d47a1]">{format(d, 'd')}</span>
+          <span className="mt-1 text-[9px] font-bold uppercase tracking-wide text-[var(--gcal-blue)]">
+            {format(d, 'MMM')}
+          </span>
+        </div>
+        <div className="min-w-0 flex-1 px-3.5 py-3">
+          <button type="button" onClick={() => onOpenDay(date)} className="w-full text-left">
+            <h4 className="text-ui-base font-bold text-[var(--gcal-text)]">
+              {format(d, 'EEEE')}
+              {isToday ? (
+                <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">· Today</span>
+              ) : daysUntilDay === 1 ? (
+                <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">· Tomorrow</span>
+              ) : countdown > 0 && daysUntilDay > 0 ? (
+                <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">
+                  · in {daysUntilDay}d
+                </span>
+              ) : muted && daysUntilDay < 0 ? (
+                <span className="ml-1.5 text-[11px] font-medium text-[var(--gcal-muted)]">
+                  · {Math.abs(daysUntilDay)}d ago
+                </span>
+              ) : null}
+            </h4>
+            {meta ? <p className="mt-0.5 text-ui-sm text-[var(--gcal-muted)]">{meta}</p> : null}
+          </button>
+          {highlights.length > 0 ? (
+            <ul className="mt-2.5">
+              {highlights.map((ev, i) => {
+                const cat = CATEGORIES[ev.category]
+                const backups = backupCount(ev)
+                return (
+                  <li key={ev.id}>
+                    <button
+                      type="button"
+                      onClick={() => onSelectEvent(ev.id)}
+                      className={cn(
+                        'flex w-full items-start gap-2 py-1.5 text-left',
+                        i > 0 && 'border-t border-[#f1f3f4]',
+                        isEventPast(ev) && 'opacity-75',
+                      )}
+                    >
+                      <span
+                        className="mt-1.5 size-[7px] shrink-0 rounded-full"
+                        style={{ background: cat.border }}
+                        aria-hidden
+                      />
+                      <span className="w-11 shrink-0 tabular-nums text-ui-sm text-[var(--gcal-muted)]">
+                        {formatEventTime(ev)}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-ui-base font-medium leading-snug">{ev.title}</span>
+                        {backups > 0 ? (
+                          <span className="text-ui-xs text-[var(--gcal-muted)]">
+                            or {backups} other plan{backups > 1 ? 's' : ''}
+                          </span>
+                        ) : null}
+                      </span>
+                    </button>
+                  </li>
+                )
+              })}
+              {dayEvents.length > 3 ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenDay(date)}
+                  className="mt-1.5 text-ui-sm font-semibold text-[var(--gcal-blue)]"
+                >
+                  +{dayEvents.length - 3} more
+                </button>
+              ) : null}
+            </ul>
+          ) : (
+            <p className="mt-2 text-ui-sm text-[var(--gcal-muted)]">Nothing planned</p>
+          )}
+        </div>
+      </article>
+    </li>
+  )
+}
+
 export function StoryTab() {
   const trip = useTripStore((s) => s.trip)!
   const events = useTripStore((s) => s.events)
@@ -55,6 +183,7 @@ export function StoryTab() {
   const setSearchQuery = useTripStore((s) => s.setSearchQuery)
   const categoryFilter = useTripStore((s) => s.categoryFilter)
   const setCategoryFilter = useTripStore((s) => s.setCategoryFilter)
+  const [showPast, setShowPast] = useState(false)
 
   const today = isoDate(new Date())
   const calendar = tripCalendarBounds(trip.startDate, trip.endDate, events)
@@ -105,6 +234,13 @@ export function StoryTab() {
     .sort()
 
   const proximity = new Map(upcomingDays.map((d, i) => [d, i]))
+  const onTrip = countdown <= 0 && !tripEnded
+  const pastDays = allDays
+    .map((d) => isoDate(d))
+    .filter((date) => date < today)
+    .filter((date) => !filterActive || eventsForDay(date).length > 0)
+    .sort()
+    .reverse()
 
   const stats =
     countdown > 0
@@ -217,127 +353,54 @@ export function StoryTab() {
         </div>
       ) : (
         <ul className="flex flex-col gap-2.5">
-          {upcomingDays.map((date) => {
-            const d = parseISO(date)
-            const dayEvents = eventsForDay(date)
-            const dayNumber = allDays.findIndex((x) => isoDate(x) === date) + 1
-            const place = dayPlace(dayEvents)
-            const vibe = dayVibe(dayEvents, dayNumber - 1, totalDays)
-            const highlights = [...dayEvents]
-              .sort((a, b) => a.startTime.localeCompare(b.startTime))
-              .slice(0, 3)
-            const isToday = date === today
-            const meta = [place, vibe].filter(Boolean).join(' · ')
-            const { stripe, numColumn } = storyStripeGiantStyle(proximity.get(date) ?? 0)
-            const daysUntilDay = differenceInCalendarDays(parseISO(date), parseISO(today))
-
-            return (
-              <li key={date}>
-                <article
-                  className={cn(
-                    'flex overflow-hidden rounded-[14px] border border-[var(--gcal-border)] bg-white shadow-sm transition-shadow hover:shadow-md',
-                    isToday && 'ring-2 ring-[var(--gcal-blue)]/25',
-                  )}
-                >
-                  <div className="w-1.5 shrink-0" style={{ background: stripe }} aria-hidden />
-
-                  <div
-                    className="flex w-[54px] shrink-0 flex-col items-center border-r border-[#f1f3f4] px-1.5 py-3.5"
-                    style={{ background: numColumn }}
-                  >
-                    <span className="text-[26px] font-extrabold leading-none text-[#0d47a1]">
-                      {format(d, 'd')}
-                    </span>
-                    <span className="mt-1 text-[9px] font-bold uppercase tracking-wide text-[var(--gcal-blue)]">
-                      {format(d, 'MMM')}
-                    </span>
-                  </div>
-
-                  <div className="min-w-0 flex-1 px-3.5 py-3">
-                    <button
-                      type="button"
-                      onClick={() => openDayOnSchedule(date)}
-                      className="w-full text-left"
-                    >
-                      <h4 className="text-ui-base font-bold text-[var(--gcal-text)]">
-                        {format(d, 'EEEE')}
-                        {isToday ? (
-                          <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">
-                            · Today
-                          </span>
-                        ) : daysUntilDay === 1 ? (
-                          <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">
-                            · Tomorrow
-                          </span>
-                        ) : countdown > 0 && daysUntilDay > 0 ? (
-                          <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">
-                            · in {daysUntilDay}d
-                          </span>
-                        ) : null}
-                      </h4>
-                      {meta ? (
-                        <p className="mt-0.5 text-ui-sm text-[var(--gcal-muted)]">{meta}</p>
-                      ) : null}
-                    </button>
-
-                    {highlights.length > 0 ? (
-                      <ul className="mt-2.5">
-                        {highlights.map((ev, i) => {
-                          const cat = CATEGORIES[ev.category]
-                          const backups = backupCount(ev)
-                          return (
-                            <li key={ev.id}>
-                              <button
-                                type="button"
-                                onClick={() => selectEvent(ev.id)}
-                                className={cn(
-                                  'flex w-full items-start gap-2 py-1.5 text-left',
-                                  i > 0 && 'border-t border-[#f1f3f4]',
-                                  isEventPast(ev) && 'opacity-75',
-                                )}
-                              >
-                                <span
-                                  className="mt-1.5 size-[7px] shrink-0 rounded-full"
-                                  style={{ background: cat.border }}
-                                  aria-hidden
-                                />
-                                <span className="w-11 shrink-0 tabular-nums text-ui-sm text-[var(--gcal-muted)]">
-                                  {formatEventTime(ev)}
-                                </span>
-                                <span className="min-w-0 flex-1">
-                                  <span className="block text-ui-base font-medium leading-snug">
-                                    {ev.title}
-                                  </span>
-                                  {backups > 0 ? (
-                                    <span className="text-ui-xs text-[var(--gcal-muted)]">
-                                      or {backups} other plan{backups > 1 ? 's' : ''}
-                                    </span>
-                                  ) : null}
-                                </span>
-                              </button>
-                            </li>
-                          )
-                        })}
-                        {dayEvents.length > 3 ? (
-                          <button
-                            type="button"
-                            onClick={() => openDayOnSchedule(date)}
-                            className="mt-1.5 text-ui-sm font-semibold text-[var(--gcal-blue)]"
-                          >
-                            +{dayEvents.length - 3} more
-                          </button>
-                        ) : null}
-                      </ul>
-                    ) : (
-                      <p className="mt-2 text-ui-sm text-[var(--gcal-muted)]">Nothing planned</p>
-                    )}
-                  </div>
-                </article>
-              </li>
-            )
-          })}
+          {upcomingDays.map((date) => (
+            <StoryDayCard
+              key={date}
+              date={date}
+              proximityIndex={proximity.get(date) ?? 0}
+              allDays={allDays}
+              totalDays={totalDays}
+              today={today}
+              countdown={countdown}
+              dayEvents={eventsForDay(date)}
+              onOpenDay={openDayOnSchedule}
+              onSelectEvent={selectEvent}
+            />
+          ))}
         </ul>
       )}
+
+      {onTrip && pastDays.length > 0 ? (
+        <div className="mt-6">
+          <button
+            type="button"
+            onClick={() => setShowPast(!showPast)}
+            className="mb-2.5 flex w-full items-center justify-between text-ui-sm font-semibold text-[var(--gcal-text)]"
+          >
+            <span>Earlier ({pastDays.length} day{pastDays.length === 1 ? '' : 's'})</span>
+            {showPast ? <ChevronUp className="size-4 text-[var(--gcal-muted)]" /> : <ChevronDown className="size-4 text-[var(--gcal-muted)]" />}
+          </button>
+          {showPast ? (
+            <ul className="flex flex-col gap-2.5">
+              {pastDays.map((date, i) => (
+                <StoryDayCard
+                  key={date}
+                  date={date}
+                  proximityIndex={Math.min(i + upcomingDays.length, 7)}
+                  allDays={allDays}
+                  totalDays={totalDays}
+                  today={today}
+                  countdown={countdown}
+                  dayEvents={eventsForDay(date)}
+                  onOpenDay={openDayOnSchedule}
+                  onSelectEvent={selectEvent}
+                  muted
+                />
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      ) : null}
 
       {mode === 'edit' && events.length === 0 ? (
         <button

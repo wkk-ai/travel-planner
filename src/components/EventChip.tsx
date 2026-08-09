@@ -136,7 +136,7 @@ export function EventChip({
       onPointerCancel={onPressEnd}
       onPointerLeave={onPressEnd}
       className={cn(
-        'event-block absolute inset-x-0.5 overflow-hidden rounded-md text-left leading-tight border-l-[3px]',
+        'event-block absolute overflow-hidden rounded-md text-left leading-tight border-l-[3px]',
         backupN > 0 && 'pr-5',
         density === 'xs' ? 'px-1 py-0' : 'px-1.5 py-0.5',
         isDragging && 'opacity-50',

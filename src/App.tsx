@@ -23,7 +23,7 @@ import { EventChip } from './components/EventChip'
 import { Toast } from './components/Toast'
 import { useIsMobile } from './lib/useMedia'
 import { Plus } from 'lucide-react'
-import { minutesToTime, snapMinutes, timeToMinutes, travelBufferWarnings, SLOT_MINUTES } from './lib/time'
+import { minutesToTime, snapMinutes, timeToMinutes, travelBufferWarnings, SLOT_MINUTES, cn } from './lib/time'
 import { parseSlotId } from './components/DayColumn'
 import type { TripEvent } from './types'
 
@@ -61,6 +61,10 @@ export default function App() {
     if (!trip || !isMobile) return
     setView('day')
   }, [trip?.id, isMobile, setView])
+
+  useEffect(() => {
+    if (isMobile && view === 'week') setView('day')
+  }, [isMobile, view, setView])
 
   useEffect(() => {
     if (!toast) return
@@ -170,12 +174,18 @@ export default function App() {
           />
         ) : null}
         {activeTab === 'story' ? (
-          <div className="cal-scroll min-h-0 min-w-0 flex-1 overflow-auto bg-[var(--gcal-bg)]">
+          <div className={cn(
+            'cal-scroll min-h-0 min-w-0 flex-1 overflow-auto bg-[var(--gcal-bg)]',
+            mode === 'view' && 'pb-16',
+          )}>
             <StoryTab />
           </div>
         ) : (
         <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-          <div ref={exportRef} className="print-area cal-scroll min-h-0 min-w-0 flex-1 overflow-auto bg-white/80 backdrop-blur-[2px]">
+          <div ref={exportRef} className={cn(
+            'print-area cal-scroll min-h-0 min-w-0 flex-1 overflow-auto bg-white/80 backdrop-blur-[2px]',
+            mode === 'view' && 'pb-16',
+          )}>
             {view === 'week' ? (
               <WeekGrid
                 events={filtered}

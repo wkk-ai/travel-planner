@@ -104,6 +104,64 @@ export function eventsOverlap(a: TripEvent, b: TripEvent): boolean {
   return as < be && bs < ae
 }
 
+export function eventEndMinutes(ev: TripEvent): number {
+  const start = timeToMinutes(ev.startTime)
+  let end = timeToMinutes(ev.endTime)
+  if (end <= start) end += 24 * 60
+  return end
+}
+
+export type EventLayoutSlot = { column: number; columnCount: number }
+
+/** Side-by-side columns for overlapping events on the same day. */
+export function layoutDayEvents(events: TripEvent[]): Map<string, EventLayoutSlot> {
+  const sorted = [...events].sort((a, b) => {
+    const d = timeToMinutes(a.startTime) - timeToMinutes(b.startTime)
+    if (d !== 0) return d
+    return eventEndMinutes(b) - eventEndMinutes(a)
+  })
+  const layout = new Map<string, EventLayoutSlot>()
+  if (!sorted.length) return layout
+
+  const columnEnds: number[] = []
+  const colById = new Map<string, number>()
+
+  for (const ev of sorted) {
+    const start = timeToMinutes(ev.startTime)
+    const end = eventEndMinutes(ev)
+    let col = columnEnds.findIndex((e) => e <= start)
+    if (col === -1) {
+      col = columnEnds.length
+      columnEnds.push(end)
+    } else {
+      columnEnds[col] = end
+    }
+    colById.set(ev.id, col)
+  }
+
+  const visited = new Set<string>()
+  for (const ev of sorted) {
+    if (visited.has(ev.id)) continue
+    const cluster: TripEvent[] = []
+    const stack = [ev]
+    while (stack.length) {
+      const cur = stack.pop()!
+      if (visited.has(cur.id)) continue
+      visited.add(cur.id)
+      cluster.push(cur)
+      for (const other of sorted) {
+        if (!visited.has(other.id) && eventsOverlap(cur, other)) stack.push(other)
+      }
+    }
+    const columnCount = Math.max(...cluster.map((e) => colById.get(e.id)!)) + 1
+    for (const e of cluster) {
+      layout.set(e.id, { column: colById.get(e.id)!, columnCount })
+    }
+  }
+
+  return layout
+}
+
 export function gapMinutes(earlier: TripEvent, later: TripEvent): number | null {
   if (earlier.date !== later.date) return null
   const end = timeToMinutes(earlier.endTime)

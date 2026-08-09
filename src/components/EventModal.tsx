@@ -24,6 +24,7 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
 
   const [draft, setDraft] = useState(event)
   const [saving, setSaving] = useState(false)
+  const [confirmDiscard, setConfirmDiscard] = useState(false)
   const times = useMemo(() => timeOptions30(), [])
 
   const dirty = useMemo(
@@ -43,7 +44,16 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
   }, [isDraft])
 
   function handleClose() {
-    if (!isDraft && dirty && !window.confirm('Discard unsaved changes?')) return
+    if (!isDraft && dirty) {
+      setConfirmDiscard(true)
+      return
+    }
+    if (isDraft) discardDraft()
+    onClose()
+  }
+
+  function confirmAndClose() {
+    setConfirmDiscard(false)
     if (isDraft) discardDraft()
     onClose()
   }
@@ -374,6 +384,28 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
             />
           ) : null}
         </div>
+
+        {confirmDiscard ? (
+          <div className="border-t border-[#fce8e6] bg-[#fef7f0] px-4 py-3">
+            <p className="text-ui-sm font-medium text-[var(--gcal-text)]">Discard unsaved changes?</p>
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmDiscard(false)}
+                className="rounded-lg px-3 py-1.5 text-ui-sm font-semibold hover:bg-white/80"
+              >
+                Keep editing
+              </button>
+              <button
+                type="button"
+                onClick={confirmAndClose}
+                className="rounded-lg bg-[#c5221f] px-3 py-1.5 text-ui-sm font-semibold text-white"
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         <div
           className={cn(
