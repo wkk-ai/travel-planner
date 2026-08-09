@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>02 · Soft sections</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .top {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+    }
+    .top .x { position: absolute; right: 12px; top: 12px; border: none; background: var(--bg); width: 32px; height: 32px; border-radius: 8px; font-size: 18px; }
+    .top h1 { font-size: 20px; font-weight: 700; padding-right: 36px; }
+    .top p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .body { padding: 12px 14px 14px; background: var(--bg); }
+    .seg {
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      border: 1px solid var(--line);
+    }
+    .seg-h {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .seg-h em {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--blue);
+      background: #e8f0fe;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-style: normal;
+    }
+    .more { color: var(--muted); font-size: 12px; text-align: center; padding: 8px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← Event modal mockups</a>
+  <p class="label">02 · Soft sections</p>
+  <div class="scene">
+    <div class="dim" style="align-items:center;padding:14px 10px">
+      <div class="modal">
+        <div class="top">
+          <button class="x">×</button>
+          <h1>Dinner at hotel</h1>
+          <p>Saturday, Aug 8 · 22:30–23:00</p>
+        </div>
+        <div class="scroll body">
+          <div class="seg">
+            <div class="seg-h">When <em>30 min</em></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <input class="field" type="date" value="2026-08-08" />
+              <input class="field" value="22:30" />
+              <input class="field" value="23:00" />
+            </div>
+          </div>
+          <div class="seg">
+            <div class="seg-h">Category</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <span class="pill meal on">Meal</span>
+              <span class="pill flight">Flight</span>
+              <span class="pill attr">Attraction</span>
+              <span class="pill other">Show</span>
+              <span class="pill other">Hotel</span>
+            </div>
+          </div>
+          <div class="seg">
+            <div class="seg-h">Where</div>
+            <input class="field" value="Hotel lobby" />
+            <input class="field" placeholder="Google Maps link" style="margin-top:8px" />
+          </div>
+          <div class="more">▼ More — notes, photo, budget, backups</div>
+        </div>
+        <div class="footer">
+          <button class="btn btn-danger">Delete</button>
+          <button class="btn btn-primary" style="flex:1;max-width:140px;margin-left:auto">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

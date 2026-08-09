@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Event modal — mockups</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --ink: #3c4043; --muted: #70757a; --line: #dadce0; --bg: #f8f9fa; --blue: #1a73e8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Plus Jakarta Sans", system-ui, sans-serif; color: var(--ink); background: var(--bg); min-height: 100vh; }
+    main { max-width: 720px; margin: 0 auto; padding: 40px 20px 64px; }
+    h1 { font-size: 1.75rem; font-weight: 700; margin: 0 0 8px; }
+    .lede { color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+    .note { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    a.back { color: var(--blue); font-size: 14px; font-weight: 600; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+    .grid { display: grid; gap: 12px; }
+    a.card {
+      display: grid; grid-template-columns: 88px 1fr; gap: 14px; align-items: center;
+      padding: 14px 16px; background: #fff; border: 1px solid var(--line); border-radius: 14px;
+      text-decoration: none; color: inherit; transition: box-shadow .15s;
+    }
+    a.card:hover { box-shadow: 0 8px 24px rgba(60,64,67,.1); }
+    .thumb { height: 76px; border-radius: 10px; border: 1px solid var(--line); overflow: hidden; background: #e8eaed; position: relative; }
+    h2 { margin: 0 0 4px; font-size: 1rem; font-weight: 700; }
+    p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.4; }
+    .t1 { display: flex; height: 100%; }
+    .t1 i { width: 6px; background: #9fc3f5; }
+    .t1 b { width: 22px; background: #e8f4ff; font-size: 10px; display: grid; place-items: center; color: #0d47a1; font-weight: 800; }
+    .t1 span { flex: 1; background: #fff; margin: 6px; border-radius: 4px; }
+    .t2 .box { margin: 6px; height: calc(100% - 12px); border-radius: 6px; background: #fff; border: 1px solid var(--line); padding: 5px; }
+    .t2 .box i { display: block; height: 7px; background: #f1f3f4; border-radius: 2px; margin-bottom: 3px; }
+    .t3 { padding: 8px; }
+    .t3 i { display: block; height: 10px; background: #e8f0fe; border-radius: 4px; margin-bottom: 4px; }
+    .t4 { display: flex; flex-direction: column; gap: 3px; padding: 8px; }
+    .t4 i { height: 8px; background: #fff; border-radius: 2px; border: 1px solid var(--line); }
+    .t5 { padding: 6px; }
+    .t5 i { display: flex; gap: 3px; margin-bottom: 4px; }
+    .t5 i b { flex: 1; height: 12px; background: #e8f0fe; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="../index.html">← All mockups</a>
+    <h1>Event modal — round 1</h1>
+    <p class="lede">Five layouts inspired by the Story tab: stripe cards, soft sections, clear hierarchy.</p>
+    <p class="note">Phone width (~390px). Pick a number — we build it in the app.</p>
+    <div class="grid">
+      <a class="card" href="01-story-card.html"><div class="thumb t1"><i></i><b>8</b><span></span></div><div><h2>01 · Story card</h2><p>Modal = expanded day card. Stripe + date column + form.</p></div></a>
+      <a class="card" href="02-sections.html"><div class="thumb t2"><div class="box"><i style="width:40%"></i><i></i><i style="width:70%"></i></div></div><div><h2>02 · Soft sections</h2><p>When · Category · Where · More in grey blocks.</p></div></a>
+      <a class="card" href="03-preview.html"><div class="thumb t3"><i></i><i style="width:80%;background:#fff;border:1px solid #dadce0"></i></div><div><h2>03 · Live preview</h2><p>Story row preview on top. Form below matches list style.</p></div></a>
+      <a class="card" href="04-minimal.html"><div class="thumb t4"><i></i><i style="width:85%"></i><i style="width:60%"></i></div><div><h2>04 · Minimal rows</h2><p>No loud labels. Each field = clean row like an event line.</p></div></a>
+      <a class="card" href="05-stats-sheet.html"><div class="thumb t5"><i><b></b><b></b><b style="background:#f1f3f4"></b></i><i style="display:block;height:40px;background:#fff;border:1px solid #dadce0;border-radius:4px"></i></div><div><h2>05 · Stats sheet</h2><p>Story stat pills (time · category · budget). Sheet from bottom.</p></div></a>
+    </div>
+  </main>
+</body>
+</html>

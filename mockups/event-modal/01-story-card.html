@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>01 · Story card</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .modal { max-height: none; }
+    .card-head {
+      display: flex;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .stripe { width: 6px; background: #9fc3f5; flex-shrink: 0; }
+    .num {
+      width: 54px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px 6px;
+      background: #e8f4ff;
+      border-right: 1px solid var(--line-soft);
+    }
+    .num b { font-size: 26px; font-weight: 800; line-height: 1; color: #0d47a1; }
+    .num small { font-size: 9px; font-weight: 700; color: var(--blue); margin-top: 3px; }
+    .head-main { flex: 1; padding: 12px 14px 10px; position: relative; }
+    .head-main .x {
+      position: absolute; right: 10px; top: 8px;
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      background: var(--bg); font-size: 16px; color: var(--muted);
+    }
+    .head-main h2 { font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.04em; }
+    .head-main input {
+      width: 100%; border: none; font-size: 18px; font-weight: 700;
+      font-family: inherit; margin-top: 4px; outline: none;
+    }
+    .head-main p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .body { padding: 14px; background: var(--bg); }
+    .block {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    .cats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .row3 { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← Event modal mockups</a>
+  <p class="label">01 · Story card</p>
+  <div class="scene">
+    <div class="dim" style="align-items:center;padding:16px 10px">
+      <div class="modal">
+        <div class="card-head">
+          <div class="stripe"></div>
+          <div class="num"><b>8</b><small>AUG</small></div>
+          <div class="head-main">
+            <button class="x">×</button>
+            <h2>Edit event · Saturday</h2>
+            <input value="Dinner at hotel" />
+            <p>22:30 – 23:00 · On trip</p>
+          </div>
+        </div>
+        <div class="scroll body">
+          <div class="block">
+            <div class="sec-label">Category</div>
+            <div class="cats">
+              <span class="pill meal on">Meal</span>
+              <span class="pill flight">Flight</span>
+              <span class="pill attr">Attraction</span>
+              <span class="pill other">Other</span>
+            </div>
+          </div>
+          <div class="block">
+            <div class="sec-label">When</div>
+            <div class="row3">
+              <input class="field" type="date" value="2026-08-08" />
+              <input class="field" value="22:30" />
+              <input class="field" value="23:00" />
+            </div>
+          </div>
+          <div class="block">
+            <div class="sec-label">Where</div>
+            <input class="field" placeholder="Place name" value="Hotel lobby" style="margin-top:6px" />
+            <input class="field" placeholder="Maps link" style="margin-top:8px" />
+          </div>
+          <div class="block">
+            <div class="sec-label">Notes & budget</div>
+            <textarea class="field" rows="2" placeholder="Extra details…" style="margin-top:6px;resize:none"></textarea>
+            <input class="field" value="0" style="margin-top:8px" />
+          </div>
+          <div class="block backup-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <strong style="font-size:11px;color:var(--muted)">BACKUP PLANS</strong>
+              <span style="font-size:12px;font-weight:600;color:var(--blue)">+ Add</span>
+            </div>
+            No backups yet — rain-day alternative
+          </div>
+        </div>
+        <div class="footer">
+          <button class="btn btn-danger">Delete</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost">Close</button>
+            <button class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

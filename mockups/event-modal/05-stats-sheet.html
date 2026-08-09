@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>05 · Stats sheet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .sheet { border-radius: 20px 20px 0 0; }
+    .grab { width: 36px; height: 4px; background: #dadce0; border-radius: 99px; margin: 10px auto 0; }
+    .sheet-h { padding: 12px 16px 8px; display: flex; align-items: flex-start; justify-content: space-between; }
+    .sheet-h h1 { font-size: 18px; font-weight: 700; }
+    .sheet-h p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .sheet-h .x { border: none; background: var(--bg); width: 32px; height: 32px; border-radius: 8px; font-size: 18px; }
+    .sheet-body { padding: 0 16px 16px; background: var(--bg); }
+    .inner { background: #fff; border-radius: 14px; border: 1px solid var(--line); padding: 14px; }
+    .field-row { margin-bottom: 12px; }
+    .field-row label { font-size: 11px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 5px; }
+    .inline2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← Event modal mockups</a>
+  <p class="label">05 · Stats sheet</p>
+  <div class="scene">
+    <div class="dim" style="align-items:flex-end;padding:0;min-height:680px">
+      <div class="modal sheet">
+        <div class="grab"></div>
+        <div class="sheet-h">
+          <div>
+            <h1>New event</h1>
+            <p>Saturday, Aug 8</p>
+          </div>
+          <button class="x">×</button>
+        </div>
+        <div class="scroll sheet-body">
+          <input class="field" value="Dinner at hotel" style="margin-bottom:12px;font-size:16px;font-weight:600;border:none;background:#fff" />
+          <div class="stat-row">
+            <div class="stat hi"><strong>22:30</strong><span>Start</span></div>
+            <div class="stat"><strong>Meal</strong><span>Category</span></div>
+            <div class="stat"><strong>$0</strong><span>Budget</span></div>
+          </div>
+          <div class="inner">
+            <div class="field-row">
+              <label>Time</label>
+              <div class="inline2">
+                <input class="field" value="22:30" />
+                <input class="field" value="23:00" />
+              </div>
+            </div>
+            <div class="field-row">
+              <label>Category</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <span class="pill meal on">Meal</span>
+                <span class="pill flight">Flight</span>
+                <span class="pill attr">Attraction</span>
+              </div>
+            </div>
+            <div class="field-row">
+              <label>Location</label>
+              <input class="field" placeholder="Place name" />
+            </div>
+            <div class="field-row" style="margin-bottom:0">
+              <label>Notes</label>
+              <textarea class="field" rows="2" style="resize:none" placeholder="Optional"></textarea>
+            </div>
+          </div>
+          <div class="backup-box" style="margin-top:10px">
+            <strong style="font-size:11px;color:var(--muted)">BACKUP PLANS</strong>
+            <p style="margin-top:6px">Same slot · swap if plans change</p>
+          </div>
+        </div>
+        <div class="footer" style="justify-content:flex-end;gap:8px">
+          <button class="btn btn-ghost">Cancel</button>
+          <button class="btn btn-primary">Create event</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

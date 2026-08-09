@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>03 · Live preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .preview-wrap { padding: 14px 14px 0; background: var(--bg); }
+    .preview-label { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+    .story-card {
+      display: flex;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(60,64,67,.06);
+    }
+    .story-card .stripe { width: 6px; background: #9fc3f5; }
+    .story-card .num {
+      width: 48px; padding: 10px 4px; text-align: center;
+      background: #e8f4ff; border-right: 1px solid var(--line-soft);
+    }
+    .story-card .num b { font-size: 22px; font-weight: 800; color: #0d47a1; display: block; line-height: 1; }
+    .story-card .num s { font-size: 9px; font-weight: 700; color: var(--blue); }
+    .story-card .content { flex: 1; padding: 10px 12px; }
+    .story-card h3 { font-size: 14px; font-weight: 700; }
+    .story-card h3 span { font-size: 11px; color: var(--blue); font-weight: 700; }
+    .story-card .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .story-card .ev { display: flex; gap: 8px; margin-top: 8px; font-size: 14px; }
+    .story-card .ev .dot { background: var(--green); }
+    .story-card .ev strong { font-weight: 700; }
+    .form { padding: 14px; }
+    .form .x { float: right; border: none; background: none; font-size: 20px; color: var(--muted); }
+    .form h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 12px; }
+    .line { margin-bottom: 10px; }
+    .line label { font-size: 11px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← Event modal mockups</a>
+  <p class="label">03 · Live preview</p>
+  <div class="scene">
+    <div class="dim" style="align-items:center;padding:12px 8px">
+      <div class="modal">
+        <div class="preview-wrap">
+          <div class="preview-label">How it looks in Story</div>
+          <div class="story-card">
+            <div class="stripe"></div>
+            <div class="num"><b>8</b><s>AUG</s></div>
+            <div class="content">
+              <h3>Saturday <span>· Today</span></h3>
+              <div class="sub">Hotel lobby · On trip</div>
+              <div class="ev">
+                <span class="dot"></span>
+                <span class="t">22:30</span>
+                <strong>Dinner at hotel</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="scroll form">
+          <button class="x">×</button>
+          <h2>Edit details</h2>
+          <div class="line">
+            <label>Title</label>
+            <input class="field" value="Dinner at hotel" />
+          </div>
+          <div class="line" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div><label>Date</label><input class="field" type="date" value="2026-08-08" /></div>
+            <div><label>Start</label><input class="field" value="22:30" /></div>
+            <div><label>End</label><input class="field" value="23:00" /></div>
+          </div>
+          <div class="line">
+            <label>Category</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+              <span class="pill meal on">Meal</span>
+              <span class="pill other">Other</span>
+            </div>
+          </div>
+          <div class="line">
+            <label>Location</label>
+            <input class="field" value="Hotel lobby" />
+          </div>
+          <div class="line">
+            <label>Notes</label>
+            <textarea class="field" rows="2" style="resize:none"></textarea>
+          </div>
+        </div>
+        <div class="footer" style="justify-content:flex-end">
+          <button class="btn btn-ghost">Cancel</button>
+          <button class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
