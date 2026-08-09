@@ -25,7 +25,7 @@ export function ViewTabToggle({ className }: { className?: string }) {
           aria-selected={activeTab === id}
           onClick={() => setActiveTab(id)}
           className={cn(
-            'rounded-full px-4 py-1.5 text-ui-sm font-semibold transition-colors',
+            'rounded-full px-3 py-1 text-ui-xs font-semibold transition-colors sm:px-4 sm:py-1.5 sm:text-ui-sm',
             activeTab === id
               ? 'bg-[var(--gcal-blue)] text-white shadow-sm'
               : 'text-[var(--gcal-muted)] hover:text-[var(--gcal-text)]',

@@ -6,6 +6,54 @@ import { useTripStore } from '../store/tripStore'
 import type { EventCategory } from '../types'
 import { ViewTabToggle } from './ViewTabToggle'
 
+function ViewModeToggle({
+  view,
+  onDay,
+  onWeek,
+  compact,
+}: {
+  view: 'day' | 'week'
+  onDay: () => void
+  onWeek: () => void
+  compact?: boolean
+}) {
+  return (
+    <div
+      className={cn(
+        'flex rounded-full bg-[var(--gcal-bg)] p-0.5',
+        compact && 'text-ui-xs',
+      )}
+    >
+      <button
+        type="button"
+        onClick={onDay}
+        className={cn(
+          'rounded-full font-semibold transition-colors',
+          compact ? 'px-2.5 py-1 text-ui-xs' : 'px-3 py-1.5 text-ui-sm',
+          view === 'day'
+            ? 'bg-white text-[var(--gcal-blue)] shadow-sm'
+            : 'text-[var(--gcal-muted)]',
+        )}
+      >
+        Day
+      </button>
+      <button
+        type="button"
+        onClick={onWeek}
+        className={cn(
+          'rounded-full font-semibold transition-colors',
+          compact ? 'px-2.5 py-1 text-ui-xs' : 'px-3 py-1.5 text-ui-sm',
+          view === 'week'
+            ? 'bg-white text-[var(--gcal-blue)] shadow-sm'
+            : 'text-[var(--gcal-muted)]',
+        )}
+      >
+        Week
+      </button>
+    </div>
+  )
+}
+
 export function TabBar() {
   const trip = useTripStore((s) => s.trip)!
   const activeTab = useTripStore((s) => s.activeTab)
@@ -31,12 +79,13 @@ export function TabBar() {
 
   return (
     <div className="no-print shrink-0 border-b border-[var(--gcal-border)] bg-white">
-      <div className="flex min-h-12 flex-wrap items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4">
+      <div className="flex min-h-11 items-center gap-2 px-3 py-2 sm:min-h-12 sm:gap-3 sm:px-4">
         <ViewTabToggle />
 
         {activeTab === 'schedule' ? (
           <>
-            <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 sm:gap-2">
+            {/* Desktop: centered date navigation */}
+            <div className="hidden min-w-0 flex-1 items-center justify-center gap-2 sm:flex">
               <button
                 type="button"
                 disabled={dayIndex <= 0}
@@ -63,36 +112,18 @@ export function TabBar() {
               </button>
             </div>
 
-            <div className="ml-auto flex shrink-0 items-center gap-0.5">
-              <button
-                type="button"
-                onClick={() => setView('day')}
-                className={cn(
-                  'rounded-lg px-2.5 py-1.5 text-ui-sm font-semibold',
-                  view === 'day'
-                    ? 'text-[var(--gcal-blue)]'
-                    : 'text-[var(--gcal-muted)] hover:bg-[var(--gcal-bg)]',
-                )}
-              >
-                Day
-              </button>
-              <button
-                type="button"
-                onClick={() => setView('week')}
-                className={cn(
-                  'rounded-lg px-2.5 py-1.5 text-ui-sm font-semibold',
-                  view === 'week'
-                    ? 'text-[var(--gcal-blue)]'
-                    : 'text-[var(--gcal-muted)] hover:bg-[var(--gcal-bg)]',
-                )}
-              >
-                Week
-              </button>
+            <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-0.5">
+              <ViewModeToggle
+                view={view}
+                onDay={() => setView('day')}
+                onWeek={() => setView('week')}
+                compact
+              />
 
-              <div className="relative ml-1">
+              <div className="relative hidden sm:block">
                 <CalendarDays className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-[var(--gcal-muted)]" />
                 <select
-                  className="max-w-[7rem] appearance-none rounded-lg border-0 bg-transparent py-1.5 pl-7 pr-2 text-ui-sm font-semibold text-[var(--gcal-muted)] hover:bg-[var(--gcal-bg)] focus:outline-none focus:ring-2 focus:ring-[#e8f0fe] sm:max-w-[8.5rem]"
+                  className="max-w-[8.5rem] appearance-none rounded-lg border-0 bg-transparent py-1.5 pl-7 pr-2 text-ui-sm font-semibold text-[var(--gcal-muted)] hover:bg-[var(--gcal-bg)] focus:outline-none focus:ring-2 focus:ring-[#e8f0fe]"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
                   aria-label="Jump to day"
@@ -106,9 +137,9 @@ export function TabBar() {
               </div>
 
               <div className="relative">
-                <SlidersHorizontal className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-[var(--gcal-muted)]" />
+                <SlidersHorizontal className="pointer-events-none absolute left-1.5 top-1/2 size-3.5 -translate-y-1/2 text-[var(--gcal-muted)] sm:left-2" />
                 <select
-                  className="max-w-[5.5rem] appearance-none rounded-lg border-0 bg-transparent py-1.5 pl-7 pr-2 text-ui-sm font-semibold text-[var(--gcal-muted)] hover:bg-[var(--gcal-bg)] focus:outline-none focus:ring-2 focus:ring-[#e8f0fe] sm:max-w-[6.5rem]"
+                  className="w-9 appearance-none rounded-lg border-0 bg-transparent py-1.5 pl-7 pr-1 text-transparent hover:bg-[var(--gcal-bg)] focus:outline-none focus:ring-2 focus:ring-[#e8f0fe] sm:w-auto sm:max-w-[6.5rem] sm:py-1.5 sm:pl-7 sm:pr-2 sm:text-ui-sm sm:font-semibold sm:text-[var(--gcal-muted)]"
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value as EventCategory | 'all')}
                   aria-label="Filter by category"
