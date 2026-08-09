@@ -70,7 +70,7 @@ function StoryDayCard({
   const dayNumber = allDays.findIndex((x) => isoDate(x) === date) + 1
   const place = dayPlace(dayEvents)
   const vibe = dayVibe(dayEvents, dayNumber - 1, totalDays)
-  const highlights = [...dayEvents].sort((a, b) => a.startTime.localeCompare(b.startTime)).slice(0, 3)
+  const sortedEvents = [...dayEvents].sort((a, b) => a.startTime.localeCompare(b.startTime))
   const isToday = date === today
   const meta = [place, vibe].filter(Boolean).join(' · ')
   const { stripe, numColumn } = storyStripeGiantStyle(proximityIndex)
@@ -115,9 +115,9 @@ function StoryDayCard({
             </h4>
             {meta ? <p className="mt-0.5 text-ui-sm text-[var(--gcal-muted)]">{meta}</p> : null}
           </button>
-          {highlights.length > 0 ? (
+          {sortedEvents.length > 0 ? (
             <ul className="mt-2.5">
-              {highlights.map((ev, i) => {
+              {sortedEvents.map((ev, i) => {
                 const cat = CATEGORIES[ev.category]
                 const backups = backupCount(ev)
                 return (
@@ -151,15 +151,6 @@ function StoryDayCard({
                   </li>
                 )
               })}
-              {dayEvents.length > 3 ? (
-                <button
-                  type="button"
-                  onClick={() => onOpenDay(date)}
-                  className="mt-1.5 text-ui-sm font-semibold text-[var(--gcal-blue)]"
-                >
-                  +{dayEvents.length - 3} more
-                </button>
-              ) : null}
             </ul>
           ) : (
             <p className="mt-2 text-ui-sm text-[var(--gcal-muted)]">Nothing planned</p>
