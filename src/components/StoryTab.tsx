@@ -1,12 +1,11 @@
 import { useMemo, useState } from 'react'
-import { differenceInCalendarDays, parseISO } from 'date-fns'
+import { differenceInCalendarDays, format, parseISO } from 'date-fns'
 import { Calendar, ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import { CATEGORIES } from '../data/categories'
 import {
   cn,
   currentEventAt,
   daysUntil,
-  formatDateBr,
   isoDate,
   isEventPast,
   tripCalendarBounds,
@@ -109,15 +108,15 @@ function StoryDayCard({
           className="flex w-[54px] shrink-0 flex-col items-center border-r border-[#f1f3f4] px-1.5 py-3.5"
           style={{ background: numColumn }}
         >
-          <span className="text-[26px] font-extrabold leading-none text-[#0d47a1]">{formatDateBr(d, 'd')}</span>
+          <span className="text-[26px] font-extrabold leading-none text-[#0d47a1]">{format(d, 'd')}</span>
           <span className="mt-1 text-[9px] font-bold uppercase tracking-wide text-[var(--gcal-blue)]">
-            {formatDateBr(d, 'MMM')}
+            {format(d, 'MMM')}
           </span>
         </div>
         <div className="min-w-0 flex-1 px-3.5 py-3">
           <button type="button" onClick={() => onOpenDay(date)} className="w-full text-left">
             <h4 className="text-ui-base font-bold text-[var(--gcal-text)]">
-              {formatDateBr(d, 'EEEE')}
+              {format(d, 'EEEE')}
               {isToday ? (
                 <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">· Today</span>
               ) : daysUntilDay === 1 ? (
@@ -350,8 +349,7 @@ export function StoryTab() {
     <div className="story-tab mx-auto max-w-2xl px-4 py-5 pb-28 sm:px-6 sm:py-6 sm:pb-12">
       <header className="mb-4">
         <p className="text-ui-sm text-[var(--gcal-muted)]">
-          {formatDateBr(calendar.startDate, 'd MMM')} –{' '}
-          {formatDateBr(calendar.endDate, "d 'de' MMM yyyy")}
+          {format(parseISO(calendar.startDate), 'MMM d')} – {format(parseISO(calendar.endDate), 'MMM d, yyyy')}
           <span className="mx-1.5 text-[var(--gcal-border)]">·</span>
           {tripStatus}
         </p>
