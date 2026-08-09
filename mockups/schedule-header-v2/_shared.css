@@ -1,0 +1,62 @@
+/* Round 2 — cleaner merged-line base */
+:root {
+  --line-soft: #eef0f2;
+  --line: #e3e5e8;
+  --line-strong: #dadce0;
+}
+.phone { border-color: var(--line-strong); }
+.merge {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 20px;
+  min-height: 44px;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+.merge .vdiv {
+  width: 1px;
+  height: 20px;
+  background: var(--line);
+  margin: 0 14px;
+  flex-shrink: 0;
+}
+.merge .grow { flex: 1; min-width: 0; }
+.r1-clean {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+.trip { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.trip h1 { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trip p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.r1-clean .search { flex: 1; max-width: 260px; background: #fff; }
+.r1-clean .actions { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.icon-ghost {
+  width: 34px; height: 34px; border: none; background: transparent;
+  border-radius: 8px; font-size: 15px; color: var(--muted); cursor: default;
+  display: grid; place-items: center;
+}
+.date-nav { display: flex; align-items: center; gap: 2px; }
+.date-nav strong { font-size: 14px; font-weight: 700; white-space: nowrap; }
+.tabs-pill {
+  display: flex; gap: 2px; background: var(--bg); border-radius: 8px; padding: 3px;
+}
+.tabs-pill button {
+  border: none; background: transparent; font-family: inherit;
+  font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 6px;
+  color: var(--muted); cursor: default;
+}
+.tabs-pill button.on { background: #fff; color: var(--blue); box-shadow: 0 1px 2px rgba(60,64,67,.08); }
+.tabs-underline { display: flex; gap: 4px; }
+.tabs-underline button {
+  border: none; background: transparent; font-family: inherit;
+  font-size: 13px; font-weight: 600; padding: 10px 12px 8px;
+  color: var(--muted); border-bottom: 2px solid transparent; cursor: default;
+  margin-bottom: -1px;
+}
+.tabs-underline button.on { color: var(--blue); border-bottom-color: var(--blue); }
+.filter-icons { display: flex; gap: 2px; align-items: center; }

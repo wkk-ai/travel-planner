@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>03 · Segments</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../schedule-header/_shared.css" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .r1-clean { padding-bottom: 10px; border-bottom: none; }
+    .r1-clean .search { max-width: 220px; }
+    .merge-seg {
+      display: flex;
+      gap: 6px;
+      padding: 0 16px 10px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    .seg {
+      display: flex;
+      align-items: center;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 4px 6px;
+      min-height: 40px;
+    }
+    .seg.view { gap: 2px; }
+    .seg.view button {
+      border: none; background: transparent; font-family: inherit;
+      font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 7px;
+      color: var(--muted); cursor: default;
+    }
+    .seg.view button.on { background: #fff; color: var(--blue); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+    .seg.schedule { flex: 1; justify-content: center; gap: 8px; padding: 4px 12px; }
+    .seg.schedule strong { font-size: 14px; font-weight: 700; }
+    .seg.tools { gap: 2px; padding: 4px; }
+    .seg.tools .pill { border: none; background: #fff; }
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← Round 2 mockups</a>
+  <p class="label">03 · Segments</p>
+  <div class="phone">
+    <div class="r1-clean">
+      <div class="trip">
+        <div class="trip-icon">📅</div>
+        <div style="min-width:0">
+          <h1>BigBang US Trip 2026 ▾</h1>
+          <p>21 days until departure · Concert in 27d</p>
+        </div>
+      </div>
+      <div class="search"><span>🔍</span> Search events…</div>
+      <div class="actions">
+        <span class="live"><i></i> Live</span>
+        <button class="btn btn-primary">+ Add</button>
+        <button class="icon-ghost">⋯</button>
+      </div>
+    </div>
+    <div class="merge-seg">
+      <div class="seg view">
+        <button>Story</button>
+        <button class="on">Schedule</button>
+      </div>
+      <div class="seg schedule">
+        <div class="pill" style="background:#fff;border:none"><button class="on">Day</button><button>Week</button></div>
+        <button class="icon-ghost" style="width:28px;height:28px">‹</button>
+        <strong>Sun, Aug 30</strong>
+        <button class="icon-ghost" style="width:28px;height:28px">›</button>
+      </div>
+      <div class="seg tools">
+        <button class="icon-ghost" title="Jump">📅</button>
+        <button class="icon-ghost" title="Filter">⧉</button>
+      </div>
+    </div>
+    <div class="cal">
+      <div class="cal-grid">
+        <div class="h"></div><div class="h">Sun</div><div class="h">Mon</div><div class="h">Tue</div><div class="h">Wed</div><div class="h">Thu</div><div class="h">Fri</div><div class="h">Sat</div>
+        <div class="h">7am</div>
+        <div class="t on"><div class="ev meal">Breakfast</div></div>
+        <div class="t"></div><div class="t"></div><div class="t"></div><div class="t"></div><div class="t"></div><div class="t"></div>
+        <div class="h">9am</div>
+        <div class="t on"><div class="ev park">Target</div></div>
+        <div class="t"></div><div class="t"><div class="ev park">Magic K.</div></div><div class="t"></div><div class="t"></div><div class="t"></div><div class="t"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
