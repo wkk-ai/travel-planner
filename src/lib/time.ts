@@ -9,8 +9,18 @@ import {
   isWithinInterval,
   parse,
   parseISO,
+  type Locale,
 } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import type { TripEvent } from '../types'
+
+/** Brazilian Portuguese — avoids confusing English Jun vs Jul month abbreviations. */
+export const DATE_LOCALE: Locale = ptBR
+
+export function formatDateBr(date: Date | string, pattern: string): string {
+  const d = typeof date === 'string' ? parseISO(date) : date
+  return format(d, pattern, { locale: DATE_LOCALE })
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -84,8 +94,8 @@ export function tripDaysIncludingEvents(
 
 export function formatDayHeader(d: Date): { date: string; weekday: string } {
   return {
-    date: format(d, 'dd/MM/yyyy'),
-    weekday: format(d, 'EEEE').toUpperCase(),
+    date: formatDateBr(d, 'dd/MM/yyyy'),
+    weekday: formatDateBr(d, 'EEEE').toUpperCase(),
   }
 }
 

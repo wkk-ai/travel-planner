@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { format, parseISO } from 'date-fns'
 import { Plus, Receipt, Trash2 } from 'lucide-react'
 import { CATEGORIES } from '../data/categories'
 import {
@@ -11,7 +10,7 @@ import {
   totalPlannedCents,
   totalSpentCents,
 } from '../lib/wallet'
-import { isoDate, tripDaysIncludingEvents } from '../lib/time'
+import { formatDateBr, isoDate, tripDaysIncludingEvents } from '../lib/time'
 import { useTripStore } from '../store/tripStore'
 import type { EventCategory, Expense } from '../types'
 
@@ -24,7 +23,7 @@ type CatRow = {
   spent: number
 }
 
-type DayRow = { key: string; shortLabel: string; planned: number; spent: number }
+type DayRow = { key: string; weekday: string; dayMonth: string; planned: number; spent: number }
 
 const RING_R = 14
 const RING_C = 2 * Math.PI * RING_R
@@ -153,9 +152,14 @@ function DayColumnChart({ rows }: { rows: DayRow[] }) {
                 />
               ) : null}
             </div>
-            <span className="w-full truncate text-center text-[9px] font-semibold text-[var(--gcal-muted)]">
-              {r.shortLabel}
-            </span>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="w-full truncate text-center text-[9px] font-semibold capitalize text-[var(--gcal-muted)]">
+                {r.weekday}
+              </span>
+              <span className="w-full truncate text-center text-[8px] font-medium tabular-nums text-[var(--gcal-muted)]">
+                {r.dayMonth}
+              </span>
+            </div>
           </div>
         )
       })}
@@ -187,7 +191,9 @@ function ExpenseRow({
         <div className="text-ui-base font-semibold text-[var(--gcal-text)]">{expense.label}</div>
         <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-ui-xs text-[var(--gcal-muted)]">
           <span style={{ color: cat.color }}>{cat.label}</span>
-          {expense.spentOn ? <span>{format(parseISO(expense.spentOn), 'MMM d')}</span> : null}
+          {expense.spentOn ? (
+            <span>{formatDateBr(expense.spentOn, "d 'de' MMM")}</span>
+          ) : null}
           {eventTitle ? (
             <button
               type="button"
@@ -286,7 +292,8 @@ export function WalletTab() {
       const iso = isoDate(d)
       return {
         key: iso,
-        shortLabel: format(d, 'EEE'),
+        weekday: formatDateBr(d, 'EEE'),
+        dayMonth: formatDateBr(d, 'd/M'),
         planned: dayPlannedCents(iso, events),
         spent: daySpentCents(iso, expenses),
       }
@@ -348,7 +355,7 @@ export function WalletTab() {
           <div className="border-b border-[#eef0f2] bg-[#e8f0fe] px-4 py-3">
             <h2 className="text-ui-sm font-bold text-[#0d47a1]">Log expense</h2>
             <p className="mt-0.5 text-ui-xs text-[var(--gcal-muted)]">
-              {format(parseISO(selectedDate), 'EEEE, MMM d')} · round to nearest $10
+              {formatDateBr(selectedDate, "EEEE, d 'de' MMMM")} · arredonda em US$ 10
             </p>
           </div>
           <div className="space-y-4 p-4">
