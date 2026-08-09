@@ -10,7 +10,7 @@ import {
   tripCalendarBounds,
   tripDaysIncludingEvents,
 } from '../lib/time'
-import { storyDayCardStyle } from '../lib/storyCardStyle'
+import { storyStripeGiantStyle } from '../lib/storyCardStyle'
 import { backupCount } from '../lib/eventBackups'
 import { useTripStore } from '../store/tripStore'
 import type { TripEvent } from '../types'
@@ -189,7 +189,7 @@ export function StoryTab() {
           </button>
         </div>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-2.5">
           {upcomingDays.map((date) => {
             const d = parseISO(date)
             const dayEvents = eventsForDay(date)
@@ -201,53 +201,61 @@ export function StoryTab() {
               .slice(0, 3)
             const isToday = date === today
             const meta = [place, vibe].filter(Boolean).join(' · ')
-            const cardStyle = storyDayCardStyle(proximity.get(date) ?? 0, isToday)
+            const { stripe, numColumn } = storyStripeGiantStyle(proximity.get(date) ?? 0)
             const daysUntilDay = differenceInCalendarDays(parseISO(date), parseISO(today))
 
             return (
               <li key={date}>
                 <article
                   className={cn(
-                    'overflow-hidden rounded-[14px] border shadow-sm transition-shadow hover:shadow-md',
-                    isToday && 'ring-2 ring-[var(--gcal-blue)]/30',
+                    'flex overflow-hidden rounded-[14px] border border-[var(--gcal-border)] bg-white shadow-sm transition-shadow hover:shadow-md',
+                    isToday && 'ring-2 ring-[var(--gcal-blue)]/25',
                   )}
-                  style={{
-                    background: cardStyle.background,
-                    borderColor: cardStyle.borderColor,
-                  }}
                 >
-                  <button
-                    type="button"
-                    onClick={() => openDayOnSchedule(date)}
-                    className="w-full px-4 pb-1 pt-3.5 text-left"
-                  >
-                    <div className="mb-2 flex flex-wrap items-baseline gap-2">
-                      <span className="text-ui-base font-bold text-[var(--gcal-text)]">
-                        {format(d, 'EEE, MMM d')}
-                      </span>
-                      {isToday ? (
-                        <span className="rounded-full bg-[var(--gcal-blue)] px-2 py-0.5 text-[11px] font-bold text-white">
-                          Today
-                        </span>
-                      ) : daysUntilDay === 1 ? (
-                        <span className="rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-semibold text-[var(--gcal-blue)]">
-                          Tomorrow
-                        </span>
-                      ) : countdown > 0 ? (
-                        <span className="text-ui-xs font-medium text-[var(--gcal-muted)]">
-                          in {daysUntilDay}d
-                        </span>
-                      ) : null}
-                    </div>
-                    {meta ? (
-                      <p className="text-ui-sm font-medium text-[var(--gcal-text)]/80">{meta}</p>
-                    ) : null}
-                  </button>
+                  <div className="w-1.5 shrink-0" style={{ background: stripe }} aria-hidden />
 
-                  <div className="px-3 pb-3.5">
+                  <div
+                    className="flex w-[54px] shrink-0 flex-col items-center border-r border-[#f1f3f4] px-1.5 py-3.5"
+                    style={{ background: numColumn }}
+                  >
+                    <span className="text-[26px] font-extrabold leading-none text-[#0d47a1]">
+                      {format(d, 'd')}
+                    </span>
+                    <span className="mt-1 text-[9px] font-bold uppercase tracking-wide text-[var(--gcal-blue)]">
+                      {format(d, 'MMM')}
+                    </span>
+                  </div>
+
+                  <div className="min-w-0 flex-1 px-3.5 py-3">
+                    <button
+                      type="button"
+                      onClick={() => openDayOnSchedule(date)}
+                      className="w-full text-left"
+                    >
+                      <h4 className="text-ui-base font-bold text-[var(--gcal-text)]">
+                        {format(d, 'EEEE')}
+                        {isToday ? (
+                          <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">
+                            · Today
+                          </span>
+                        ) : countdown > 0 && daysUntilDay > 0 ? (
+                          <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">
+                            · in {daysUntilDay}d
+                          </span>
+                        ) : daysUntilDay === 1 ? (
+                          <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">
+                            · Tomorrow
+                          </span>
+                        ) : null}
+                      </h4>
+                      {meta ? (
+                        <p className="mt-0.5 text-ui-sm text-[var(--gcal-muted)]">{meta}</p>
+                      ) : null}
+                    </button>
+
                     {highlights.length > 0 ? (
-                      <ul className="space-y-1.5">
-                        {highlights.map((ev) => {
+                      <ul className="mt-2.5">
+                        {highlights.map((ev, i) => {
                           const cat = CATEGORIES[ev.category]
                           const backups = backupCount(ev)
                           return (
@@ -256,17 +264,17 @@ export function StoryTab() {
                                 type="button"
                                 onClick={() => selectEvent(ev.id)}
                                 className={cn(
-                                  'flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-white/90',
+                                  'flex w-full items-start gap-2 py-1.5 text-left',
+                                  i > 0 && 'border-t border-[#f1f3f4]',
                                   isEventPast(ev) && 'opacity-75',
                                 )}
-                                style={{ background: cardStyle.eventSurface }}
                               >
                                 <span
-                                  className="mt-1.5 size-2.5 shrink-0 rounded-full ring-2 ring-white"
+                                  className="mt-1.5 size-[7px] shrink-0 rounded-full"
                                   style={{ background: cat.border }}
                                   aria-hidden
                                 />
-                                <span className="w-11 shrink-0 tabular-nums text-ui-sm font-medium text-[var(--gcal-muted)]">
+                                <span className="w-11 shrink-0 tabular-nums text-ui-sm text-[var(--gcal-muted)]">
                                   {formatEventTime(ev)}
                                 </span>
                                 <span className="min-w-0 flex-1">
@@ -287,19 +295,14 @@ export function StoryTab() {
                           <button
                             type="button"
                             onClick={() => openDayOnSchedule(date)}
-                            className="w-full py-1 pl-[62px] text-left text-ui-sm font-medium text-[var(--gcal-blue)]"
+                            className="mt-1.5 text-ui-sm font-semibold text-[var(--gcal-blue)]"
                           >
                             +{dayEvents.length - 3} more
                           </button>
                         ) : null}
                       </ul>
                     ) : (
-                      <p
-                        className="rounded-lg px-3 py-2 text-ui-sm text-[var(--gcal-muted)]"
-                        style={{ background: cardStyle.eventSurface }}
-                      >
-                        Nothing planned
-                      </p>
+                      <p className="mt-2 text-ui-sm text-[var(--gcal-muted)]">Nothing planned</p>
                     )}
                   </div>
                 </article>
