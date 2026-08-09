@@ -17,6 +17,7 @@ import {
   SEED_NOTES,
   TRIP_META,
 } from '../data/seed'
+import { mergeEventsWithSeedCatalog, seedCatalogChanged } from '../lib/seedCatalog'
 import {
   createTrip,
   deleteChecklistRemote,
@@ -159,6 +160,15 @@ async function ensureTripCoversEvents(trip: Trip, events: TripEvent[]): Promise<
 
 let initPromise: Promise<void> | null = null
 
+async function applySeedCatalogPatches(events: TripEvent[]): Promise<TripEvent[]> {
+  const patched = mergeEventsWithSeedCatalog(events)
+  if (!seedCatalogChanged(events, patched)) return events
+  if (supabaseConfigured && navigator.onLine) {
+    await upsertEvents(patched)
+  }
+  return patched
+}
+
 async function openTripBundle(
   set: (partial: Partial<TripState>) => void,
   get: () => TripState,
@@ -166,16 +176,17 @@ async function openTripBundle(
   mode: AccessMode,
 ) {
   const bundle = await fetchTripBundle(trip.id)
+  const events = await applySeedCatalogPatches(bundle.events)
   localStorage.setItem(LOCAL_TOKEN_KEY, trip.editToken)
   window.location.hash =
     mode === 'edit' ? `#/e/${trip.editToken}` : `#/v/${trip.viewToken}`
 
-  const syncedTrip = await ensureTripCoversEvents(trip, bundle.events)
+  const syncedTrip = await ensureTripCoversEvents(trip, events)
 
   set({
     trip: syncedTrip,
     mode,
-    events: bundle.events,
+    events,
     notes: bundle.notes,
     checklist: bundle.checklist,
     expenses: bundle.expenses,
@@ -185,7 +196,7 @@ async function openTripBundle(
   })
 
   subscribeRealtime(trip.id)
-  if (bundle.events.length === 0 && mode === 'edit') {
+  if (events.length === 0 && mode === 'edit') {
     void get().seedIfEmpty()
   }
   void get().flush()

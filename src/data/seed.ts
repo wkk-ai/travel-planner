@@ -1,5 +1,30 @@
 import type { EventCategory } from '../types'
 
+/** Google Maps place links for map tab routing (no API key). */
+const MAPS = {
+  cgh: 'https://www.google.com/maps/place/São+Paulo–Congonhas+Airport/@-23.6261,-46.6564,17z',
+  cnf: 'https://www.google.com/maps/place/Tancredo+Neves+International+Airport/@-19.6244,-43.9719,17z',
+  mco: 'https://www.google.com/maps/place/Orlando+International+Airport/@28.4311585,-81.3101821,17z',
+  sfo: 'https://www.google.com/maps/place/San+Francisco+International+Airport/@37.621313,-122.381152,17z',
+  walmart: 'https://www.google.com/maps/place/Walmart+Supercenter/@28.3871,-81.5087,17z',
+  targetBestBuy: 'https://www.google.com/maps/place/Target/@28.3844,-81.4979,17z',
+  publix: 'https://www.google.com/maps/place/Publix+Super+Market/@28.4514,-81.4878,17z',
+  disneySprings: 'https://www.google.com/maps/place/Disney+Springs/@28.3712,-81.5183,17z',
+  shakeShack: 'https://www.google.com/maps/place/Shake+Shack/@28.3708,-81.5190,17z',
+  buschGardens: 'https://www.google.com/maps/place/Busch+Gardens+Tampa+Bay/@27.9959,-82.4196,17z',
+  epicUniverse: 'https://www.google.com/maps/place/Universal+Epic+Universe/@28.3615,-81.5412,17z',
+  cityWalk: 'https://www.google.com/maps/place/Universal+CityWalk+Orlando/@28.473328,-81.466498,17z',
+  raisingCanes: 'https://www.google.com/maps/place/Raising+Cane\'s+Chicken+Fingers/@28.4567,-81.4702,17z',
+  cheesecakeFactory: 'https://www.google.com/maps/place/The+Cheesecake+Factory/@37.7844,-122.4094,17z',
+  emeryville: 'https://www.google.com/maps/place/Emeryville,+CA/@37.8313,-122.2852,14z',
+  oaklandColiseum: 'https://www.google.com/maps/place/Oakland+Coliseum/@37.7516,-122.2005,17z',
+  unionSquare: 'https://www.google.com/maps/place/Union+Square/@37.7879,-122.4074,17z',
+  menshoRamen: 'https://www.google.com/maps/place/Mensho+Tokyo+SF/@37.7871,-122.4095,17z',
+  goldenGate: 'https://www.google.com/maps/place/Golden+Gate+Bridge/@37.8199,-122.4783,17z',
+  pier39: 'https://www.google.com/maps/place/Pier+39/@37.8087,-122.4098,17z',
+  ferryBuilding: 'https://www.google.com/maps/place/Ferry+Building/@37.7956,-122.3933,17z',
+} as const
+
 export interface SeedEvent {
   date: string
   startTime: string
@@ -72,6 +97,8 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Flight CGH → CNF',
     category: 'flight',
     notes: 'Azul 4214',
+    location: 'CGH',
+    mapsUrl: MAPS.cgh,
     flight: { airline: 'Azul', flightNumber: '4214', from: 'CGH', to: 'CNF' },
   },
   {
@@ -81,6 +108,8 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Flight CNF → MCO',
     category: 'flight',
     notes: 'Azul 8730',
+    location: 'MCO',
+    mapsUrl: MAPS.mco,
     flight: { airline: 'Azul', flightNumber: '8730', from: 'CNF', to: 'MCO' },
   },
   {
@@ -90,6 +119,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Hotel check-in',
     category: 'hotel',
     location: 'Orlando',
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Orlando+FL+hotel',
   },
   {
     date: '2026-08-29',
@@ -98,6 +128,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Pick up rental car',
     category: 'transport',
     location: 'MCO',
+    mapsUrl: MAPS.mco,
   },
   {
     date: '2026-08-30',
@@ -106,6 +137,8 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Flight VCP → MCO',
     category: 'flight',
     notes: 'Azul 8705 — companion arrival',
+    location: 'MCO',
+    mapsUrl: MAPS.mco,
     flight: { airline: 'Azul', flightNumber: '8705', from: 'VCP', to: 'MCO' },
   },
   {
@@ -114,6 +147,8 @@ export const SEED_EVENTS: SeedEvent[] = [
     endTime: '19:00',
     title: 'Hotel check-in',
     category: 'hotel',
+    location: 'Orlando',
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Orlando+FL+hotel',
   },
   {
     date: '2026-08-30',
@@ -123,7 +158,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'shopping',
     notes: 'Clam chowder + vitamins',
     location: 'Walmart Orlando',
-    mapsUrl: 'https://maps.google.com/?q=Walmart+Orlando',
+    mapsUrl: MAPS.walmart,
   },
   {
     date: '2026-08-31',
@@ -139,7 +174,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Target & Best Buy',
     category: 'shopping',
     location: 'Target / Best Buy',
-    mapsUrl: 'https://maps.google.com/?q=Target+Best+Buy+Orlando',
+    mapsUrl: MAPS.targetBestBuy,
   },
   {
     date: '2026-08-31',
@@ -149,6 +184,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'meal',
     notes: 'Publix',
     location: 'Publix',
+    mapsUrl: MAPS.publix,
   },
   {
     date: '2026-08-31',
@@ -158,7 +194,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'shopping',
     notes: 'Ross, TJ Maxx, Disney Springs / Boardwalk',
     location: 'Disney Springs',
-    mapsUrl: 'https://maps.google.com/?q=Disney+Springs',
+    mapsUrl: MAPS.disneySprings,
   },
   {
     date: '2026-08-31',
@@ -168,7 +204,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'meal',
     notes: 'Shake Shack',
     location: 'Shake Shack',
-    mapsUrl: 'https://maps.google.com/?q=Shake+Shack+Disney+Springs',
+    mapsUrl: MAPS.shakeShack,
     budgetCents: 4500,
   },
   {
@@ -192,7 +228,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Busch Gardens',
     category: 'attraction',
     location: 'Busch Gardens Tampa',
-    mapsUrl: 'https://maps.google.com/?q=Busch+Gardens+Tampa',
+    mapsUrl: MAPS.buschGardens,
     budgetCents: 12000,
   },
   {
@@ -223,7 +259,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Epic Universe',
     category: 'attraction',
     location: 'Universal Epic Universe',
-    mapsUrl: 'https://maps.google.com/?q=Universal+Epic+Universe',
+    mapsUrl: MAPS.epicUniverse,
     budgetCents: 15000,
   },
   {
@@ -234,6 +270,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'attraction',
     notes: 'Toothsome',
     location: 'Universal CityWalk',
+    mapsUrl: MAPS.cityWalk,
   },
   {
     date: '2026-09-02',
@@ -243,6 +280,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'meal',
     notes: "Raising Cane's",
     location: "Raising Cane's",
+    mapsUrl: MAPS.raisingCanes,
     budgetCents: 3500,
   },
   {
@@ -274,6 +312,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Return rental car',
     category: 'transport',
     location: 'MCO',
+    mapsUrl: MAPS.mco,
   },
   {
     date: '2026-09-03',
@@ -282,6 +321,8 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Flight MCO → SFO',
     category: 'flight',
     notes: 'AA 3087',
+    location: 'MCO',
+    mapsUrl: MAPS.mco,
     flight: { airline: 'American', flightNumber: '3087', from: 'MCO', to: 'SFO' },
   },
   {
@@ -292,6 +333,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'transport',
     notes: 'SFO',
     location: 'SFO',
+    mapsUrl: MAPS.sfo,
   },
   {
     date: '2026-09-03',
@@ -301,6 +343,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'hotel',
     notes: 'Drop luggage',
     location: 'San Francisco',
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=San+Francisco+hotel',
   },
   {
     date: '2026-09-03',
@@ -310,7 +353,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'meal',
     notes: 'Cheesecake Factory',
     location: 'Cheesecake Factory',
-    mapsUrl: 'https://maps.google.com/?q=Cheesecake+Factory+San+Francisco',
+    mapsUrl: MAPS.cheesecakeFactory,
     budgetCents: 8000,
   },
   {
@@ -336,7 +379,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'shopping',
     notes: 'Target, Best Buy, Uniqlo',
     location: 'Emeryville',
-    mapsUrl: 'https://maps.google.com/?q=Emeryville+CA',
+    mapsUrl: MAPS.emeryville,
   },
   {
     date: '2026-09-04',
@@ -367,8 +410,8 @@ export const SEED_EVENTS: SeedEvent[] = [
     endTime: '23:59',
     title: 'BigBang Day 1',
     category: 'show',
-    location: 'Chase Center',
-    mapsUrl: 'https://maps.google.com/?q=Chase+Center+San+Francisco',
+    location: 'Oakland Coliseum',
+    mapsUrl: MAPS.oaklandColiseum,
     budgetCents: 25000,
   },
   {
@@ -395,6 +438,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     notes: 'LA 6815 arrives 10:52',
     flight: { airline: 'LATAM', flightNumber: '6815', from: 'SCL', to: 'SFO' },
     location: 'SFO',
+    mapsUrl: MAPS.sfo,
   },
   {
     date: '2026-09-05',
@@ -403,7 +447,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Union Square & Sephora',
     category: 'shopping',
     location: 'Union Square SF',
-    mapsUrl: 'https://maps.google.com/?q=Union+Square+San+Francisco',
+    mapsUrl: MAPS.unionSquare,
   },
   {
     date: '2026-09-05',
@@ -413,7 +457,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'meal',
     notes: 'Mensho Ramen, then bakery',
     location: 'Mensho Ramen',
-    mapsUrl: 'https://maps.google.com/?q=Mensho+Ramen+San+Francisco',
+    mapsUrl: MAPS.menshoRamen,
     budgetCents: 6000,
   },
   {
@@ -437,8 +481,8 @@ export const SEED_EVENTS: SeedEvent[] = [
     endTime: '23:59',
     title: 'BigBang Day 2',
     category: 'show',
-    location: 'Chase Center',
-    mapsUrl: 'https://maps.google.com/?q=Chase+Center+San+Francisco',
+    location: 'Oakland Coliseum',
+    mapsUrl: MAPS.oaklandColiseum,
   },
   {
     date: '2026-09-06',
@@ -462,7 +506,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Golden Gate, Palace of Fine Arts & Pier 39',
     category: 'attraction',
     location: 'Golden Gate Bridge',
-    mapsUrl: 'https://maps.google.com/?q=Golden+Gate+Bridge',
+    mapsUrl: MAPS.goldenGate,
   },
   {
     date: '2026-09-06',
@@ -472,7 +516,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'meal',
     notes: 'Clam chowder at Pier 39',
     location: 'Pier 39',
-    mapsUrl: 'https://maps.google.com/?q=Pier+39+San+Francisco',
+    mapsUrl: MAPS.pier39,
     budgetCents: 5000,
   },
   {
@@ -483,7 +527,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'attraction',
     notes: 'Ghirardelli; fortune cookies and pastel de nata',
     location: 'Ferry Building',
-    mapsUrl: 'https://maps.google.com/?q=Ferry+Building+San+Francisco',
+    mapsUrl: MAPS.ferryBuilding,
   },
   {
     date: '2026-09-06',
@@ -500,6 +544,7 @@ export const SEED_EVENTS: SeedEvent[] = [
     category: 'transport',
     notes: 'SFO',
     location: 'SFO',
+    mapsUrl: MAPS.sfo,
   },
   {
     date: '2026-09-07',
@@ -508,6 +553,8 @@ export const SEED_EVENTS: SeedEvent[] = [
     title: 'Flight SFO → PTY',
     category: 'flight',
     notes: 'CM 383',
+    location: 'SFO',
+    mapsUrl: MAPS.sfo,
     flight: { airline: 'Copa', flightNumber: '383', from: 'SFO', to: 'PTY' },
   },
   {
