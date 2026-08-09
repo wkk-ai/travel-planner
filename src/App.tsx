@@ -13,6 +13,9 @@ import { shareUrls, useTripStore } from './store/tripStore'
 import { TopBar } from './components/TopBar'
 import { TabBar } from './components/TabBar'
 import { StoryTab } from './components/StoryTab'
+import { MapTab } from './components/MapTab'
+import { PackTab } from './components/PackTab'
+import { WalletTab } from './components/WalletTab'
 import { SyncBanner } from './components/SyncBanner'
 import { WeekGrid } from './components/WeekGrid'
 import { DayGrid } from './components/DayGrid'
@@ -179,6 +182,27 @@ export default function App() {
             mode === 'view' && 'pb-16',
           )}>
             <StoryTab />
+          </div>
+        ) : activeTab === 'map' ? (
+          <div className={cn(
+            'cal-scroll min-h-0 min-w-0 flex-1 overflow-auto bg-[var(--gcal-bg)]',
+            mode === 'view' && 'pb-16',
+          )}>
+            <MapTab />
+          </div>
+        ) : activeTab === 'pack' ? (
+          <div className={cn(
+            'cal-scroll min-h-0 min-w-0 flex-1 overflow-auto bg-[var(--gcal-bg)]',
+            mode === 'view' && 'pb-16',
+          )}>
+            <PackTab />
+          </div>
+        ) : activeTab === 'wallet' ? (
+          <div className={cn(
+            'cal-scroll min-h-0 min-w-0 flex-1 overflow-auto bg-[var(--gcal-bg)]',
+            mode === 'view' && 'pb-16',
+          )}>
+            <WalletTab />
           </div>
         ) : (
         <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>

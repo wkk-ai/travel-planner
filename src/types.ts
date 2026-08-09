@@ -103,7 +103,7 @@ export interface Trip {
 }
 
 export type CalendarView = 'week' | 'day'
-export type AppTab = 'story' | 'schedule'
+export type AppTab = 'story' | 'schedule' | 'map' | 'pack' | 'wallet'
 export type AccessMode = 'edit' | 'view'
 
 export interface UndoSnapshot {

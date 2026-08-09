@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Camera, ExternalLink, Trash2, X } from 'lucide-react'
+import { Camera, ExternalLink, Receipt, Trash2, X } from 'lucide-react'
 import type { EventCategory, TripEvent } from '../types'
 import { CATEGORIES, eventColors } from '../data/categories'
 import { useTripStore } from '../store/tripStore'
 import { timeOptions30, cn } from '../lib/time'
 import { EventBackupsSection } from './EventBackupsSection'
 import { FormRow } from './FormRow'
+import { formatUsd, eventSpentCents } from '../lib/wallet'
 
 interface Props {
   event: TripEvent
@@ -20,6 +21,8 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
   const commitDraft = useTripStore((s) => s.commitDraft)
   const discardDraft = useTripStore((s) => s.discardDraft)
   const setToast = useTripStore((s) => s.setToast)
+  const expenses = useTripStore((s) => s.expenses)
+  const addExpense = useTripStore((s) => s.addExpense)
   const readOnly = mode !== 'edit'
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -88,6 +91,7 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
   const headerTitle = draft.title.trim() || (isDraft ? 'New event' : 'Untitled event')
   const colors = eventColors(draft.category, draft.color)
   const onCustomColor = Boolean(draft.color)
+  const spentOnEvent = !isDraft ? eventSpentCents(event.id, expenses) : 0
 
   return (
     <div
@@ -346,6 +350,39 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
               />
             </div>
           </FormRow>
+
+          {!isDraft ? (
+            <FormRow label="Spent" hint="Actual cost logged">
+              <div className="space-y-2">
+                {spentOnEvent > 0 ? (
+                  <p className="text-ui-sm font-semibold text-[#137333]">
+                    Logged: {formatUsd(spentOnEvent)}
+                  </p>
+                ) : (
+                  <p className="text-ui-sm text-[var(--gcal-muted)]">Nothing logged yet</p>
+                )}
+                {!readOnly ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void addExpense({
+                        eventId: event.id,
+                        label: draft.title || 'Expense',
+                        category: draft.category,
+                        amountCents: draft.budgetCents > 0 ? draft.budgetCents : 1000,
+                        spentOn: draft.date,
+                      })
+                      setToast('Expense logged — see Wallet')
+                    }}
+                    className="field inline-flex w-full items-center justify-center gap-2 border-dashed bg-[var(--gcal-bg)] text-sm font-semibold text-[var(--gcal-blue)] hover:border-[var(--gcal-blue)] hover:bg-[#e8f0fe]"
+                  >
+                    <Receipt className="size-4" />
+                    Log expense for this event
+                  </button>
+                ) : null}
+              </div>
+            </FormRow>
+          ) : null}
 
           <FormRow label="Photo" hint="Optional image">
             {draft.photoDataUrl ? (

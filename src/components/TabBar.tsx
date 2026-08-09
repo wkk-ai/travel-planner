@@ -81,7 +81,7 @@ export function TabBar() {
   const stripRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (activeTab !== 'schedule') return
+    if (activeTab !== 'schedule' && activeTab !== 'map') return
     const selected = stripRef.current?.querySelector('[data-selected="true"]')
     selected?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })
   }, [selectedDate, activeTab])
@@ -93,7 +93,7 @@ export function TabBar() {
       <div className="flex min-h-11 items-center gap-2 px-3 py-2 sm:min-h-12 sm:gap-3 sm:px-4">
         <ViewTabToggle />
 
-        {activeTab === 'schedule' ? (
+        {activeTab === 'schedule' || activeTab === 'map' ? (
           <>
             {/* Desktop: centered date navigation */}
             <div className="hidden min-w-0 flex-1 items-center justify-center gap-2 sm:flex">
@@ -124,52 +124,72 @@ export function TabBar() {
             </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-0.5">
-              <div className="hidden sm:block">
-                <ViewModeToggle
-                  view={view}
-                  onDay={() => setView('day')}
-                  onWeek={() => setView('week')}
-                  compact
-                />
-              </div>
+              {activeTab === 'schedule' ? (
+                <>
+                  <div className="hidden sm:block">
+                    <ViewModeToggle
+                      view={view}
+                      onDay={() => setView('day')}
+                      onWeek={() => setView('week')}
+                      compact
+                    />
+                  </div>
 
-              <div className="relative hidden sm:block">
-                <CalendarDays className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-[var(--gcal-muted)]" />
-                <select
-                  className="max-w-[8.5rem] appearance-none rounded-lg border-0 bg-transparent py-1.5 pl-7 pr-2 text-ui-sm font-semibold text-[var(--gcal-muted)] hover:bg-[var(--gcal-bg)] focus:outline-none focus:ring-2 focus:ring-[#e8f0fe]"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  aria-label="Jump to day"
-                >
-                  {days.map((d) => (
-                    <option key={isoDate(d)} value={isoDate(d)}>
-                      {format(d, 'EEE dd/MM')}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className="relative hidden sm:block">
+                    <CalendarDays className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-[var(--gcal-muted)]" />
+                    <select
+                      className="max-w-[8.5rem] appearance-none rounded-lg border-0 bg-transparent py-1.5 pl-7 pr-2 text-ui-sm font-semibold text-[var(--gcal-muted)] hover:bg-[var(--gcal-bg)] focus:outline-none focus:ring-2 focus:ring-[#e8f0fe]"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                      aria-label="Jump to day"
+                    >
+                      {days.map((d) => (
+                        <option key={isoDate(d)} value={isoDate(d)}>
+                          {format(d, 'EEE dd/MM')}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              <div className="relative">
-                <SlidersHorizontal className="pointer-events-none absolute left-1.5 top-1/2 size-3.5 -translate-y-1/2 text-[var(--gcal-muted)] sm:left-2" />
-                <select
-                  className={cn(
-                    'appearance-none rounded-lg border-0 bg-transparent py-1.5 pl-7 pr-2 text-ui-xs font-semibold hover:bg-[var(--gcal-bg)] focus:outline-none focus:ring-2 focus:ring-[#e8f0fe] sm:max-w-[6.5rem] sm:py-1.5 sm:text-ui-sm',
-                    categoryFilter === 'all'
-                      ? 'w-9 text-transparent sm:w-auto sm:text-[var(--gcal-muted)]'
-                      : 'max-w-[5.5rem] text-[var(--gcal-blue)] sm:text-[var(--gcal-muted)]',
-                  )}
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value as EventCategory | 'all')}
-                  aria-label={`Filter by category: ${filterLabel}`}
-                >
-                  <option value="all">All</option>
-                  {Object.entries(CATEGORIES).map(([k, v]) => (
-                    <option key={k} value={k}>
-                      {v.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className="relative">
+                    <SlidersHorizontal className="pointer-events-none absolute left-1.5 top-1/2 size-3.5 -translate-y-1/2 text-[var(--gcal-muted)] sm:left-2" />
+                    <select
+                      className={cn(
+                        'appearance-none rounded-lg border-0 bg-transparent py-1.5 pl-7 pr-2 text-ui-xs font-semibold hover:bg-[var(--gcal-bg)] focus:outline-none focus:ring-2 focus:ring-[#e8f0fe] sm:max-w-[6.5rem] sm:py-1.5 sm:text-ui-sm',
+                        categoryFilter === 'all'
+                          ? 'w-9 text-transparent sm:w-auto sm:text-[var(--gcal-muted)]'
+                          : 'max-w-[5.5rem] text-[var(--gcal-blue)] sm:text-[var(--gcal-muted)]',
+                      )}
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value as EventCategory | 'all')}
+                      aria-label={`Filter by category: ${filterLabel}`}
+                    >
+                      <option value="all">All</option>
+                      {Object.entries(CATEGORIES).map(([k, v]) => (
+                        <option key={k} value={k}>
+                          {v.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              ) : (
+                <div className="relative hidden sm:block">
+                  <CalendarDays className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-[var(--gcal-muted)]" />
+                  <select
+                    className="max-w-[8.5rem] appearance-none rounded-lg border-0 bg-transparent py-1.5 pl-7 pr-2 text-ui-sm font-semibold text-[var(--gcal-muted)] hover:bg-[var(--gcal-bg)] focus:outline-none focus:ring-2 focus:ring-[#e8f0fe]"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    aria-label="Jump to day"
+                  >
+                    {days.map((d) => (
+                      <option key={isoDate(d)} value={isoDate(d)}>
+                        {format(d, 'EEE dd/MM')}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
           </>
         ) : (
@@ -179,7 +199,7 @@ export function TabBar() {
         )}
       </div>
 
-      {activeTab === 'schedule' ? (
+      {activeTab === 'schedule' || activeTab === 'map' ? (
         <div ref={stripRef} className="flex gap-1.5 overflow-x-auto px-3 pb-2.5 sm:hidden">
           {days.map((d) => {
             const iso = isoDate(d)
@@ -192,7 +212,7 @@ export function TabBar() {
                 data-selected={selected ? 'true' : undefined}
                 onClick={() => {
                   setSelectedDate(iso)
-                  setView('day')
+                  if (activeTab === 'schedule') setView('day')
                 }}
                 className={cn(
                   'flex shrink-0 flex-col items-center rounded-xl px-3 py-1.5 text-center',

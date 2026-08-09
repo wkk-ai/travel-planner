@@ -12,7 +12,9 @@ import {
   tripDaysIncludingEvents,
   travelBufferWarnings,
 } from '../lib/time'
+import { dayRouteStops } from '../lib/googleMapsRoute'
 import { storyStripeGiantStyle } from '../lib/storyCardStyle'
+import { daySpentCents, formatUsd } from '../lib/wallet'
 import { backupCount } from '../lib/eventBackups'
 import { useTripStore } from '../store/tripStore'
 import type { TripEvent } from '../types'
@@ -56,6 +58,12 @@ function StoryDayCard({
   onSelectEvent,
   muted,
   warnings,
+  packTodoCount = 0,
+  daySpentCents = 0,
+  mapStops = 0,
+  onOpenPack,
+  onOpenWallet,
+  onOpenMap,
 }: {
   date: string
   proximityIndex: number
@@ -68,6 +76,12 @@ function StoryDayCard({
   onSelectEvent: (id: string) => void
   muted?: boolean
   warnings: { eventId: string; message: string }[]
+  packTodoCount?: number
+  daySpentCents?: number
+  mapStops?: number
+  onOpenPack?: () => void
+  onOpenWallet?: () => void
+  onOpenMap?: () => void
 }) {
   const d = parseISO(date)
   const dayNumber = allDays.findIndex((x) => isoDate(x) === date) + 1
@@ -119,6 +133,37 @@ function StoryDayCard({
             </h4>
             {meta ? <p className="mt-0.5 text-ui-sm text-[var(--gcal-muted)]">{meta}</p> : null}
           </button>
+          {packTodoCount > 0 || daySpentCents > 0 || mapStops > 1 ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {packTodoCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenPack?.()}
+                  className="rounded-full bg-[#e8f0fe] px-2.5 py-0.5 text-[10px] font-bold text-[var(--gcal-blue)] hover:bg-[#d2e3fc]"
+                >
+                  {packTodoCount} to pack
+                </button>
+              ) : null}
+              {daySpentCents > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenWallet?.()}
+                  className="rounded-full bg-[#e6f4ea] px-2.5 py-0.5 text-[10px] font-bold text-[#137333] hover:bg-[#ceead6]"
+                >
+                  {formatUsd(daySpentCents)} spent
+                </button>
+              ) : null}
+              {mapStops > 1 ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenMap?.()}
+                  className="rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold text-[var(--gcal-text)] ring-1 ring-[var(--gcal-border)] hover:bg-[var(--gcal-bg)]"
+                >
+                  {mapStops} stops · map
+                </button>
+              ) : null}
+            </div>
+          ) : null}
           {sortedEvents.length > 0 ? (
             <ul className="mt-2.5">
               {sortedEvents.map((ev, i) => {
@@ -195,6 +240,8 @@ function StoryDayCard({
 export function StoryTab() {
   const trip = useTripStore((s) => s.trip)!
   const events = useTripStore((s) => s.events)
+  const checklist = useTripStore((s) => s.checklist)
+  const expenses = useTripStore((s) => s.expenses)
   const mode = useTripStore((s) => s.mode)
   const setActiveTab = useTripStore((s) => s.setActiveTab)
   const setSelectedDate = useTripStore((s) => s.setSelectedDate)
@@ -225,6 +272,20 @@ export function StoryTab() {
         : tripEnded
           ? 'Trip complete'
           : `Day ${Math.abs(countdown) + 1} of ${totalDays}`
+
+  function openDayOnMap(date: string) {
+    setSelectedDate(date)
+    setActiveTab('map')
+  }
+
+  function dayStoryLinks(date: string) {
+    const dayEvents = eventsForDay(date)
+    return {
+      packTodoCount: checklist.filter((c) => c.dayDate === date && !c.done).length,
+      daySpentCents: daySpentCents(date, expenses),
+      mapStops: dayRouteStops(dayEvents).length,
+    }
+  }
 
   function openDayOnSchedule(date: string) {
     setSelectedDate(date)
@@ -389,6 +450,16 @@ export function StoryTab() {
               onOpenDay={openDayOnSchedule}
               onSelectEvent={selectEvent}
               warnings={warnings}
+              {...dayStoryLinks(date)}
+              onOpenPack={() => {
+                setSelectedDate(date)
+                setActiveTab('pack')
+              }}
+              onOpenWallet={() => {
+                setSelectedDate(date)
+                setActiveTab('wallet')
+              }}
+              onOpenMap={() => openDayOnMap(date)}
             />
           ))}
         </ul>
@@ -420,6 +491,16 @@ export function StoryTab() {
                   onSelectEvent={selectEvent}
                   muted
                   warnings={warnings}
+                  {...dayStoryLinks(date)}
+                  onOpenPack={() => {
+                    setSelectedDate(date)
+                    setActiveTab('pack')
+                  }}
+                  onOpenWallet={() => {
+                    setSelectedDate(date)
+                    setActiveTab('wallet')
+                  }}
+                  onOpenMap={() => openDayOnMap(date)}
                 />
               ))}
             </ul>

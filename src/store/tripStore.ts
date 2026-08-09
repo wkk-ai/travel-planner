@@ -42,6 +42,7 @@ import {
 } from '../lib/supabase'
 import { addDaysIso, isoDate, minutesToTime, shiftEventsFrom, SLOT_MINUTES, timeToMinutes, tripCalendarBounds } from '../lib/time'
 import { swapEventWithBackup } from '../lib/eventBackups'
+import { isValidAppTab } from '../lib/googleMapsRoute'
 import type { EventCategory } from '../types'
 
 const LOCAL_TOKEN_KEY = 'travel-planner-last-token'
@@ -50,7 +51,7 @@ const LOCAL_TAB_KEY = 'travel-planner-tab'
 function loadTabForTrip(tripId: string): AppTab {
   try {
     const raw = localStorage.getItem(`${LOCAL_TAB_KEY}-${tripId}`)
-    return raw === 'schedule' ? 'schedule' : 'story'
+    return isValidAppTab(raw) ? raw : 'story'
   } catch {
     return 'story'
   }
@@ -119,9 +120,11 @@ interface TripState {
   updateNote: (id: string, patch: Partial<TripNote>) => Promise<void>
   deleteNote: (id: string) => Promise<void>
   addChecklist: (text: string, dayDate?: string | null) => Promise<void>
+  updateChecklist: (id: string, patch: Partial<Pick<ChecklistItem, 'text' | 'dayDate' | 'done'>>) => Promise<void>
   toggleChecklist: (id: string) => Promise<void>
   deleteChecklist: (id: string) => Promise<void>
   addExpense: (partial?: Partial<Expense>) => Promise<void>
+  updateExpense: (id: string, patch: Partial<Expense>) => Promise<void>
   deleteExpense: (id: string) => Promise<void>
   updateTrip: (patch: Partial<Trip>) => Promise<void>
   createWhatIf: () => Promise<string | null>
@@ -756,6 +759,17 @@ export const useTripStore = create<TripState>((set, get) => ({
     else await upsertChecklistItem(c)
   },
 
+  updateChecklist: async (id, patch) => {
+    if (get().mode !== 'edit') return
+    const checklist = get().checklist.map((c) => (c.id === id ? { ...c, ...patch } : c))
+    set({ checklist })
+    const c = checklist.find((x) => x.id === id)
+    if (!c) return
+    if (!supabaseConfigured || !navigator.onLine)
+      queueOp({ type: 'upsert_checklist', payload: c })
+    else await upsertChecklistItem(c)
+  },
+
   toggleChecklist: async (id) => {
     if (get().mode !== 'edit') return
     const checklist = get().checklist.map((c) =>
@@ -791,6 +805,17 @@ export const useTripStore = create<TripState>((set, get) => ({
       spentOn: partial.spentOn ?? get().selectedDate,
     }
     set({ expenses: [...get().expenses, e] })
+    if (!supabaseConfigured || !navigator.onLine)
+      queueOp({ type: 'upsert_expense', payload: e })
+    else await upsertExpense(e)
+  },
+
+  updateExpense: async (id, patch) => {
+    if (get().mode !== 'edit') return
+    const expenses = get().expenses.map((e) => (e.id === id ? { ...e, ...patch } : e))
+    set({ expenses })
+    const e = expenses.find((x) => x.id === id)
+    if (!e) return
     if (!supabaseConfigured || !navigator.onLine)
       queueOp({ type: 'upsert_expense', payload: e })
     else await upsertExpense(e)

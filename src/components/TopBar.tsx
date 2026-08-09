@@ -40,11 +40,18 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
   const setSearchQuery = useTripStore((s) => s.setSearchQuery)
   const setPanel = useTripStore((s) => s.setPanel)
   const panel = useTripStore((s) => s.panel)
+  const activeTab = useTripStore((s) => s.activeTab)
   const runningLate = useTripStore((s) => s.runningLate)
   const setToast = useTripStore((s) => s.setToast)
   const [busy, setBusy] = useState(false)
   const [menu, setMenu] = useState<'none' | 'plan' | 'tools' | 'share' | 'more'>('none')
   const [searchOpen, setSearchOpen] = useState(false)
+
+  useEffect(() => {
+    if (activeTab !== 'story' && activeTab !== 'schedule' && activeTab !== 'map') {
+      setSearchOpen(false)
+    }
+  }, [activeTab])
 
   const countdown = daysUntil(trip.startDate)
   const concertCountdown = daysUntil('2026-09-04')
@@ -95,6 +102,8 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
     setMenu('none')
   }
 
+  const searchTabs = activeTab === 'story' || activeTab === 'schedule' || activeTab === 'map'
+
   return (
     <header className="no-print z-40 border-b border-[var(--gcal-border)] bg-white shadow-sm">
       {/* —— Mobile —— */}
@@ -135,12 +144,14 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
               <Undo2 className="size-4" />
             </IconBtn>
           ) : null}
-          <IconBtn
-            label={searchOpen ? 'Close search' : 'Search'}
-            onClick={() => setSearchOpen(!searchOpen)}
-          >
-            {searchOpen ? <X className="size-4" /> : <Search className="size-4" />}
-          </IconBtn>
+          {searchTabs ? (
+            <IconBtn
+              label={searchOpen ? 'Close search' : 'Search'}
+              onClick={() => setSearchOpen(!searchOpen)}
+            >
+              {searchOpen ? <X className="size-4" /> : <Search className="size-4" />}
+            </IconBtn>
+          ) : null}
           <MenuButton
             open={menu === 'more'}
             label="More"
@@ -215,7 +226,7 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
           </MenuButton>
         </div>
 
-        {searchOpen ? (
+        {searchTabs && searchOpen ? (
           <div className="border-t border-[var(--gcal-border)] px-3 py-2">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--gcal-muted)]" />
@@ -263,16 +274,18 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
           </div>
         </button>
 
-        <div className="relative min-w-[120px] flex-1 max-w-xs">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--gcal-muted)]" />
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search events…"
-            title="Search events"
-            className="w-full rounded-full border border-[var(--gcal-border)] bg-white py-2 pl-8 pr-3 text-ui-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe]"
-          />
-        </div>
+        {searchTabs ? (
+          <div className="relative min-w-[120px] flex-1 max-w-xs">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--gcal-muted)]" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search events…"
+              title="Search events"
+              className="w-full rounded-full border border-[var(--gcal-border)] bg-white py-2 pl-8 pr-3 text-ui-sm outline-none focus:border-[var(--gcal-blue)] focus:ring-2 focus:ring-[#e8f0fe]"
+            />
+          </div>
+        ) : null}
 
         <div className="ml-auto flex flex-wrap items-center gap-1">
           <StatusDot />

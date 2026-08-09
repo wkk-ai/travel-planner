@@ -223,6 +223,14 @@ textarea {
   }
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .field {
   width: 100%;
   border: 1px solid var(--gcal-border);
