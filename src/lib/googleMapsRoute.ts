@@ -2,23 +2,125 @@ import type { TripEvent } from '../types'
 
 const VALID_TABS = new Set(['story', 'schedule', 'map', 'pack', 'wallet'])
 
-/** Best label for Google Maps from an event's place name or maps link. */
-export function stopQuery(event: TripEvent): string | null {
-  const loc = event.location.trim()
-  if (loc) return loc
-  const url = event.mapsUrl.trim()
-  if (!url) return null
+export interface ParsedMapsUrl {
+  label: string | null
+  routeQuery: string
+  coords: { lat: number; lng: number } | null
+  placeId: string | null
+}
+
+function decodeSegment(s: string): string {
   try {
-    const u = new URL(url)
-    const q = u.searchParams.get('q') ?? u.searchParams.get('query')
-    if (q) return decodeURIComponent(q.replace(/\+/g, ' '))
-    const path = u.pathname
-    const placeMatch = path.match(/\/place\/([^/]+)/)
-    if (placeMatch) return decodeURIComponent(placeMatch[1].replace(/\+/g, ' '))
+    return decodeURIComponent(s.replace(/\+/g, ' '))
   } catch {
-    /* ignore */
+    return s.replace(/\+/g, ' ')
   }
-  return null
+}
+
+function cleanPlaceLabel(raw: string): string {
+  return decodeSegment(raw).replace(/\s+/g, ' ').trim()
+}
+
+/** Parse a Google Maps share/search URL — no API key, no cost. */
+export function parseGoogleMapsUrl(raw: string): ParsedMapsUrl | null {
+  const trimmed = raw.trim()
+  if (!trimmed) return null
+  try {
+    const href = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`
+    const u = new URL(href)
+
+    const q = u.searchParams.get('q') ?? u.searchParams.get('query')
+    const placeIdFromQ = q?.match(/^place_id:(.+)$/i)?.[1] ?? null
+    const placeId =
+      placeIdFromQ ??
+      u.searchParams.get('query_place_id') ??
+      u.searchParams.get('place_id')
+
+    const placePath = u.pathname.match(/\/place\/([^/@?]+)/)
+    let label: string | null = null
+    if (placePath?.[1] && placePath[1] !== '') {
+      label = cleanPlaceLabel(placePath[1])
+    } else if (q && !/^-?\d+\.?\d*,\s*-?\d+\.?\d*$/.test(q) && !q.startsWith('place_id:')) {
+      label = cleanPlaceLabel(q)
+    }
+
+    const d3 = href.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/)
+    const at = href.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)
+    const qCoords = q?.match(/^(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)$/)
+
+    let lat: number | null = null
+    let lng: number | null = null
+    if (d3) {
+      lat = parseFloat(d3[1])
+      lng = parseFloat(d3[2])
+    } else if (at) {
+      lat = parseFloat(at[1])
+      lng = parseFloat(at[2])
+    } else if (qCoords) {
+      lat = parseFloat(qCoords[1])
+      lng = parseFloat(qCoords[2])
+    }
+
+    let routeQuery: string | null = null
+    if (lat != null && lng != null && !Number.isNaN(lat) && !Number.isNaN(lng)) {
+      routeQuery = `${lat},${lng}`
+    } else if (placeId) {
+      routeQuery = `place_id:${placeId}`
+    } else if (label) {
+      routeQuery = label
+    } else if (q) {
+      routeQuery = cleanPlaceLabel(q)
+    }
+
+    if (!routeQuery) return null
+
+    return {
+      label,
+      routeQuery,
+      coords: lat != null && lng != null ? { lat, lng } : null,
+      placeId,
+    }
+  } catch {
+    return null
+  }
+}
+
+/** Apply pasted maps URL; auto-fill location when empty (free, from URL only). */
+export function mapsUrlPatch(
+  mapsUrl: string,
+  currentLocation: string,
+): { mapsUrl: string; location?: string } {
+  const parsed = parseGoogleMapsUrl(mapsUrl)
+  if (parsed?.label && !currentLocation.trim()) {
+    return { mapsUrl, location: parsed.label }
+  }
+  return { mapsUrl }
+}
+
+/** Best routing target — prefers Google Maps link over plain text name. */
+export function stopQuery(event: TripEvent): string | null {
+  const mapsUrl = event.mapsUrl.trim()
+  if (mapsUrl) {
+    const parsed = parseGoogleMapsUrl(mapsUrl)
+    if (parsed) return parsed.routeQuery
+  }
+  const loc = event.location.trim()
+  return loc || null
+}
+
+export function stopDisplayLabel(event: TripEvent): string {
+  const mapsUrl = event.mapsUrl.trim()
+  if (mapsUrl) {
+    const parsed = parseGoogleMapsUrl(mapsUrl)
+    if (parsed?.label) return parsed.label
+  }
+  if (event.location.trim()) return event.location.trim()
+  if (mapsUrl) return 'Google Maps pin'
+  return 'No place set'
+}
+
+export function stopUsesMapsPin(event: TripEvent): boolean {
+  return Boolean(event.mapsUrl.trim() && parseGoogleMapsUrl(event.mapsUrl.trim()))
 }
 
 /** Ordered stops for a day (events with a resolvable place). */
@@ -37,7 +139,11 @@ export function buildGoogleMapsRouteUrl(stops: string[]): string | null {
   const clean = stops.map((s) => s.trim()).filter(Boolean)
   if (!clean.length) return null
   if (clean.length === 1) {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(clean[0])}`
+    const s = clean[0]
+    if (s.startsWith('place_id:')) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s)}`
+    }
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s)}`
   }
   const origin = clean[0]
   const destination = clean[clean.length - 1]

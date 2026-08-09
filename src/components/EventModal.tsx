@@ -5,6 +5,7 @@ import { CATEGORIES, eventColors } from '../data/categories'
 import { useTripStore } from '../store/tripStore'
 import { timeOptions30, cn } from '../lib/time'
 import { EventBackupsSection } from './EventBackupsSection'
+import { mapsUrlPatch } from '../lib/googleMapsRoute'
 import { FormRow } from './FormRow'
 import { formatUsd, eventSpentCents } from '../lib/wallet'
 
@@ -29,6 +30,7 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
   const [draft, setDraft] = useState(event)
   const [saving, setSaving] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
+  const [logAmount, setLogAmount] = useState('')
   const times = useMemo(() => timeOptions30(), [])
 
   const dirty = useMemo(
@@ -37,6 +39,12 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
   )
 
   useEffect(() => setDraft(event), [event])
+
+  useEffect(() => {
+    setLogAmount(
+      event.budgetCents > 0 ? String((event.budgetCents / 100).toFixed(2)) : '',
+    )
+  }, [event.id, event.budgetCents])
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -245,24 +253,17 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
             </div>
           </FormRow>
 
-          <FormRow label="Location" hint="Venue or address">
-            <input
-              disabled={readOnly}
-              className="field"
-              value={draft.location}
-              onChange={(e) => setDraft({ ...draft, location: e.target.value })}
-              placeholder="Place name"
-            />
-          </FormRow>
-
-          <FormRow label="Maps" hint="Open in Google Maps">
+          <FormRow label="Maps" hint="Paste Google Maps link">
             <div className="flex gap-2">
               <input
                 disabled={readOnly}
                 className="field min-w-0 flex-1"
                 value={draft.mapsUrl}
-                onChange={(e) => setDraft({ ...draft, mapsUrl: e.target.value })}
-                placeholder="Paste URL"
+                onChange={(e) => {
+                  const mapsUrl = e.target.value
+                  setDraft({ ...draft, ...mapsUrlPatch(mapsUrl, draft.location) })
+                }}
+                placeholder="https://maps.google.com/…"
               />
               {draft.mapsUrl ? (
                 <a
@@ -275,6 +276,21 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
                 </a>
               ) : null}
             </div>
+            {!readOnly ? (
+              <p className="mt-1.5 text-[11px] text-[var(--gcal-muted)]">
+                Fills place name from link — free, no API needed
+              </p>
+            ) : null}
+          </FormRow>
+
+          <FormRow label="Location" hint="Name shown on schedule">
+            <input
+              disabled={readOnly}
+              className="field"
+              value={draft.location}
+              onChange={(e) => setDraft({ ...draft, location: e.target.value })}
+              placeholder="Place name"
+            />
           </FormRow>
 
           {draft.category === 'flight' ? (
@@ -333,56 +349,80 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
             />
           </FormRow>
 
-          <FormRow label="Budget" hint="Estimated cost">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-[var(--gcal-muted)]">$</span>
-              <input
-                type="number"
-                min={0}
-                step={10}
-                disabled={readOnly}
-                className="field"
-                value={Number((draft.budgetCents / 100).toFixed(2))}
-                onChange={(e) => {
-                  const n = Math.max(0, parseFloat(e.target.value || '0'))
-                  setDraft({ ...draft, budgetCents: Math.round(n * 100) })
-                }}
-              />
+          <FormRow label="Budget" hint="Plan & log spending">
+            <div className="space-y-3">
+              <div>
+                <div className="mb-1 text-[11px] font-semibold text-[var(--gcal-muted)]">Planned</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-[var(--gcal-muted)]">$</span>
+                  <input
+                    type="number"
+                    min={0}
+                    step={10}
+                    disabled={readOnly}
+                    className="field"
+                    value={Number((draft.budgetCents / 100).toFixed(2))}
+                    onChange={(e) => {
+                      const n = Math.max(0, parseFloat(e.target.value || '0'))
+                      setDraft({ ...draft, budgetCents: Math.round(n * 100) })
+                    }}
+                  />
+                </div>
+              </div>
+              {!isDraft ? (
+                <div>
+                  <div className="mb-1 text-[11px] font-semibold text-[var(--gcal-muted)]">
+                    Actually spent
+                    {spentOnEvent > 0 ? (
+                      <span className="ml-1 font-bold text-[#137333]">
+                        · {formatUsd(spentOnEvent)} logged
+                      </span>
+                    ) : null}
+                  </div>
+                  {!readOnly ? (
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        <span className="shrink-0 text-sm text-[var(--gcal-muted)]">$</span>
+                        <input
+                          type="number"
+                          min={0}
+                          step={0.01}
+                          className="field min-w-0 flex-1"
+                          value={logAmount}
+                          onChange={(e) => setLogAmount(e.target.value)}
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const cents = Math.round(parseFloat(logAmount || '0') * 100)
+                          if (cents <= 0) {
+                            setToast('Enter an amount to log')
+                            return
+                          }
+                          void addExpense({
+                            eventId: event.id,
+                            label: draft.title || 'Expense',
+                            category: draft.category,
+                            amountCents: cents,
+                            spentOn: draft.date,
+                          })
+                          setToast('Expense logged — see Wallet')
+                        }}
+                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--gcal-blue)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--gcal-blue-hover)]"
+                      >
+                        <Receipt className="size-4" />
+                        Log spent
+                      </button>
+                    </div>
+                  ) : spentOnEvent <= 0 ? (
+                    <p className="text-ui-sm text-[var(--gcal-muted)]">Nothing logged yet</p>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </FormRow>
-
-          {!isDraft ? (
-            <FormRow label="Spent" hint="Actual cost logged">
-              <div className="space-y-2">
-                {spentOnEvent > 0 ? (
-                  <p className="text-ui-sm font-semibold text-[#137333]">
-                    Logged: {formatUsd(spentOnEvent)}
-                  </p>
-                ) : (
-                  <p className="text-ui-sm text-[var(--gcal-muted)]">Nothing logged yet</p>
-                )}
-                {!readOnly ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void addExpense({
-                        eventId: event.id,
-                        label: draft.title || 'Expense',
-                        category: draft.category,
-                        amountCents: draft.budgetCents > 0 ? draft.budgetCents : 1000,
-                        spentOn: draft.date,
-                      })
-                      setToast('Expense logged — see Wallet')
-                    }}
-                    className="field inline-flex w-full items-center justify-center gap-2 border-dashed bg-[var(--gcal-bg)] text-sm font-semibold text-[var(--gcal-blue)] hover:border-[var(--gcal-blue)] hover:bg-[#e8f0fe]"
-                  >
-                    <Receipt className="size-4" />
-                    Log expense for this event
-                  </button>
-                ) : null}
-              </div>
-            </FormRow>
-          ) : null}
 
           <FormRow label="Photo" hint="Optional image">
             {draft.photoDataUrl ? (

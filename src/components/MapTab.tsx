@@ -2,7 +2,7 @@ import { format } from 'date-fns'
 import { ExternalLink, MapPin, Navigation } from 'lucide-react'
 import { useMemo } from 'react'
 import { CATEGORIES, eventColors } from '../data/categories'
-import { dayRouteStops, openGoogleMapsRoute } from '../lib/googleMapsRoute'
+import { dayRouteStops, openGoogleMapsRoute, stopDisplayLabel, stopUsesMapsPin } from '../lib/googleMapsRoute'
 import { isoDate, tripDaysIncludingEvents } from '../lib/time'
 import { useTripStore } from '../store/tripStore'
 import type { TripEvent } from '../types'
@@ -51,6 +51,8 @@ function StopRow({
 }) {
   const colors = eventColors(event.category, event.color)
   const mapsLink = event.mapsUrl.trim()
+  const placeLabel = stopDisplayLabel(event)
+  const pinned = stopUsesMapsPin(event)
 
   return (
     <li>
@@ -82,8 +84,13 @@ function StopRow({
           </span>
           <span className="mt-0.5 flex items-center gap-1 text-ui-sm text-[var(--gcal-muted)]">
             <MapPin className="size-3.5 shrink-0" />
-            <span className="truncate">{event.location || 'Place'}</span>
+            <span className="truncate">{placeLabel}</span>
           </span>
+          {pinned ? (
+            <span className="mt-0.5 block text-[10px] font-semibold text-[var(--gcal-blue)]">
+              Pinned via Google Maps link
+            </span>
+          ) : null}
         </span>
         {mapsLink ? (
           <a
@@ -134,7 +141,7 @@ export function MapTab() {
       <header className="mb-4">
         <h1 className="text-ui-xl font-bold text-[var(--gcal-text)]">Map</h1>
         <p className="mt-0.5 text-ui-sm text-[var(--gcal-muted)]">
-          {selectedDay ? format(selectedDay, 'EEEE, MMM d') : 'Pick a day above'} · stops in time order
+          {selectedDay ? format(selectedDay, 'EEEE, MMM d') : 'Pick a day above'} · uses Maps links first
         </p>
       </header>
 
@@ -183,7 +190,7 @@ export function MapTab() {
           <MapPin className="mx-auto size-10 text-[var(--gcal-muted)]/40" />
           <p className="mt-3 text-ui-base font-semibold text-[var(--gcal-text)]">No places for this day</p>
           <p className="mt-1 text-ui-sm text-[var(--gcal-muted)]">
-            Add a location on events in Schedule — they show up here in order.
+            Add a Google Maps link on events — routes use the pin, not just the name.
           </p>
         </div>
       )}

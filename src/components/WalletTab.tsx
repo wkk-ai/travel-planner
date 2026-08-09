@@ -56,18 +56,21 @@ function ExpenseRow({
         {readOnly ? (
           <span className="text-ui-base font-bold tabular-nums">{formatUsd(expense.amountCents)}</span>
         ) : (
-          <input
-            type="number"
-            min={0}
-            step={0.01}
-            className="field w-20 text-right text-ui-sm font-bold tabular-nums"
-            value={(expense.amountCents / 100).toFixed(2)}
-            onChange={(e) => {
-              const n = Math.max(0, parseFloat(e.target.value || '0'))
-              onAmountChange(Math.round(n * 100))
-            }}
-            aria-label="Amount"
-          />
+          <div className="flex items-center gap-1.5">
+            <span className="shrink-0 text-sm text-[var(--gcal-muted)]">$</span>
+            <input
+              type="number"
+              min={0}
+              step={0.01}
+              className="field w-24 text-right text-ui-sm font-bold tabular-nums"
+              value={(expense.amountCents / 100).toFixed(2)}
+              onChange={(e) => {
+                const n = Math.max(0, parseFloat(e.target.value || '0'))
+                onAmountChange(Math.round(n * 100))
+              }}
+              aria-label="Amount"
+            />
+          </div>
         )}
         {!readOnly ? (
           <button
@@ -205,33 +208,33 @@ export function WalletTab() {
           <p className="mb-3 text-ui-xs text-[var(--gcal-muted)]">
             For {format(parseISO(selectedDate), 'EEEE, MMM d')}
           </p>
-          <div className="grid gap-2 sm:grid-cols-[1fr_100px_auto]">
+          <div className="flex flex-col gap-2">
             <input
               className="field"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="What did you buy?"
             />
-            <div className="relative">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--gcal-muted)]">
-                $
-              </span>
-              <input
-                className="field pl-7"
-                type="number"
-                min={0}
-                step={0.01}
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0"
-              />
+            <div className="flex gap-2">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <span className="shrink-0 text-sm font-medium text-[var(--gcal-muted)]">$</span>
+                <input
+                  className="field min-w-0 flex-1"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                />
+              </div>
+              <button
+                type="submit"
+                className="flex shrink-0 items-center justify-center gap-1 rounded-xl bg-[var(--gcal-blue)] px-4 py-2.5 text-ui-sm font-semibold text-white hover:bg-[var(--gcal-blue-hover)]"
+              >
+                <Plus className="size-4" /> Add
+              </button>
             </div>
-            <button
-              type="submit"
-              className="flex items-center justify-center gap-1 rounded-xl bg-[var(--gcal-blue)] px-4 py-2.5 text-ui-sm font-semibold text-white hover:bg-[var(--gcal-blue-hover)]"
-            >
-              <Plus className="size-4" /> Add
-            </button>
           </div>
         </form>
       ) : null}
