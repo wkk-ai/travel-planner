@@ -11,42 +11,154 @@ import {
   totalPlannedCents,
   totalSpentCents,
 } from '../lib/wallet'
-import { cn, isoDate, tripDaysIncludingEvents } from '../lib/time'
+import { isoDate, tripDaysIncludingEvents } from '../lib/time'
 import { useTripStore } from '../store/tripStore'
 import type { EventCategory, Expense } from '../types'
 
-type BarRow = { key: string; label: string; color: string; border: string; planned: number; spent: number }
+type CatRow = {
+  key: string
+  label: string
+  color: string
+  bg: string
+  planned: number
+  spent: number
+}
 
-function CompareBars({ rows }: { rows: BarRow[] }) {
-  const max = Math.max(...rows.map((r) => Math.max(r.planned, r.spent)), 1)
+type DayRow = { key: string; shortLabel: string; planned: number; spent: number }
+
+const RING_R = 14
+const RING_C = 2 * Math.PI * RING_R
+
+function WalletRingSummary({
+  planned,
+  spent,
+}: {
+  planned: number
+  spent: number
+}) {
+  const over = spent > planned && planned > 0
+  const pct = planned > 0 ? Math.round((spent / planned) * 100) : spent > 0 ? 100 : 0
+  const overCents = Math.max(0, spent - planned)
+
+  let blueLen = 0
+  let redLen = 0
+  if (spent <= 0) {
+    blueLen = 0
+  } else if (planned <= 0) {
+    blueLen = RING_C
+  } else if (!over) {
+    blueLen = (spent / planned) * RING_C
+  } else {
+    blueLen = (planned / spent) * RING_C
+    redLen = RING_C - blueLen
+  }
+
   return (
-    <div className="space-y-3.5">
-      {rows.map((r) => (
-        <div key={r.key}>
-          <div className="mb-1.5 flex items-center justify-between gap-2">
-            <span className="flex min-w-0 items-center gap-1.5 text-ui-sm font-semibold text-[var(--gcal-text)]">
-              <span className="size-2 shrink-0 rounded-full" style={{ background: r.border }} />
-              <span className="truncate">{r.label}</span>
-            </span>
-            <span className="shrink-0 text-ui-xs tabular-nums text-[var(--gcal-muted)]">
-              <span className="font-bold text-[var(--gcal-text)]">{formatUsd(r.spent)}</span>
-              {r.planned > 0 ? ` / ${formatUsd(r.planned)}` : ''}
-            </span>
-          </div>
-          <div className="relative h-3 overflow-hidden rounded-full bg-[var(--gcal-bg)]">
-            {r.planned > 0 ? (
-              <div
-                className="absolute inset-y-0 left-0 rounded-full bg-[#dadce0]"
-                style={{ width: `${(r.planned / max) * 100}%` }}
-              />
-            ) : null}
-            <div
-              className="absolute inset-y-0 left-0 rounded-full"
-              style={{ width: `${(r.spent / max) * 100}%`, background: r.border }}
+    <div className="mb-5 grid grid-cols-[auto_1fr] items-center gap-4 rounded-2xl border border-[var(--gcal-border)] bg-white p-4 shadow-sm">
+      <div className="relative size-24 shrink-0">
+        <svg className="size-24 -rotate-90" viewBox="0 0 36 36" aria-hidden>
+          <circle cx="18" cy="18" r={RING_R} fill="none" stroke="#e8f0fe" strokeWidth="4" />
+          {blueLen > 0 ? (
+            <circle
+              cx="18"
+              cy="18"
+              r={RING_R}
+              fill="none"
+              stroke="var(--gcal-blue)"
+              strokeWidth="4"
+              strokeDasharray={`${blueLen} ${RING_C}`}
+              strokeLinecap="round"
             />
+          ) : null}
+          {redLen > 0 ? (
+            <circle
+              cx="18"
+              cy="18"
+              r={RING_R}
+              fill="none"
+              stroke="#ea4335"
+              strokeWidth="4"
+              strokeDasharray={`${redLen} ${RING_C}`}
+              strokeDashoffset={-blueLen}
+              strokeLinecap="round"
+            />
+          ) : null}
+        </svg>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+          <div className="text-xl font-bold tabular-nums text-[var(--gcal-text)]">{pct}%</div>
+          <div className="text-[10px] font-medium text-[var(--gcal-muted)]">of plan</div>
+        </div>
+      </div>
+      <div className="min-w-0 space-y-1 text-ui-sm">
+        <div className="text-[var(--gcal-muted)]">
+          Spent <span className="font-bold text-[var(--gcal-text)]">{formatUsd(spent)}</span>
+        </div>
+        <div className="text-[var(--gcal-muted)]">
+          Planned <span className="font-bold text-[var(--gcal-text)]">{formatUsd(planned)}</span>
+        </div>
+        {over ? (
+          <div className="pt-0.5 font-semibold text-[#c5221f]">{formatUsd(overCents)} over plan</div>
+        ) : planned > 0 ? (
+          <div className="pt-0.5 font-semibold text-[#137333]">
+            {formatUsd(Math.max(0, planned - spent))} left
           </div>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+function CategoryPills({ rows }: { rows: CatRow[] }) {
+  return (
+    <div className="space-y-2">
+      {rows.map((r) => (
+        <div
+          key={r.key}
+          className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-ui-sm font-semibold"
+          style={{ background: r.bg, color: r.color }}
+        >
+          <span>{r.label}</span>
+          <span className="shrink-0 tabular-nums">
+            {formatUsd(r.spent)}
+            {r.planned > 0 ? ` / ${formatUsd(r.planned)}` : ''}
+          </span>
         </div>
       ))}
+    </div>
+  )
+}
+
+function DayColumnChart({ rows }: { rows: DayRow[] }) {
+  const max = Math.max(...rows.map((r) => Math.max(r.planned, r.spent)), 1)
+  return (
+    <div className="flex h-28 items-end justify-between gap-1">
+      {rows.map((r) => {
+        const plannedH = r.planned > 0 ? Math.max(6, (r.planned / max) * 100) : 0
+        const spentH = r.spent > 0 ? Math.max(6, (r.spent / max) * 100) : 0
+        return (
+          <div key={r.key} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
+            <div className="flex w-full flex-1 items-end justify-center gap-0.5">
+              {plannedH > 0 ? (
+                <div
+                  className="w-[42%] rounded-t-md bg-[var(--gcal-border)]"
+                  style={{ height: `${plannedH}%` }}
+                  title={`Planned ${formatUsd(r.planned)}`}
+                />
+              ) : null}
+              {spentH > 0 ? (
+                <div
+                  className="w-[42%] rounded-t-md bg-[var(--gcal-blue)]"
+                  style={{ height: `${spentH}%` }}
+                  title={`Spent ${formatUsd(r.spent)}`}
+                />
+              ) : null}
+            </div>
+            <span className="w-full truncate text-center text-[9px] font-semibold text-[var(--gcal-muted)]">
+              {r.shortLabel}
+            </span>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -147,10 +259,8 @@ export function WalletTab() {
 
   const planned = useMemo(() => totalPlannedCents(events), [events])
   const spent = useMemo(() => totalSpentCents(expenses), [expenses])
-  const diff = planned - spent
-  const over = spent > planned && planned > 0
 
-  const byCategory = useMemo((): BarRow[] => {
+  const byCategory = useMemo((): CatRow[] => {
     const map = new Map<string, { planned: number; spent: number }>()
     for (const e of events) {
       const cur = map.get(e.category) ?? { planned: 0, spent: 0 }
@@ -166,101 +276,37 @@ export function WalletTab() {
       .filter(([, v]) => v.planned > 0 || v.spent > 0)
       .map(([key, v]) => {
         const meta = CATEGORIES[key as EventCategory] ?? CATEGORIES.other
-        return { key, label: meta.label, color: meta.color, border: meta.border, ...v }
+        return { key, label: meta.label, color: meta.color, bg: meta.bg, ...v }
       })
       .sort((a, b) => b.spent - a.spent)
   }, [events, expenses])
 
-  const byDay = useMemo((): BarRow[] => {
-    return days
-      .map((d) => {
-        const iso = isoDate(d)
-        return {
-          key: iso,
-          label: format(d, 'EEE, MMM d'),
-          color: 'var(--gcal-text)',
-          border: 'var(--gcal-blue)',
-          planned: dayPlannedCents(iso, events),
-          spent: daySpentCents(iso, expenses),
-        }
-      })
-      .filter((d) => d.planned > 0 || d.spent > 0)
+  const byDay = useMemo((): DayRow[] => {
+    return days.map((d) => {
+      const iso = isoDate(d)
+      return {
+        key: iso,
+        shortLabel: format(d, 'EEE'),
+        planned: dayPlannedCents(iso, events),
+        spent: daySpentCents(iso, expenses),
+      }
+    })
   }, [days, events, expenses])
 
   const eventTitle = (eventId: string | null) =>
     eventId ? events.find((e) => e.id === eventId)?.title : undefined
 
-  const spentDollars = Math.round(spent / 100)
-  const plannedDollars = Math.round(planned / 100)
-  const diffDollars = Math.abs(Math.round(diff / 100))
+  const showDayChart = byDay.some((d) => d.planned > 0 || d.spent > 0)
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-5 pb-24">
       <header className="mb-4">
         <h1 className="text-ui-xl font-bold text-[var(--gcal-text)]">Wallet</h1>
-        <p className="mt-0.5 text-ui-sm text-[var(--gcal-muted)]">
-          Planned vs spent · linked to your events
-        </p>
+        <p className="mt-0.5 text-ui-sm text-[var(--gcal-muted)]">Planned vs spent</p>
       </header>
 
-      <div className="mb-5 grid grid-cols-3 gap-2">
-        <div className="rounded-2xl border border-[#c2d7f7] bg-[#e8f0fe] p-3 shadow-sm">
-          <div className="text-ui-xs font-semibold uppercase tracking-wide text-[var(--gcal-blue)]">
-            Spent
-          </div>
-          <div className="mt-1 text-2xl font-bold tabular-nums text-[#0d47a1]">{spentDollars}</div>
-          <div className="text-[10px] font-medium text-[var(--gcal-muted)]">USD</div>
-        </div>
-        <div className="rounded-2xl border border-[var(--gcal-border)] bg-white p-3 shadow-sm">
-          <div className="text-ui-xs font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
-            Planned
-          </div>
-          <div className="mt-1 text-2xl font-bold tabular-nums text-[var(--gcal-text)]">
-            {plannedDollars}
-          </div>
-          <div className="text-[10px] font-medium text-[var(--gcal-muted)]">USD</div>
-        </div>
-        <div
-          className={cn(
-            'rounded-2xl border p-3 shadow-sm',
-            over ? 'border-[#f5c2c0] bg-[#fce8e6]' : 'border-[#ceead6] bg-[#e6f4ea]',
-          )}
-        >
-          <div
-            className={cn(
-              'text-ui-xs font-semibold uppercase tracking-wide',
-              over ? 'text-[#c5221f]' : 'text-[#137333]',
-            )}
-          >
-            {over ? 'Over' : 'Left'}
-          </div>
-          <div
-            className={cn(
-              'mt-1 text-2xl font-bold tabular-nums',
-              over ? 'text-[#c5221f]' : 'text-[#137333]',
-            )}
-          >
-            {diffDollars}
-          </div>
-          <div className="text-[10px] font-medium text-[var(--gcal-muted)]">USD</div>
-        </div>
-      </div>
-
-      {planned > 0 ? (
-        <div className="mb-5 rounded-2xl border border-[var(--gcal-border)] bg-white px-4 py-3 shadow-sm">
-          <div className="mb-2 flex justify-between text-ui-xs text-[var(--gcal-muted)]">
-            <span>Trip progress</span>
-            <span className="font-semibold tabular-nums">
-              {Math.min(100, Math.round((spent / planned) * 100))}% of plan
-            </span>
-          </div>
-          <div className="h-2.5 overflow-hidden rounded-full bg-[var(--gcal-bg)]">
-            <div
-              className={cn('h-full rounded-full', over ? 'bg-[#ea4335]' : 'bg-[#34a853]')}
-              style={{ width: `${Math.min(100, (spent / planned) * 100)}%` }}
-            />
-          </div>
-        </div>
+      {planned > 0 || spent > 0 ? (
+        <WalletRingSummary planned={planned} spent={spent} />
       ) : null}
 
       {byCategory.length > 0 ? (
@@ -268,17 +314,17 @@ export function WalletTab() {
           <h2 className="mb-3 text-ui-sm font-bold uppercase tracking-wide text-[var(--gcal-muted)]">
             By category
           </h2>
-          <CompareBars rows={byCategory} />
+          <CategoryPills rows={byCategory} />
         </section>
       ) : null}
 
-      {byDay.length > 0 ? (
+      {showDayChart ? (
         <section className="mb-5 rounded-2xl border border-[var(--gcal-border)] bg-white p-4 shadow-sm">
           <h2 className="mb-1 text-ui-sm font-bold uppercase tracking-wide text-[var(--gcal-muted)]">
             By day
           </h2>
-          <p className="mb-3 text-[10px] text-[var(--gcal-muted)]">Gray = planned · Color = spent</p>
-          <CompareBars rows={byDay} />
+          <p className="mb-3 text-[10px] text-[var(--gcal-muted)]">Gray = planned · Blue = spent</p>
+          <DayColumnChart rows={byDay} />
         </section>
       ) : null}
 
