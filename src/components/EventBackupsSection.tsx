@@ -12,6 +12,7 @@ interface Props {
   readOnly: boolean
   onBackupsChange: (backups: EventBackup[]) => void
   onUseBackup?: (backupId: string) => void | Promise<void>
+  compact?: boolean
 }
 
 export function EventBackupsSection({
@@ -20,6 +21,7 @@ export function EventBackupsSection({
   readOnly,
   onBackupsChange,
   onUseBackup,
+  compact = false,
 }: Props) {
   const swapWithBackup = useTripStore((s) => s.swapWithBackup)
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -40,31 +42,50 @@ export function EventBackupsSection({
   }
 
   return (
-    <section className="rounded-xl border border-[#dadce0] bg-[#f8f9fa]/80 p-3">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
-            Backup plans
+    <section
+      className={cn(
+        compact
+          ? 'rounded-xl border border-dashed border-[var(--gcal-border)] bg-[var(--gcal-bg)] p-3'
+          : 'rounded-xl border border-[#dadce0] bg-[#f8f9fa]/80 p-3',
+      )}
+    >
+      {!compact ? (
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wide text-[var(--gcal-muted)]">
+              Backup plans
+            </div>
+            <p className="mt-0.5 text-[11px] text-[var(--gcal-muted)]">
+              Same time slot ({event.startTime}–{event.endTime}). Swap on trip day if plans change.
+            </p>
           </div>
-          <p className="mt-0.5 text-[11px] text-[var(--gcal-muted)]">
-            Same time slot ({event.startTime}–{event.endTime}). Swap on trip day if plans change.
-          </p>
+          {!readOnly ? (
+            <button
+              type="button"
+              onClick={addBackup}
+              className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--gcal-blue)] shadow-sm ring-1 ring-[var(--gcal-border)] hover:bg-[#e8f0fe]"
+            >
+              <Plus className="size-3.5" /> Add backup
+            </button>
+          ) : null}
         </div>
-        {!readOnly ? (
-          <button
-            type="button"
-            onClick={addBackup}
-            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--gcal-blue)] shadow-sm ring-1 ring-[var(--gcal-border)] hover:bg-[#e8f0fe]"
-          >
-            <Plus className="size-3.5" /> Add backup
-          </button>
-        ) : null}
-      </div>
+      ) : null}
 
       {backups.length === 0 ? (
-        <p className="rounded-lg bg-white px-3 py-2 text-xs text-[var(--gcal-muted)]">
-          No backups yet — add an indoor option, shorter plan, or rain-day alternative.
-        </p>
+        <div className={compact ? 'space-y-2' : undefined}>
+          <p className={cn('text-xs text-[var(--gcal-muted)]', !compact && 'rounded-lg bg-white px-3 py-2')}>
+            {compact ? 'None yet' : 'No backups yet — add an indoor option, shorter plan, or rain-day alternative.'}
+          </p>
+          {!readOnly ? (
+            <button
+              type="button"
+              onClick={addBackup}
+              className="text-xs font-semibold text-[var(--gcal-blue)] hover:underline"
+            >
+              + Add backup
+            </button>
+          ) : null}
+        </div>
       ) : (
         <ul className="space-y-2">
           {backups.map((backup) => (
@@ -84,6 +105,15 @@ export function EventBackupsSection({
           ))}
         </ul>
       )}
+      {compact && !readOnly && backups.length > 0 ? (
+        <button
+          type="button"
+          onClick={addBackup}
+          className="mt-2 text-xs font-semibold text-[var(--gcal-blue)] hover:underline"
+        >
+          + Add backup
+        </button>
+      ) : null}
     </section>
   )
 }

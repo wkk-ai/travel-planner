@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Camera, ExternalLink, Trash2, X } from 'lucide-react'
 import type { EventCategory, TripEvent } from '../types'
-import { CATEGORIES, eventColors } from '../data/categories'
+import { CATEGORIES } from '../data/categories'
 import { useTripStore } from '../store/tripStore'
 import { timeOptions30, cn } from '../lib/time'
 import { EventBackupsSection } from './EventBackupsSection'
@@ -84,7 +84,7 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
     reader.readAsDataURL(file)
   }
 
-  const colors = eventColors(draft.category, draft.color)
+  const headerTitle = draft.title.trim() || (isDraft ? 'New event' : 'Untitled event')
 
   return (
     <div
@@ -95,43 +95,79 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
         className="panel-enter flex max-h-[94vh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Colored header */}
-        <div
-          className="relative px-5 pb-4 pt-4"
-          style={{ background: colors.bg, borderBottom: `3px solid ${colors.border}` }}
-        >
+        <div className="relative border-b border-[#c2d7f7] bg-[#e8f0fe] px-5 py-4">
           <button
             type="button"
             onClick={handleClose}
-            className="absolute right-3 top-3 rounded-full bg-white/70 p-1.5 hover:bg-white"
+            className="absolute right-3 top-3 rounded-lg bg-white/80 p-1.5 hover:bg-white"
             aria-label="Close"
           >
-            <X className="size-4" />
+            <X className="size-4 text-[var(--gcal-muted)]" />
           </button>
-          <div className="pr-10 text-[11px] font-semibold uppercase tracking-wide" style={{ color: colors.color }}>
-            {isDraft ? 'New event (not saved yet)' : 'Edit event'}
-          </div>
-          <input
-            disabled={readOnly}
-            className="mt-1 w-full border-0 bg-transparent text-2xl font-semibold outline-none placeholder:opacity-50"
-            style={{ color: colors.color }}
-            value={draft.title}
-            placeholder="Event title"
-            onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-            autoFocus={isDraft}
-          />
+          <h2 className="pr-10 text-lg font-bold text-[#0d47a1]">Event details</h2>
+          <p className="mt-0.5 truncate pr-10 text-xs text-[var(--gcal-muted)]">{headerTitle}</p>
           {isDraft ? (
-            <p className="mt-1 text-xs" style={{ color: colors.color }}>
-              Close without Save discards this draft
+            <p className="mt-1 text-[11px] text-[var(--gcal-muted)]">
+              Close without saving discards this draft
             </p>
           ) : null}
         </div>
 
-        <div className="cal-scroll flex-1 space-y-5 overflow-auto px-5 py-4">
-          {/* Category chips */}
-          <section>
-            <Label>Category</Label>
-            <div className="mt-1.5 flex flex-wrap gap-1.5">
+        <div className="cal-scroll flex-1 overflow-auto">
+          <Row label="Title" hint="Name on schedule">
+            <input
+              disabled={readOnly}
+              className="field"
+              value={draft.title}
+              placeholder="Event title"
+              onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+              autoFocus={isDraft}
+            />
+          </Row>
+
+          <Row label="Date" hint="Day of trip">
+            <input
+              type="date"
+              disabled={readOnly}
+              className="field"
+              value={draft.date}
+              onChange={(e) => setDraft({ ...draft, date: e.target.value })}
+            />
+          </Row>
+
+          <Row label="Time" hint="Start and end">
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                disabled={readOnly}
+                className="field"
+                value={normalizeTimeOption(draft.startTime, times)}
+                onChange={(e) => setDraft({ ...draft, startTime: e.target.value })}
+                aria-label="Start time"
+              >
+                {times.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+              <select
+                disabled={readOnly}
+                className="field"
+                value={normalizeTimeOption(draft.endTime, times)}
+                onChange={(e) => setDraft({ ...draft, endTime: e.target.value })}
+                aria-label="End time"
+              >
+                {times.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </Row>
+
+          <Row label="Category" hint="Color on calendar">
+            <div className="flex flex-wrap gap-1.5">
               {Object.entries(CATEGORIES).map(([key, meta]) => {
                 const active = draft.category === key && !draft.color
                 return (
@@ -162,11 +198,11 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
               })}
             </div>
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-xs text-[var(--gcal-muted)]">Custom color</span>
+              <span className="text-[11px] text-[var(--gcal-muted)]">Custom color</span>
               <input
                 type="color"
                 disabled={readOnly}
-                value={draft.color ?? colors.border}
+                value={draft.color ?? CATEGORIES[draft.category].border}
                 onChange={(e) => setDraft({ ...draft, color: e.target.value })}
                 className="h-8 w-10 cursor-pointer rounded border border-[var(--gcal-border)] bg-white"
               />
@@ -174,100 +210,49 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
                 <button
                   type="button"
                   disabled={readOnly}
-                  className="text-xs font-medium text-[var(--gcal-blue)]"
+                  className="text-[11px] font-medium text-[var(--gcal-blue)]"
                   onClick={() => setDraft({ ...draft, color: null })}
                 >
                   Use category color
                 </button>
               ) : null}
             </div>
-          </section>
+          </Row>
 
-          {/* When */}
-          <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div>
-              <Label>Date</Label>
-              <input
-                type="date"
-                disabled={readOnly}
-                className="field mt-1"
-                value={draft.date}
-                onChange={(e) => setDraft({ ...draft, date: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>Start</Label>
-              <select
-                disabled={readOnly}
-                className="field mt-1"
-                value={normalizeTimeOption(draft.startTime, times)}
-                onChange={(e) => setDraft({ ...draft, startTime: e.target.value })}
-              >
-                {times.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label>End</Label>
-              <select
-                disabled={readOnly}
-                className="field mt-1"
-                value={normalizeTimeOption(draft.endTime, times)}
-                onChange={(e) => setDraft({ ...draft, endTime: e.target.value })}
-              >
-                {times.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </section>
+          <Row label="Location" hint="Venue or address">
+            <input
+              disabled={readOnly}
+              className="field"
+              value={draft.location}
+              onChange={(e) => setDraft({ ...draft, location: e.target.value })}
+              placeholder="Place name"
+            />
+          </Row>
 
-          {/* Place */}
-          <section className="space-y-2">
-            <div>
-              <Label>Location</Label>
+          <Row label="Maps" hint="Open in Google Maps">
+            <div className="flex gap-2">
               <input
                 disabled={readOnly}
-                className="field mt-1"
-                value={draft.location}
-                onChange={(e) => setDraft({ ...draft, location: e.target.value })}
-                placeholder="Place name"
+                className="field min-w-0 flex-1"
+                value={draft.mapsUrl}
+                onChange={(e) => setDraft({ ...draft, mapsUrl: e.target.value })}
+                placeholder="Paste URL"
               />
+              {draft.mapsUrl ? (
+                <a
+                  href={draft.mapsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-[var(--gcal-border)] hover:bg-[var(--gcal-bg)]"
+                >
+                  <ExternalLink className="size-4" />
+                </a>
+              ) : null}
             </div>
-            <div>
-              <Label>Google Maps link</Label>
-              <div className="mt-1 flex gap-2">
-                <input
-                  disabled={readOnly}
-                  className="field flex-1"
-                  value={draft.mapsUrl}
-                  onChange={(e) => setDraft({ ...draft, mapsUrl: e.target.value })}
-                  placeholder="https://maps.google.com/…"
-                />
-                {draft.mapsUrl ? (
-                  <a
-                    href={draft.mapsUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex size-10 items-center justify-center rounded-xl border border-[var(--gcal-border)] hover:bg-[var(--gcal-bg)]"
-                  >
-                    <ExternalLink className="size-4" />
-                  </a>
-                ) : null}
-              </div>
-            </div>
-          </section>
+          </Row>
 
           {draft.category === 'flight' ? (
-            <section className="rounded-xl border border-[#d2e3fc] bg-[#e8f0fe]/60 p-3">
-              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--gcal-blue)]">
-                Flight details
-              </div>
+            <Row label="Flight" hint="Airline details">
               <div className="grid grid-cols-2 gap-2">
                 <input
                   disabled={readOnly}
@@ -309,43 +294,43 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
                   }
                 />
               </div>
-            </section>
+            </Row>
           ) : null}
 
-          <section>
-            <Label>Notes</Label>
+          <Row label="Notes" hint="Private details">
             <textarea
               disabled={readOnly}
-              className="field mt-1 min-h-[72px]"
+              className="field min-h-[72px] resize-none"
               value={draft.notes}
               onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
               placeholder="Extra details…"
             />
-          </section>
+          </Row>
 
-          <section>
-            <Label>Budget (USD)</Label>
-            <input
-              type="number"
-              min={0}
-              step={10}
-              disabled={readOnly}
-              className="field mt-1"
-              value={Number((draft.budgetCents / 100).toFixed(2))}
-              onChange={(e) => {
-                const n = Math.max(0, parseFloat(e.target.value || '0'))
-                setDraft({ ...draft, budgetCents: Math.round(n * 100) })
-              }}
-            />
-          </section>
+          <Row label="Budget" hint="Estimated cost">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-[var(--gcal-muted)]">$</span>
+              <input
+                type="number"
+                min={0}
+                step={10}
+                disabled={readOnly}
+                className="field"
+                value={Number((draft.budgetCents / 100).toFixed(2))}
+                onChange={(e) => {
+                  const n = Math.max(0, parseFloat(e.target.value || '0'))
+                  setDraft({ ...draft, budgetCents: Math.round(n * 100) })
+                }}
+              />
+            </div>
+          </Row>
 
-          <section>
-            <Label>Photo</Label>
+          <Row label="Photo" hint="Optional image">
             {draft.photoDataUrl ? (
               <img
                 src={draft.photoDataUrl}
                 alt=""
-                className="mt-1 mb-2 max-h-40 w-full rounded-xl object-cover"
+                className="mb-2 max-h-36 w-full rounded-xl object-cover"
               />
             ) : null}
             {!readOnly ? (
@@ -361,27 +346,32 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--gcal-border)] bg-[var(--gcal-bg)] px-4 py-3 text-sm font-medium text-[var(--gcal-text)] hover:border-[var(--gcal-blue)] hover:bg-[#e8f0fe]"
+                  className="field inline-flex w-full items-center justify-center gap-2 border-dashed bg-[var(--gcal-bg)] text-sm font-medium hover:border-[var(--gcal-blue)] hover:bg-[#e8f0fe]"
                 >
                   <Camera className="size-4 text-[var(--gcal-blue)]" />
                   {draft.photoDataUrl ? 'Change photo' : 'Add photo'}
                 </button>
               </>
-            ) : null}
-          </section>
+            ) : draft.photoDataUrl ? null : (
+              <p className="py-2 text-sm text-[var(--gcal-muted)]">No photo</p>
+            )}
+          </Row>
 
           {!isDraft ? (
-            <EventBackupsSection
-              event={draft}
-              backups={draft.backups ?? []}
-              readOnly={readOnly}
-              onBackupsChange={(backups) => setDraft({ ...draft, backups })}
-              onUseBackup={async (backupId) => {
-                await useTripStore
-                  .getState()
-                  .swapWithBackup(event.id, backupId, { ...draft, backups: draft.backups ?? [] })
-              }}
-            />
+            <Row label="Backups" hint="Plan B same slot" noBorder>
+              <EventBackupsSection
+                event={draft}
+                backups={draft.backups ?? []}
+                readOnly={readOnly}
+                onBackupsChange={(backups) => setDraft({ ...draft, backups })}
+                onUseBackup={async (backupId) => {
+                  await useTripStore
+                    .getState()
+                    .swapWithBackup(event.id, backupId, { ...draft, backups: draft.backups ?? [] })
+                }}
+                compact
+              />
+            </Row>
           ) : null}
         </div>
 
@@ -416,20 +406,20 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
           {!readOnly && !isDraft ? (
             <button
               type="button"
-              className="inline-flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-medium text-[#c5221f] hover:bg-[#fce8e6]"
+              className="inline-flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-semibold text-[#c5221f] hover:bg-[#fce8e6]"
               onClick={() => {
                 void deleteEvent(event.id)
                 onClose()
               }}
             >
-              <Trash2 className="size-4" /> Delete
+              <Trash2 className="size-4" /> Delete event
             </button>
           ) : null}
           <div className="flex gap-2">
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-xl px-4 py-2 text-sm font-medium hover:bg-[var(--gcal-bg)]"
+              className="rounded-xl px-4 py-2 text-sm font-medium text-[var(--gcal-muted)] hover:bg-[var(--gcal-bg)]"
             >
               {isDraft ? 'Cancel' : 'Close'}
             </button>
@@ -451,10 +441,11 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
         .field {
           width: 100%;
           border: 1px solid var(--gcal-border);
-          border-radius: 0.75rem;
-          padding: 0.55rem 0.75rem;
+          border-radius: 0.625rem;
+          padding: 0.625rem 0.75rem;
           background: white;
           outline: none;
+          font-size: 0.875rem;
         }
         .field:focus {
           border-color: var(--gcal-blue);
@@ -469,14 +460,40 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
   )
 }
 
-function Label({ children }: { children: React.ReactNode }) {
-  return <div className="text-xs font-semibold text-[var(--gcal-muted)]">{children}</div>
+function Row({
+  label,
+  hint,
+  children,
+  noBorder,
+}: {
+  label: string
+  hint?: string
+  children: React.ReactNode
+  noBorder?: boolean
+}) {
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-[110px_1fr] items-start gap-3 px-5 py-3.5',
+        !noBorder && 'border-b border-[#eef0f2]',
+      )}
+    >
+      <div className="pt-2.5 text-[13px] font-semibold text-[var(--gcal-text)]">
+        {label}
+        {hint ? (
+          <small className="mt-0.5 block text-[11px] font-medium text-[var(--gcal-muted)]">
+            {hint}
+          </small>
+        ) : null}
+      </div>
+      <div className="min-w-0">{children}</div>
+    </div>
+  )
 }
 
 function normalizeTimeOption(time: string, options: string[]): string {
   const t = time.slice(0, 5)
   if (options.includes(t)) return t
-  // snap odd times (e.g. 13:27) to nearest listed option for the select
   const [h, m] = t.split(':').map(Number)
   const mins = h * 60 + (m || 0)
   const snapped = Math.round(mins / 30) * 30
