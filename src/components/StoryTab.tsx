@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { differenceInCalendarDays, format, parseISO } from 'date-fns'
 import { Calendar, ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import { CATEGORIES } from '../data/categories'
@@ -10,6 +10,7 @@ import {
   isEventPast,
   tripCalendarBounds,
   tripDaysIncludingEvents,
+  travelBufferWarnings,
 } from '../lib/time'
 import { storyStripeGiantStyle } from '../lib/storyCardStyle'
 import { backupCount } from '../lib/eventBackups'
@@ -54,6 +55,7 @@ function StoryDayCard({
   onOpenDay,
   onSelectEvent,
   muted,
+  warnings,
 }: {
   date: string
   proximityIndex: number
@@ -65,12 +67,14 @@ function StoryDayCard({
   onOpenDay: (date: string) => void
   onSelectEvent: (id: string) => void
   muted?: boolean
+  warnings: { eventId: string; message: string }[]
 }) {
   const d = parseISO(date)
   const dayNumber = allDays.findIndex((x) => isoDate(x) === date) + 1
   const place = dayPlace(dayEvents)
   const vibe = dayVibe(dayEvents, dayNumber - 1, totalDays)
   const sortedEvents = [...dayEvents].sort((a, b) => a.startTime.localeCompare(b.startTime))
+  const nextEventId = sortedEvents.find((ev) => !isEventPast(ev))?.id ?? null
   const isToday = date === today
   const meta = [place, vibe].filter(Boolean).join(' · ')
   const { stripe, numColumn } = storyStripeGiantStyle(proximityIndex)
@@ -120,6 +124,9 @@ function StoryDayCard({
               {sortedEvents.map((ev, i) => {
                 const cat = CATEGORIES[ev.category]
                 const backups = backupCount(ev)
+                const past = isEventPast(ev)
+                const isNext = ev.id === nextEventId
+                const warn = warnings.find((w) => w.eventId === ev.id)?.message
                 return (
                   <li key={ev.id}>
                     <button
@@ -128,21 +135,45 @@ function StoryDayCard({
                       className={cn(
                         'flex w-full items-start gap-2 py-1.5 text-left',
                         i > 0 && 'border-t border-[#f1f3f4]',
-                        isEventPast(ev) && 'opacity-75',
                       )}
                     >
                       <span
-                        className="mt-1.5 size-[7px] shrink-0 rounded-full"
+                        className={cn(
+                          'mt-1.5 size-[7px] shrink-0 rounded-full',
+                          past && 'opacity-40',
+                        )}
                         style={{ background: cat.border }}
                         aria-hidden
                       />
-                      <span className="w-11 shrink-0 tabular-nums text-ui-sm text-[var(--gcal-muted)]">
+                      <span
+                        className={cn(
+                          'w-11 shrink-0 tabular-nums text-ui-sm',
+                          past && 'text-[var(--gcal-muted)]/45',
+                          isNext && 'font-bold text-[var(--gcal-text)]',
+                          !past && !isNext && 'text-[var(--gcal-muted)]',
+                        )}
+                      >
                         {formatEventTime(ev)}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block text-ui-base font-medium leading-snug">{ev.title}</span>
+                        <span
+                          className={cn(
+                            'block text-ui-base leading-snug',
+                            isNext && 'font-bold text-[var(--gcal-text)]',
+                            past && 'font-normal text-[var(--gcal-muted)]/50',
+                            !past && !isNext && 'font-medium text-[var(--gcal-text)]',
+                          )}
+                        >
+                          {ev.title}
+                        </span>
+                        {warn ? (
+                          <span className="mt-0.5 flex items-start gap-1 text-ui-xs text-amber-700">
+                            <span aria-hidden>⚠</span>
+                            <span>{warn}</span>
+                          </span>
+                        ) : null}
                         {backups > 0 ? (
-                          <span className="text-ui-xs text-[var(--gcal-muted)]">
+                          <span className={cn('text-ui-xs', past ? 'text-[var(--gcal-muted)]/45' : 'text-[var(--gcal-muted)]')}>
                             or {backups} other plan{backups > 1 ? 's' : ''}
                           </span>
                         ) : null}
@@ -175,6 +206,7 @@ export function StoryTab() {
   const categoryFilter = useTripStore((s) => s.categoryFilter)
   const setCategoryFilter = useTripStore((s) => s.setCategoryFilter)
   const [showPast, setShowPast] = useState(false)
+  const warnings = useMemo(() => travelBufferWarnings(events), [events])
 
   const today = isoDate(new Date())
   const calendar = tripCalendarBounds(trip.startDate, trip.endDate, events)
@@ -356,6 +388,7 @@ export function StoryTab() {
               dayEvents={eventsForDay(date)}
               onOpenDay={openDayOnSchedule}
               onSelectEvent={selectEvent}
+              warnings={warnings}
             />
           ))}
         </ul>
@@ -386,6 +419,7 @@ export function StoryTab() {
                   onOpenDay={openDayOnSchedule}
                   onSelectEvent={selectEvent}
                   muted
+                  warnings={warnings}
                 />
               ))}
             </ul>

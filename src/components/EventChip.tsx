@@ -163,7 +163,16 @@ export function EventChip({
       >
         {showIcon ? <Plane className="size-2.5 shrink-0 opacity-90" /> : null}
         <span className={density === 'xs' ? 'truncate' : 'line-clamp-2'}>{event.title}</span>
-        {warning ? <AlertTriangle className="size-2.5 shrink-0 text-amber-600" /> : null}
+        {warning ? (
+          <span
+            className="inline-flex shrink-0"
+            title={warning}
+            aria-label={warning}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AlertTriangle className="size-2.5 text-amber-600" />
+          </span>
+        ) : null}
       </div>
 
       {showPlace ? (
@@ -177,6 +186,14 @@ export function EventChip({
         <div className="mt-px leading-snug opacity-55" style={{ fontSize: 'var(--text-event-xs)' }}>
           {event.startTime}–{event.endTime}
           {isDraft ? ' · draft' : ''}
+        </div>
+      ) : null}
+      {warning && (density === 'md' || density === 'lg') ? (
+        <div
+          className="mt-px line-clamp-2 leading-snug text-amber-800"
+          style={{ fontSize: 'var(--text-event-xs)' }}
+        >
+          {warning}
         </div>
       ) : null}
       {backupN > 0 ? (

@@ -297,6 +297,7 @@ export const useTripStore = create<TripState>((set, get) => ({
     const { id: _draftId, ...rest } = draft
     set({ pendingDraft: null })
     await get().addEvent({ ...rest, ...patch })
+    set({ selectedEventId: null })
   },
 
   discardDraft: () => {
