@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Event modal — dashboard mockups (all)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blue: #1a73e8;
+      --blue-soft: #e8f0fe;
+      --muted: #70757a;
+      --line: #dadce0;
+      --line-soft: #eef0f2;
+      --bg: #f8f9fa;
+      --text: #3c4043;
+      --danger: #c5221f;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      background: #e8eaed;
+      color: var(--text);
+      padding: 24px 16px 80px;
+    }
+    .page {
+      max-width: 440px;
+      margin: 0 auto;
+    }
+    .page-h {
+      margin-bottom: 32px;
+    }
+    .page-h a {
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .page-h h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
+    .page-h p { font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+    /* —— mockup block —— */
+    .mock {
+      margin-bottom: 48px;
+    }
+    .mock-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--blue);
+      margin-bottom: 6px;
+    }
+    .mock-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .mock-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      line-height: 1.45;
+    }
+    .frame {
+      background: rgba(60, 64, 67, 0.4);
+      border-radius: 20px;
+      padding: 20px 12px;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 48px rgba(60, 64, 67, 0.18);
+    }
+
+    /* shared form bits */
+    .lbl {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .lbl span { color: var(--muted); font-weight: 500; }
+    .inp {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 14px;
+      background: #fff;
+      color: var(--text);
+    }
+    .inp::placeholder { color: #9aa0a6; }
+    .hint { font-size: 11px; color: var(--muted); margin-top: 5px; line-height: 1.35; }
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 16px;
+      border-top: 1px solid var(--line);
+      background: #fff;
+    }
+    .btn {
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 18px;
+      cursor: default;
+    }
+    .btn-p { background: var(--blue); color: #fff; }
+    .btn-g { background: transparent; color: var(--muted); }
+    .btn-d { background: transparent; color: var(--danger); font-size: 13px; padding: 10px 12px; }
+    .pill {
+      display: inline-flex;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+    }
+    .pill.on { background: var(--blue-soft); color: var(--blue); border-color: #c2d7f7; }
+    .scroll { max-height: 520px; overflow: auto; }
+
+    /* A — Spacious sections */
+    .a-top {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--line-soft);
+      position: relative;
+    }
+    .a-top .x {
+      position: absolute; right: 14px; top: 14px;
+      width: 32px; height: 32px; border: none; border-radius: 8px;
+      background: var(--bg); font-size: 18px; color: var(--muted);
+    }
+    .a-top .kicker { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .a-top h2 { font-size: 22px; font-weight: 700; margin-top: 6px; padding-right: 36px; }
+    .a-body { padding: 20px; background: var(--bg); display: flex; flex-direction: column; gap: 20px; }
+    .a-sec { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+    .a-sec-h { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--line-soft); }
+    .a-field { margin-bottom: 14px; }
+    .a-field:last-child { margin-bottom: 0; }
+    .a-row3 { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; }
+
+    /* B — Two-column dashboard */
+    .b-hdr {
+      padding: 18px 20px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    .b-hdr h2 { font-size: 20px; font-weight: 700; }
+    .b-hdr p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .b-body { padding: 18px 20px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+    .b-full { grid-column: 1 / -1; }
+    .b-sec-title {
+      grid-column: 1 / -1;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-top: 4px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line-soft);
+    }
+    .b-sec-title:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+    /* C — Labeled rows (settings style) */
+    .c-hdr { padding: 16px 20px; background: var(--blue-soft); border-bottom: 1px solid #c2d7f7; }
+    .c-hdr h2 { font-size: 18px; font-weight: 700; color: #0d47a1; }
+    .c-hdr p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .c-row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .c-row .k { font-size: 13px; font-weight: 600; color: var(--text); padding-top: 10px; }
+    .c-row .k small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); margin-top: 2px; }
+    .c-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    /* D — Card grid dashboard */
+    .d-toolbar {
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+    }
+    .d-toolbar h2 { font-size: 17px; font-weight: 700; }
+    .d-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 16px;
+      background: var(--bg);
+    }
+    .d-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .d-card.wide { grid-column: 1 / -1; }
+    .d-card h3 { font-size: 12px; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+
+    /* E — Step summary + panels */
+    .e-summary {
+      margin: 16px 16px 0;
+      padding: 14px 16px;
+      background: var(--blue-soft);
+      border-radius: 12px;
+      border: 1px solid #c2d7f7;
+    }
+    .e-summary dt { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--muted); }
+    .e-summary dd { font-size: 15px; font-weight: 700; color: #0d47a1; margin: 2px 0 10px; }
+    .e-summary dd:last-child { margin-bottom: 0; }
+    .e-summary .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .e-panel { padding: 18px 18px 6px; }
+    .e-panel + .e-panel { border-top: 8px solid var(--bg); }
+    .e-panel-h { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+
+    /* F — Wide labels stacked */
+    .f-body { padding: 20px; display: flex; flex-direction: column; gap: 18px; }
+    .f-group { display: flex; flex-direction: column; gap: 8px; }
+    .f-group-h {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+    .f-divider { height: 1px; background: var(--line-soft); margin: 4px 0; }
+    .backup {
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      background: var(--bg);
+    }
+    .backup-h { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+    .backup p { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .backup a { font-size: 12px; font-weight: 600; color: var(--blue); }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-h">
+      <a href="index.html">← Round 1 (individual pages)</a>
+      <h1>Event modal — dashboard round</h1>
+      <p>All options on one page. Clear labels, roomy layout, organized sections. Scroll and pick a letter.</p>
+    </div>
+
+    <!-- A -->
+    <section class="mock">
+      <div class="mock-tag">Option A</div>
+      <div class="mock-title">Spacious section cards</div>
+      <p class="mock-desc">Each topic in its own white card on grey canvas. Bold section titles with divider. Fields never touch.</p>
+      <div class="frame">
+        <div class="modal">
+          <div class="a-top">
+            <button class="x">×</button>
+            <div class="kicker">Edit event</div>
+            <h2>Dinner at hotel</h2>
+          </div>
+          <div class="scroll a-body">
+            <div class="a-sec">
+              <div class="a-sec-h">When</div>
+              <div class="a-field">
+                <label class="lbl">Date</label>
+                <input class="inp" type="date" value="2026-08-08" />
+              </div>
+              <div class="a-row3">
+                <div class="a-field" style="margin:0">
+                  <label class="lbl">Start time</label>
+                  <input class="inp" value="22:30" />
+                </div>
+                <div class="a-field" style="margin:0">
+                  <label class="lbl">End time</label>
+                  <input class="inp" value="23:00" />
+                </div>
+              </div>
+              <p class="hint">30 minutes · Saturday, Aug 8</p>
+            </div>
+            <div class="a-sec">
+              <div class="a-sec-h">Category</div>
+              <label class="lbl">Event type</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:2px">
+                <span class="pill on">Meal</span>
+                <span class="pill">Flight</span>
+                <span class="pill">Attraction</span>
+                <span class="pill">Show</span>
+                <span class="pill">Other</span>
+              </div>
+            </div>
+            <div class="a-sec">
+              <div class="a-sec-h">Location</div>
+              <div class="a-field">
+                <label class="lbl">Place name</label>
+                <input class="inp" value="Hotel lobby" />
+              </div>
+              <div class="a-field" style="margin:0">
+                <label class="lbl">Google Maps link <span>(optional)</span></label>
+                <input class="inp" placeholder="https://maps.google.com/…" />
+              </div>
+            </div>
+            <div class="a-sec">
+              <div class="a-sec-h">Details</div>
+              <div class="a-field">
+                <label class="lbl">Notes</label>
+                <textarea class="inp" rows="2" placeholder="Reservations, dress code, etc." style="resize:none"></textarea>
+              </div>
+              <div class="a-field" style="margin:0">
+                <label class="lbl">Budget (USD)</label>
+                <input class="inp" value="0" />
+              </div>
+            </div>
+            <div class="a-sec backup">
+              <div class="backup-h">Backup plans</div>
+              <p>Same time slot. Add a rain-day or indoor alternative.</p>
+              <a href="#">+ Add backup plan</a>
+            </div>
+          </div>
+          <div class="footer">
+            <button class="btn btn-d">Delete</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-g">Cancel</button>
+              <button class="btn btn-p">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- B -->
+    <section class="mock">
+      <div class="mock-tag">Option B</div>
+      <div class="mock-title">Two-column field grid</div>
+      <p class="mock-desc">Dashboard grid: section labels span full width, fields sit in two columns. Dense but aligned.</p>
+      <div class="frame">
+        <div class="modal">
+          <div class="b-hdr">
+            <h2>Edit event</h2>
+            <p>Dinner at hotel · Meal · Aug 8</p>
+          </div>
+          <div class="scroll b-body">
+            <div class="b-sec-title">Schedule</div>
+            <div>
+              <label class="lbl">Date</label>
+              <input class="inp" type="date" value="2026-08-08" />
+            </div>
+            <div>
+              <label class="lbl">Start</label>
+              <input class="inp" value="22:30" />
+            </div>
+            <div>
+              <label class="lbl">End</label>
+              <input class="inp" value="23:00" />
+            </div>
+            <div>
+              <label class="lbl">Category</label>
+              <select class="inp"><option>Meal</option></select>
+            </div>
+            <div class="b-sec-title">Location</div>
+            <div class="b-full">
+              <label class="lbl">Place name</label>
+              <input class="inp" value="Hotel lobby" />
+            </div>
+            <div class="b-full">
+              <label class="lbl">Maps URL</label>
+              <input class="inp" placeholder="Optional link" />
+            </div>
+            <div class="b-sec-title">Extras</div>
+            <div class="b-full">
+              <label class="lbl">Notes</label>
+              <textarea class="inp" rows="2" style="resize:none"></textarea>
+            </div>
+            <div>
+              <label class="lbl">Budget ($)</label>
+              <input class="inp" value="0" />
+            </div>
+            <div>
+              <label class="lbl">Photo</label>
+              <button class="inp" style="text-align:left;color:var(--blue);font-weight:600">Add photo</button>
+            </div>
+          </div>
+          <div class="footer" style="justify-content:flex-end;gap:8px">
+            <button class="btn btn-g">Close</button>
+            <button class="btn btn-p">Save</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- C -->
+    <section class="mock">
+      <div class="mock-tag">Option C</div>
+      <div class="mock-title">Label · field rows</div>
+      <p class="mock-desc">Settings-table feel. Fixed label column, input column. Subtitle under each label explains the field.</p>
+      <div class="frame">
+        <div class="modal">
+          <div class="c-hdr">
+            <h2>Event details</h2>
+            <p>Dinner at hotel</p>
+          </div>
+          <div class="scroll">
+            <div class="c-row">
+              <div class="k">Title<small>Name on schedule</small></div>
+              <input class="inp" value="Dinner at hotel" />
+            </div>
+            <div class="c-row">
+              <div class="k">Date<small>Day of trip</small></div>
+              <input class="inp" type="date" value="2026-08-08" />
+            </div>
+            <div class="c-row">
+              <div class="k">Time<small>Start and end</small></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <input class="inp" value="22:30" />
+                <input class="inp" value="23:00" />
+              </div>
+            </div>
+            <div class="c-row">
+              <div class="k">Category<small>Color on calendar</small></div>
+              <div class="c-pills">
+                <span class="pill on">Meal</span>
+                <span class="pill">Flight</span>
+                <span class="pill">Attraction</span>
+              </div>
+            </div>
+            <div class="c-row">
+              <div class="k">Location<small>Venue or address</small></div>
+              <input class="inp" value="Hotel lobby" />
+            </div>
+            <div class="c-row">
+              <div class="k">Maps<small>Open in Google Maps</small></div>
+              <input class="inp" placeholder="Paste URL" />
+            </div>
+            <div class="c-row">
+              <div class="k">Notes<small>Private details</small></div>
+              <textarea class="inp" rows="2" style="resize:none"></textarea>
+            </div>
+            <div class="c-row">
+              <div class="k">Budget<small>Estimated cost</small></div>
+              <input class="inp" value="0" />
+            </div>
+            <div class="c-row" style="border:none">
+              <div class="k">Backups<small>Plan B same slot</small></div>
+              <div class="backup" style="width:100%">
+                <p style="font-size:12px;color:var(--muted)">None yet</p>
+                <a href="#" style="font-size:12px;font-weight:600;color:var(--blue)">Add backup</a>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            <button class="btn btn-d">Delete event</button>
+            <button class="btn btn-p">Save</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- D -->
+    <section class="mock">
+      <div class="mock-tag">Option D</div>
+      <div class="mock-title">Metric card grid</div>
+      <p class="mock-desc">Small dashboard tiles. Each tile = one input group with its own title. Wide tiles for text areas.</p>
+      <div class="frame">
+        <div class="modal">
+          <div class="d-toolbar">
+            <h2>New event</h2>
+            <button class="x" style="border:none;background:var(--bg);width:32px;height:32px;border-radius:8px;font-size:18px">×</button>
+          </div>
+          <div class="scroll d-grid">
+            <div class="d-card wide">
+              <h3>Event title</h3>
+              <input class="inp" value="Dinner at hotel" style="font-size:16px;font-weight:600" />
+            </div>
+            <div class="d-card">
+              <h3>Date</h3>
+              <input class="inp" type="date" value="2026-08-08" />
+            </div>
+            <div class="d-card">
+              <h3>Duration</h3>
+              <div style="display:flex;gap:6px">
+                <input class="inp" value="22:30" />
+                <input class="inp" value="23:00" />
+              </div>
+            </div>
+            <div class="d-card wide">
+              <h3>Category</h3>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <span class="pill on">Meal</span>
+                <span class="pill">Flight</span>
+                <span class="pill">Attraction</span>
+                <span class="pill">Shopping</span>
+              </div>
+            </div>
+            <div class="d-card">
+              <h3>Place</h3>
+              <input class="inp" value="Hotel lobby" />
+            </div>
+            <div class="d-card">
+              <h3>Budget</h3>
+              <input class="inp" value="$0" />
+            </div>
+            <div class="d-card wide">
+              <h3>Notes</h3>
+              <textarea class="inp" rows="2" style="resize:none" placeholder="Optional"></textarea>
+            </div>
+            <div class="d-card wide">
+              <h3>Backup plans</h3>
+              <p class="hint">Indoor option if weather changes</p>
+              <button class="inp" style="margin-top:6px;color:var(--blue);font-weight:600;text-align:center">+ Add backup</button>
+            </div>
+          </div>
+          <div class="footer" style="justify-content:flex-end;gap:8px">
+            <button class="btn btn-g">Cancel</button>
+            <button class="btn btn-p">Create event</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- E -->
+    <section class="mock">
+      <div class="mock-tag">Option E</div>
+      <div class="mock-title">Summary bar + panels</div>
+      <p class="mock-desc">Top dashboard strip shows key facts. Below, labeled panels with generous vertical rhythm.</p>
+      <div class="frame">
+        <div class="modal">
+          <div class="e-summary">
+            <dl class="grid">
+              <div><dt>Date</dt><dd>Aug 8</dd></div>
+              <div><dt>Time</dt><dd>22:30</dd></div>
+              <div><dt>Type</dt><dd>Meal</dd></div>
+            </dl>
+          </div>
+          <div class="scroll">
+            <div class="e-panel">
+              <div class="e-panel-h">Basic information</div>
+              <label class="lbl">Event title</label>
+              <input class="inp" value="Dinner at hotel" style="margin-bottom:14px" />
+              <label class="lbl">Category</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+                <span class="pill on">Meal</span><span class="pill">Other</span>
+              </div>
+            </div>
+            <div class="e-panel">
+              <div class="e-panel-h">Schedule</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+                <div><label class="lbl">Date</label><input class="inp" type="date" value="2026-08-08" /></div>
+                <div><label class="lbl">Start</label><input class="inp" value="22:30" /></div>
+                <div><label class="lbl">End</label><input class="inp" value="23:00" /></div>
+              </div>
+            </div>
+            <div class="e-panel">
+              <div class="e-panel-h">Location & notes</div>
+              <label class="lbl">Place name</label>
+              <input class="inp" style="margin-bottom:12px" />
+              <label class="lbl">Google Maps link</label>
+              <input class="inp" style="margin-bottom:12px" />
+              <label class="lbl">Notes</label>
+              <textarea class="inp" rows="2" style="resize:none"></textarea>
+            </div>
+            <div class="e-panel">
+              <div class="e-panel-h">Optional</div>
+              <label class="lbl">Budget (USD)</label>
+              <input class="inp" style="margin-bottom:12px" />
+              <label class="lbl">Photo</label>
+              <button class="inp" style="color:var(--blue);font-weight:600">Upload photo</button>
+            </div>
+          </div>
+          <div class="footer">
+            <button class="btn btn-d">Delete</button>
+            <button class="btn btn-p" style="margin-left:auto">Save</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- F -->
+    <section class="mock">
+      <div class="mock-tag">Option F</div>
+      <div class="mock-title">Single column · clear hierarchy</div>
+      <p class="mock-desc">One column, max clarity. Group headers in caps, every field labeled, 18px gaps. Simplest dashboard.</p>
+      <div class="frame">
+        <div class="modal">
+          <div style="padding:18px 20px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:start">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase">Edit event</div>
+              <div style="font-size:20px;font-weight:700;margin-top:4px">Dinner at hotel</div>
+            </div>
+            <button style="border:none;background:var(--bg);width:34px;height:34px;border-radius:8px;font-size:18px">×</button>
+          </div>
+          <div class="scroll f-body">
+            <div class="f-group">
+              <div class="f-group-h">Title</div>
+              <label class="lbl">What is this event called?</label>
+              <input class="inp" value="Dinner at hotel" />
+            </div>
+            <div class="f-divider"></div>
+            <div class="f-group">
+              <div class="f-group-h">Schedule</div>
+              <label class="lbl">Date</label>
+              <input class="inp" type="date" value="2026-08-08" />
+              <label class="lbl" style="margin-top:10px">Start time</label>
+              <input class="inp" value="22:30" />
+              <label class="lbl" style="margin-top:10px">End time</label>
+              <input class="inp" value="23:00" />
+            </div>
+            <div class="f-divider"></div>
+            <div class="f-group">
+              <div class="f-group-h">Category</div>
+              <label class="lbl">What kind of activity?</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <span class="pill on">Meal</span>
+                <span class="pill">Flight</span>
+                <span class="pill">Attraction</span>
+                <span class="pill">Hotel</span>
+                <span class="pill">Transport</span>
+                <span class="pill">Other</span>
+              </div>
+            </div>
+            <div class="f-divider"></div>
+            <div class="f-group">
+              <div class="f-group-h">Location</div>
+              <label class="lbl">Place name</label>
+              <input class="inp" value="Hotel lobby" />
+              <label class="lbl" style="margin-top:10px">Google Maps link (optional)</label>
+              <input class="inp" placeholder="https://…" />
+            </div>
+            <div class="f-divider"></div>
+            <div class="f-group">
+              <div class="f-group-h">Details</div>
+              <label class="lbl">Notes (optional)</label>
+              <textarea class="inp" rows="3" style="resize:none" placeholder="Anything else to remember"></textarea>
+              <label class="lbl" style="margin-top:10px">Budget in USD (optional)</label>
+              <input class="inp" value="0" />
+              <label class="lbl" style="margin-top:10px">Photo (optional)</label>
+              <button class="inp" style="text-align:center;color:var(--blue);font-weight:600">+ Add photo</button>
+            </div>
+            <div class="f-divider"></div>
+            <div class="f-group">
+              <div class="f-group-h">Backup plans</div>
+              <label class="lbl">Alternative for the same time slot</label>
+              <div class="backup">
+                <p>No backups yet. Add a plan B if weather or timing changes.</p>
+                <a href="#">+ Add backup plan</a>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            <button class="btn btn-d">Delete</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-g">Cancel</button>
+              <button class="btn btn-p">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:8px">End of mockups — reply with A–F (or mix) to build in the app.</p>
+  </div>
+</body>
+</html>
