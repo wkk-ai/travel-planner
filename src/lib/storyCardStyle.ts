@@ -1,16 +1,27 @@
-/** Blue gradient intensity — index 0 = nearest upcoming day (darkest). */
+/** Solid blue per card — index 0 = nearest day (darkest), each step below lighter. */
+const CARD_BLUES = [
+  '#b4d0f8',
+  '#c2dafb',
+  '#d0e3fc',
+  '#dce9fd',
+  '#e8f0fe',
+  '#edf3fe',
+  '#f2f7fe',
+  '#f8fbff',
+] as const
+
 export function storyDayCardStyle(proximityIndex: number, isToday: boolean): {
   background: string
   borderColor: string
   eventSurface: string
 } {
-  const intensity = isToday ? 1 : Math.max(0.15, 1 - proximityIndex * 0.14)
-  const top = `rgba(26, 115, 232, ${0.1 + intensity * 0.22})`
-  const mid = `rgba(210, 227, 252, ${0.25 + intensity * 0.45})`
-  const bottom = `rgba(248, 251, 255, ${0.5 + intensity * 0.35})`
+  const idx = Math.min(Math.max(0, proximityIndex), CARD_BLUES.length - 1)
+  const background = isToday ? '#9fc3f5' : CARD_BLUES[idx]
+  const borderAlpha = Math.max(0.18, 0.5 - proximityIndex * 0.05)
+
   return {
-    background: `linear-gradient(145deg, ${top} 0%, ${mid} 42%, ${bottom} 100%)`,
-    borderColor: `rgba(26, 115, 232, ${0.22 + intensity * 0.5})`,
-    eventSurface: isToday ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 255, 255, 0.78)',
+    background,
+    borderColor: `rgba(26, 115, 232, ${borderAlpha})`,
+    eventSurface: 'rgba(255, 255, 255, 0.9)',
   }
 }
