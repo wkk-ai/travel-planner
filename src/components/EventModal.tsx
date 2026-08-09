@@ -375,7 +375,12 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between gap-2 border-t border-[var(--gcal-border)] bg-white px-4 py-3">
+        <div
+          className={cn(
+            'flex items-center gap-2 border-t border-[var(--gcal-border)] bg-white px-4 py-3',
+            readOnly || isDraft ? 'justify-end' : 'justify-between',
+          )}
+        >
           {!readOnly && !isDraft ? (
             <button
               type="button"
@@ -387,15 +392,7 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
             >
               <Trash2 className="size-4" /> Delete
             </button>
-          ) : (
-            <button
-              type="button"
-              className="rounded-xl px-3 py-2 text-sm font-medium text-[var(--gcal-muted)] hover:bg-[var(--gcal-bg)]"
-              onClick={handleClose}
-            >
-              {isDraft ? 'Discard' : ' '}
-            </button>
-          )}
+          ) : null}
           <div className="flex gap-2">
             <button
               type="button"

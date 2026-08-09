@@ -52,6 +52,9 @@ export function StoryTab() {
   const selectEvent = useTripStore((s) => s.selectEvent)
   const setPanel = useTripStore((s) => s.setPanel)
   const searchQuery = useTripStore((s) => s.searchQuery)
+  const setSearchQuery = useTripStore((s) => s.setSearchQuery)
+  const categoryFilter = useTripStore((s) => s.categoryFilter)
+  const setCategoryFilter = useTripStore((s) => s.setCategoryFilter)
 
   const today = isoDate(new Date())
   const calendar = tripCalendarBounds(trip.startDate, trip.endDate, events)
@@ -80,7 +83,10 @@ export function StoryTab() {
   const q = searchQuery.trim().toLowerCase()
 
   function eventsForDay(date: string) {
-    const dayEvents = events.filter((e) => e.date === date)
+    let dayEvents = events.filter((e) => e.date === date)
+    if (categoryFilter !== 'all') {
+      dayEvents = dayEvents.filter((e) => e.category === categoryFilter)
+    }
     if (!q) return dayEvents
     return dayEvents.filter(
       (e) =>
@@ -90,10 +96,12 @@ export function StoryTab() {
     )
   }
 
+  const filterActive = Boolean(q) || categoryFilter !== 'all'
+
   const upcomingDays = allDays
     .map((d) => isoDate(d))
     .filter((date) => date >= today)
-    .filter((date) => !q || eventsForDay(date).length > 0)
+    .filter((date) => !filterActive || eventsForDay(date).length > 0)
     .sort()
 
   const proximity = new Map(upcomingDays.map((d, i) => [d, i]))
@@ -173,20 +181,39 @@ export function StoryTab() {
         <div className="rounded-[14px] border border-dashed border-[var(--gcal-border)] bg-white px-6 py-10 text-center">
           <Calendar className="mx-auto size-10 text-[var(--gcal-muted)]" />
           <p className="mt-3 text-ui-base font-semibold text-[var(--gcal-text)]">
-            {tripEnded ? 'Trip complete' : 'No upcoming days'}
+            {filterActive
+              ? 'No matching days'
+              : tripEnded
+                ? 'Trip complete'
+                : 'No upcoming days'}
           </p>
           <p className="mt-1 text-ui-sm text-[var(--gcal-muted)]">
-            {tripEnded
-              ? 'Past days live in your full schedule.'
-              : 'Add events or extend trip dates in trip settings.'}
+            {filterActive
+              ? 'Try a different search or category filter.'
+              : tripEnded
+                ? 'Past days live in your full schedule.'
+                : 'Add events or extend trip dates in trip settings.'}
           </p>
-          <button
-            type="button"
-            onClick={() => setActiveTab('schedule')}
-            className="mt-4 text-ui-sm font-semibold text-[var(--gcal-blue)] hover:underline"
-          >
-            Open schedule
-          </button>
+          {filterActive ? (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery('')
+                setCategoryFilter('all')
+              }}
+              className="mt-4 text-ui-sm font-semibold text-[var(--gcal-blue)] hover:underline"
+            >
+              Clear filters
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setActiveTab('schedule')}
+              className="mt-4 text-ui-sm font-semibold text-[var(--gcal-blue)] hover:underline"
+            >
+              Open schedule
+            </button>
+          )}
         </div>
       ) : (
         <ul className="flex flex-col gap-2.5">
@@ -238,13 +265,13 @@ export function StoryTab() {
                           <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">
                             · Today
                           </span>
-                        ) : countdown > 0 && daysUntilDay > 0 ? (
-                          <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">
-                            · in {daysUntilDay}d
-                          </span>
                         ) : daysUntilDay === 1 ? (
                           <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">
                             · Tomorrow
+                          </span>
+                        ) : countdown > 0 && daysUntilDay > 0 ? (
+                          <span className="ml-1.5 text-[11px] font-bold text-[var(--gcal-blue)]">
+                            · in {daysUntilDay}d
                           </span>
                         ) : null}
                       </h4>

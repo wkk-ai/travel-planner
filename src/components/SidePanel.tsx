@@ -272,6 +272,11 @@ function ChecklistPanel() {
           </button>
         </form>
       ) : null}
+      {items.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-[var(--gcal-border)] px-3 py-6 text-center text-sm text-[var(--gcal-muted)]">
+          {mode === 'edit' ? 'No checklist items yet — add one above.' : 'No checklist items.'}
+        </p>
+      ) : (
       <ul className="space-y-1.5">
         {items.map((c) => (
           <li
@@ -307,6 +312,7 @@ function ChecklistPanel() {
           </li>
         ))}
       </ul>
+      )}
     </div>
   )
 }
@@ -329,7 +335,12 @@ function NotesPanel() {
           + Add note
         </button>
       ) : null}
-      {notes.map((n) => (
+      {notes.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-[var(--gcal-border)] px-3 py-6 text-center text-sm text-[var(--gcal-muted)]">
+          {mode === 'edit' ? 'No notes yet — add one above.' : 'No notes for this trip.'}
+        </p>
+      ) : (
+      notes.map((n) => (
         <div key={n.id} className="rounded-xl border border-[var(--gcal-border)] p-2.5">
           <input
             disabled={mode !== 'edit'}
@@ -352,7 +363,8 @@ function NotesPanel() {
             ) : null}
           </div>
         </div>
-      ))}
+      ))
+      )}
     </div>
   )
 }

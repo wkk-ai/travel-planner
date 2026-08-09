@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { format, isToday } from 'date-fns'
 import { CalendarDays, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react'
 import { CATEGORIES } from '../data/categories'
@@ -77,6 +78,16 @@ export function TabBar() {
     if (dayIndex >= 0 && dayIndex < days.length - 1) setSelectedDate(isoDate(days[dayIndex + 1]))
   }
 
+  const stripRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (activeTab !== 'schedule') return
+    const selected = stripRef.current?.querySelector('[data-selected="true"]')
+    selected?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })
+  }, [selectedDate, activeTab])
+
+  const filterLabel = categoryFilter === 'all' ? 'All' : CATEGORIES[categoryFilter].label
+
   return (
     <div className="no-print shrink-0 border-b border-[var(--gcal-border)] bg-white">
       <div className="flex min-h-11 items-center gap-2 px-3 py-2 sm:min-h-12 sm:gap-3 sm:px-4">
@@ -113,12 +124,14 @@ export function TabBar() {
             </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-0.5">
-              <ViewModeToggle
-                view={view}
-                onDay={() => setView('day')}
-                onWeek={() => setView('week')}
-                compact
-              />
+              <div className="hidden sm:block">
+                <ViewModeToggle
+                  view={view}
+                  onDay={() => setView('day')}
+                  onWeek={() => setView('week')}
+                  compact
+                />
+              </div>
 
               <div className="relative hidden sm:block">
                 <CalendarDays className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-[var(--gcal-muted)]" />
@@ -139,10 +152,15 @@ export function TabBar() {
               <div className="relative">
                 <SlidersHorizontal className="pointer-events-none absolute left-1.5 top-1/2 size-3.5 -translate-y-1/2 text-[var(--gcal-muted)] sm:left-2" />
                 <select
-                  className="w-9 appearance-none rounded-lg border-0 bg-transparent py-1.5 pl-7 pr-1 text-transparent hover:bg-[var(--gcal-bg)] focus:outline-none focus:ring-2 focus:ring-[#e8f0fe] sm:w-auto sm:max-w-[6.5rem] sm:py-1.5 sm:pl-7 sm:pr-2 sm:text-ui-sm sm:font-semibold sm:text-[var(--gcal-muted)]"
+                  className={cn(
+                    'appearance-none rounded-lg border-0 bg-transparent py-1.5 pl-7 pr-2 text-ui-xs font-semibold hover:bg-[var(--gcal-bg)] focus:outline-none focus:ring-2 focus:ring-[#e8f0fe] sm:max-w-[6.5rem] sm:py-1.5 sm:text-ui-sm',
+                    categoryFilter === 'all'
+                      ? 'w-9 text-transparent sm:w-auto sm:text-[var(--gcal-muted)]'
+                      : 'max-w-[5.5rem] text-[var(--gcal-blue)] sm:text-[var(--gcal-muted)]',
+                  )}
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value as EventCategory | 'all')}
-                  aria-label="Filter by category"
+                  aria-label={`Filter by category: ${filterLabel}`}
                 >
                   <option value="all">All</option>
                   {Object.entries(CATEGORIES).map(([k, v]) => (
@@ -160,7 +178,7 @@ export function TabBar() {
       </div>
 
       {activeTab === 'schedule' ? (
-        <div className="flex gap-1.5 overflow-x-auto px-3 pb-2.5 sm:hidden">
+        <div ref={stripRef} className="flex gap-1.5 overflow-x-auto px-3 pb-2.5 sm:hidden">
           {days.map((d) => {
             const iso = isoDate(d)
             const selected = iso === selectedDate
@@ -169,6 +187,7 @@ export function TabBar() {
               <button
                 key={iso}
                 type="button"
+                data-selected={selected ? 'true' : undefined}
                 onClick={() => {
                   setSelectedDate(iso)
                   setView('day')

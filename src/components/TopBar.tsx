@@ -3,6 +3,7 @@ import {
   CalendarDays,
   CheckSquare,
   ChevronDown,
+  Clock,
   Copy,
   Ellipsis,
   FileDown,
@@ -10,7 +11,6 @@ import {
   Link2,
   ListTodo,
   Plus,
-  Redo2,
   Search,
   Share2,
   Sparkles,
@@ -167,7 +167,7 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
             {mode === 'edit' ? (
               <>
                 <div className="my-1 border-t border-[var(--gcal-border)]" />
-                <MenuItem icon={<Redo2 className="size-4" />} onClick={() => {
+                <MenuItem icon={<Clock className="size-4" />} onClick={() => {
                   const today = isoDate(new Date())
                   const nowTime = format(new Date(), 'HH:mm')
                   const state = useTripStore.getState()
@@ -195,6 +195,22 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
             </MenuItem>
             <MenuItem icon={<Copy className="size-4" />} onClick={() => copy(share.view, 'View link')}>
               Copy view link
+            </MenuItem>
+            <MenuItem icon={<Copy className="size-4" />} disabled={busy} onClick={() => void doExportImage()}>
+              Save as image
+            </MenuItem>
+            <MenuItem icon={<FileDown className="size-4" />} disabled={busy} onClick={() => void doExportPdf()}>
+              Export PDF
+            </MenuItem>
+            <MenuItem
+              icon={<CheckSquare className="size-4" />}
+              onClick={() => {
+                exportExpensesCsv(useTripStore.getState().expenses, `${trip.name}-expenses.csv`)
+                setToast('Expenses CSV downloaded')
+                setMenu('none')
+              }}
+            >
+              Expenses CSV
             </MenuItem>
           </MenuButton>
         </div>
@@ -303,7 +319,7 @@ export function TopBar({ exportRef, onQuickAdd, share }: Props) {
               onClose={() => setMenu('none')}
             >
               <MenuItem
-                icon={<Redo2 className="size-4" />}
+                icon={<Clock className="size-4" />}
                 hint="Push remaining events later by 30 minutes (today from now, or the day you are viewing)."
                 onClick={() => {
                   const today = isoDate(new Date())
@@ -453,7 +469,7 @@ function IconBtn({
       title={label}
       disabled={disabled}
       onClick={onClick}
-      className="inline-flex size-8 items-center justify-center rounded-full text-[var(--gcal-text)] hover:bg-[var(--gcal-bg)] disabled:opacity-40"
+      className="inline-flex size-10 items-center justify-center rounded-full text-[var(--gcal-text)] hover:bg-[var(--gcal-bg)] disabled:opacity-40 sm:size-8"
     >
       {children}
     </button>

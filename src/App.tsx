@@ -232,7 +232,7 @@ export default function App() {
       ) : null}
 
       {mode === 'view' ? (
-        <div className="no-print fixed bottom-4 left-1/2 z-40 max-w-[90vw] -translate-x-1/2 rounded-full bg-[#3c4043]/95 px-4 py-2 text-center text-xs font-medium text-white shadow-lg backdrop-blur sm:bottom-4 sm:max-w-none">
+        <div className="no-print fixed bottom-20 left-1/2 z-40 max-w-[90vw] -translate-x-1/2 rounded-full bg-[#3c4043]/95 px-4 py-2 text-center text-xs font-medium text-white shadow-lg backdrop-blur sm:bottom-4 sm:max-w-none">
           View-only — ask for the edit link to make changes
         </div>
       ) : null}
