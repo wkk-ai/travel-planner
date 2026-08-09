@@ -3,199 +3,216 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Wallet tab — 5 chart mockups (all)</title>
+  <title>Wallet — round 2 mockups (app palette)</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="_shared.css" />
   <style>
-    /* A — Donut + area */
-    .donut-wrap { display: flex; align-items: center; gap: 14px; }
-    .donut { width: 108px; height: 108px; flex-shrink: 0; }
-    .donut-legend { flex: 1; display: grid; gap: 6px; }
-    .donut-legend div {
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 11px;
-    }
-    .donut-legend span { color: var(--muted); font-size: 10px; }
-    .area-chart { width: 100%; height: 88px; display: block; }
-
-    /* B — Treemap + columns */
-    .treemap {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr 0.9fr;
-      grid-template-rows: 52px 44px;
-      gap: 5px;
-      height: 100px;
-    }
-    .treemap div {
-      border-radius: 8px;
-      padding: 8px;
-      font-size: 10px;
-      font-weight: 600;
+    /* B — stacked strip + columns */
+    .seg-bar {
       display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--gcal-border);
     }
-    .treemap div small { font-size: 9px; font-weight: 500; opacity: 0.85; }
-    .treemap .t1 { grid-row: span 2; background: var(--meal-bg); color: #5a7d66; }
-    .treemap .t2 { background: var(--attraction-bg); color: #946864; }
-    .treemap .t3 { background: var(--show-bg); color: #8f7a4f; }
+    .seg-bar span { flex: var(--f); }
+    .seg-legend { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 10px; }
+    .seg-legend div { font-size: 10px; color: var(--gcal-muted); display: flex; align-items: center; gap: 5px; }
+    .seg-legend i { width: 8px; height: 8px; border-radius: 50%; }
     .col-chart {
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
       gap: 4px;
-      height: 96px;
-      padding-top: 4px;
+      height: 88px;
     }
-    .col-day { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%; }
+    .col-day { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
     .col-pair { display: flex; gap: 2px; align-items: flex-end; flex: 1; width: 100%; justify-content: center; }
-    .col-pair i { width: 42%; border-radius: 4px 4px 0 0; display: block; }
-    .col-day label { font-size: 8px; color: var(--muted); font-weight: 600; }
+    .col-pair i { width: 40%; border-radius: 4px 4px 0 0; display: block; min-height: 4px; }
+    .col-day label { font-size: 8px; color: var(--gcal-muted); font-weight: 600; }
 
-    /* C — Lollipop + heatmap */
-    .lollipop { display: grid; gap: 8px; }
-    .lol-row { display: grid; grid-template-columns: 58px 1fr 42px; align-items: center; gap: 6px; font-size: 10px; }
-    .lol-track { height: 2px; background: var(--line-soft); position: relative; }
-    .lol-track::after {
-      content: "";
-      position: absolute;
-      left: 0; top: 50%;
-      width: var(--w, 50%);
-      height: 2px;
-      background: var(--c, var(--blue));
-      transform: translateY(-50%);
-    }
-    .lol-dot {
-      position: absolute;
-      right: calc(100% - var(--w, 50%));
-      top: 50%;
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: var(--c, var(--blue));
-      transform: translate(50%, -50%);
-      border: 2px solid var(--card);
-      box-shadow: 0 0 0 1px var(--line);
-    }
-    .heatmap {
+    /* C — ring hero */
+    .hero-card {
+      margin: 0 12px 10px;
+      padding: 14px;
+      background: var(--gcal-surface);
+      border: 1px solid var(--gcal-border);
+      border-radius: 14px;
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.06);
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-    }
-    .heat {
-      aspect-ratio: 1;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      font-size: 8px;
-      font-weight: 700;
-      color: var(--muted);
-    }
-
-    /* D — Gauge + dot timeline */
-    .gauge-wrap { text-align: center; padding: 4px 0 0; }
-    .gauge { width: 100%; height: 72px; }
-    .gauge-caption { font-size: 11px; color: var(--muted); margin-top: -4px; }
-    .gauge-caption b { color: var(--over); font-weight: 700; }
-    .dot-timeline { display: flex; justify-content: space-between; align-items: flex-end; padding: 8px 4px 0; min-height: 72px; }
-    .dot-day { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
-    .dot-day .bubble {
-      border-radius: 50%;
-      background: var(--blue);
-      opacity: 0.85;
-    }
-    .dot-day span { font-size: 8px; color: var(--muted); font-weight: 600; }
-
-    /* E — Waterfall + sparkline */
-    .waterfall { display: flex; align-items: flex-end; gap: 6px; height: 88px; padding-top: 6px; }
-    .wf-step {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+      grid-template-columns: 96px 1fr;
+      gap: 12px;
       align-items: center;
-      gap: 4px;
-      height: 100%;
-      justify-content: flex-end;
     }
-    .wf-bar {
-      width: 100%;
-      border-radius: 6px 6px 0 0;
-      min-height: 8px;
+    .ring-wrap { position: relative; width: 96px; height: 96px; }
+    .ring-wrap svg { width: 96px; height: 96px; }
+    .ring-center {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-content: center;
+      text-align: center;
     }
-    .wf-step label { font-size: 8px; color: var(--muted); font-weight: 600; text-align: center; }
-    .spark-wrap { position: relative; }
-    .spark { width: 100%; height: 64px; display: block; }
-    .spark-days {
+    .ring-center .pct { font-size: 18px; font-weight: 700; color: var(--gcal-text); }
+    .ring-center .sub { font-size: 9px; color: var(--gcal-muted); }
+    .hero-stats .row { font-size: 11px; margin-bottom: 4px; color: var(--gcal-muted); }
+    .hero-stats .row b { color: var(--gcal-text); }
+    .hero-stats .over { color: var(--over-color); font-weight: 600; font-size: 11px; margin-top: 4px; }
+    .cat-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .cat-pill:last-child { margin-bottom: 0; }
+    .cat-pill span { font-size: 10px; font-weight: 500; color: var(--gcal-muted); }
+    .day-line {
+      display: grid;
+      grid-template-columns: 72px 1fr 52px;
+      gap: 8px;
+      align-items: center;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--line-soft);
+      font-size: 11px;
+    }
+    .day-line:last-child { border-bottom: 0; }
+    .day-line .mini {
+      height: 6px;
+      border-radius: 999px;
+      background: var(--gcal-bg);
+      overflow: hidden;
+    }
+    .day-line .mini i { display: block; height: 100%; border-radius: 999px; background: var(--gcal-blue); }
+
+    /* D — story day cards */
+    .story-day {
+      margin-bottom: 8px;
+      background: var(--gcal-surface);
+      border: 1px solid var(--gcal-border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 4px 1fr auto;
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.06);
+    }
+    .story-day .body { padding: 10px 12px; }
+    .story-day .body b { font-size: 12px; display: block; }
+    .story-day .body span { font-size: 10px; color: var(--gcal-muted); }
+    .story-day .amt {
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      align-self: center;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    /* E — donut outline + table */
+    .donut-row { display: flex; gap: 14px; align-items: center; }
+    .donut { width: 100px; height: 100px; flex-shrink: 0; }
+    .donut-key { flex: 1; display: grid; gap: 6px; }
+    .donut-key div {
       display: flex;
       justify-content: space-between;
-      margin-top: 4px;
-      font-size: 8px;
-      color: var(--muted);
+      font-size: 11px;
       font-weight: 600;
-      padding: 0 2px;
     }
+    .donut-key span { color: var(--gcal-muted); font-weight: 500; font-size: 10px; }
+    .table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .table th {
+      text-align: left;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--gcal-muted);
+      padding: 0 0 6px;
+      font-weight: 700;
+    }
+    .table th:last-child, .table td:last-child { text-align: right; }
+    .table td { padding: 5px 0; border-top: 1px solid var(--line-soft); font-variant-numeric: tabular-nums; }
+    .table td:first-child { font-weight: 600; }
+    .table .over { color: var(--over-color); }
   </style>
 </head>
 <body>
   <div class="page">
     <header class="page-h">
-      <a href="index.html">← Wallet mockups index</a>
-      <h1>Wallet — 5 chart directions</h1>
-      <p>Same trip data, softer colors, different graph types. Scroll to compare — pick a letter.</p>
+      <a href="index.html">← Wallet mockups</a>
+      <h1>Wallet — round 2</h1>
+      <p>Same blues, greens, reds, and yellows as the live app. Layout and chart type change — not the palette.</p>
+      <p class="note">Colors pulled from <code>categories.ts</code> and <code>index.css</code> — light category backgrounds, border accents, Google blue chrome.</p>
     </header>
 
-    <!-- A -->
+    <!-- A: baseline refined -->
     <section class="mock" id="a">
       <div class="mock-tag">Option A</div>
-      <div class="mock-title">Donut split + area trend</div>
-      <p class="mock-desc">Category as a soft donut with legend. Daily spend as a gentle area line — good when you want “where it went” vs “how it flowed.”</p>
+      <div class="mock-title">Refined baseline (live app pattern)</div>
+      <p class="mock-desc">What you have now, tightened: stat cards, trip progress, compare bars for category + day. Safest match to Story / Schedule.</p>
       <div class="frame">
         <div class="phone">
-          <div class="w-header"><h2>Wallet</h2><p>Planned vs spent</p></div>
+          <div class="w-header"><h2>Wallet</h2><p>Planned vs spent · linked to your events</p></div>
           <div class="stat-row">
-            <div class="stat" style="background:var(--blue-bg);border-color:#d5dfe8"><div class="lbl" style="color:var(--blue-deep)">Spent</div><div class="val" style="color:var(--blue-deep)">790</div><div class="unit">USD</div></div>
-            <div class="stat"><div class="lbl">Planned</div><div class="val">670</div><div class="unit">USD</div></div>
-            <div class="stat" style="background:var(--over-bg);border-color:#e8d8d6"><div class="lbl" style="color:var(--over)">Over</div><div class="val" style="color:var(--over)">120</div><div class="unit">USD</div></div>
+            <div class="stat" style="background:var(--gcal-blue-soft);border-color:#c2d7f7">
+              <div class="lbl" style="color:var(--gcal-blue)">Spent</div>
+              <div class="val" style="color:#0d47a1">790</div>
+              <div class="unit">USD</div>
+            </div>
+            <div class="stat">
+              <div class="lbl">Planned</div><div class="val">670</div><div class="unit">USD</div>
+            </div>
+            <div class="stat" style="background:var(--over-bg);border-color:#f5c2c0">
+              <div class="lbl" style="color:var(--over-color)">Over</div>
+              <div class="val" style="color:var(--over-color)">120</div>
+              <div class="unit">USD</div>
+            </div>
+          </div>
+          <div class="progress-line">
+            <div class="top"><span>Trip progress</span><b>118% of plan</b></div>
+            <div class="progress-track"><div class="progress-fill" style="width:100%;background:var(--attraction-border)"></div></div>
           </div>
           <div class="card">
             <h3>By category</h3>
-            <div class="donut-wrap">
-              <svg class="donut" viewBox="0 0 36 36">
-                <circle cx="18" cy="18" r="14" fill="none" stroke="#eef0f2" stroke-width="5"/>
-                <circle cx="18" cy="18" r="14" fill="none" stroke="#7a9e87" stroke-width="5" stroke-dasharray="34 56" stroke-dashoffset="0" transform="rotate(-90 18 18)"/>
-                <circle cx="18" cy="18" r="14" fill="none" stroke="#b87d78" stroke-width="5" stroke-dasharray="34 56" stroke-dashoffset="-34" transform="rotate(-90 18 18)"/>
-                <circle cx="18" cy="18" r="14" fill="none" stroke="#b89a62" stroke-width="5" stroke-dasharray="32 58" stroke-dashoffset="-68" transform="rotate(-90 18 18)"/>
-                <text x="18" y="17" text-anchor="middle" font-size="5" fill="#8b9198" font-weight="600">TOTAL</text>
-                <text x="18" y="22.5" text-anchor="middle" font-size="6.5" fill="#4a4f54" font-weight="700">$790</text>
-              </svg>
-              <div class="donut-legend">
-                <div><span style="color:#7a9e87">● Meal</span> <b>$270</b></div>
-                <div><span style="color:#b87d78">● Attraction</span> <b>$270</b></div>
-                <div><span style="color:#b89a62">● Show</span> <b>$250</b></div>
-              </div>
+            <div class="bar-row">
+              <div class="bar-head"><span class="name"><i style="background:var(--meal-border)"></i>Meal</span><span class="nums"><b>$270</b> / $270</span></div>
+              <div class="bar-track"><div class="bar-planned" style="width:100%"></div><div class="bar-spent" style="width:100%;background:var(--meal-border)"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-head"><span class="name"><i style="background:var(--attraction-border)"></i>Attraction</span><span class="nums"><b>$270</b> / $150</span></div>
+              <div class="bar-track"><div class="bar-planned" style="width:56%"></div><div class="bar-spent" style="width:100%;background:var(--attraction-border)"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-head"><span class="name"><i style="background:var(--show-border)"></i>Show</span><span class="nums"><b>$250</b> / $250</span></div>
+              <div class="bar-track"><div class="bar-planned" style="width:93%"></div><div class="bar-spent" style="width:93%;background:var(--show-border)"></div></div>
             </div>
           </div>
           <div class="card">
-            <h3>Spend trend</h3>
-            <p class="hint">Cumulative by day</p>
-            <svg class="area-chart" viewBox="0 0 320 88" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#6b8cae" stop-opacity="0.35"/>
-                  <stop offset="100%" stop-color="#6b8cae" stop-opacity="0.02"/>
-                </linearGradient>
-              </defs>
-              <line x1="0" y1="72" x2="320" y2="72" stroke="#e4e7ea" stroke-width="1"/>
-              <path d="M0,72 L46,68 L92,58 L138,52 L184,38 L230,28 L276,22 L320,18 L320,72 Z" fill="url(#ag)"/>
-              <path d="M0,72 L46,68 L92,58 L138,52 L184,38 L230,28 L276,22 L320,18" fill="none" stroke="#6b8cae" stroke-width="2" stroke-linecap="round"/>
-              <circle cx="320" cy="18" r="3.5" fill="#6b8cae"/>
-            </svg>
-            <div class="spark-days"><span>Mon</span><span>Wed</span><span>Fri</span><span>Sun</span></div>
+            <h3>By day</h3>
+            <p class="hint">Gray = planned · Color = spent</p>
+            <div class="bar-row">
+              <div class="bar-head"><span class="name">Fri, Sep 4</span><span class="nums"><b>$250</b> / $250</span></div>
+              <div class="bar-track"><div class="bar-planned" style="width:100%"></div><div class="bar-spent" style="width:100%;background:var(--gcal-blue)"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-head"><span class="name">Wed, Sep 2</span><span class="nums"><b>$185</b> / $185</span></div>
+              <div class="bar-track"><div class="bar-planned" style="width:74%"></div><div class="bar-spent" style="width:74%;background:var(--gcal-blue)"></div></div>
+            </div>
           </div>
           <div class="form-card">
-            <div class="form-head"><b>Log expense</b><span>Saturday, Aug 29</span></div>
+            <div class="form-head"><b>Log expense</b><span>Saturday, Aug 29 · round to nearest $10</span></div>
             <div class="form-body">
-              <div><div class="lbl">What</div><div class="inp">Lunch at Pier 39</div></div>
-              <div><div class="lbl">Amount</div><div class="inp">50</div></div>
+              <div><div class="lbl">What did you buy?</div><div class="inp">Lunch at Pier 39</div></div>
+              <div><div class="lbl">Amount (USD)</div><div class="inp">50</div></div>
               <button class="btn" type="button">+ Add expense</button>
             </div>
           </div>
@@ -203,194 +220,182 @@
       </div>
     </section>
 
-    <!-- B -->
+    <!-- B: segment strip + column chart -->
     <section class="mock" id="b">
       <div class="mock-tag">Option B</div>
-      <div class="mock-title">Treemap tiles + column pairs</div>
-      <p class="mock-desc">Categories as proportional soft tiles. Days as paired columns (gray plan, muted color spent) — classic dashboard, less repetitive than bars everywhere.</p>
+      <div class="mock-title">Category strip + day columns</div>
+      <p class="mock-desc">One segmented bar for category mix (calendar tints). Days as paired columns — gray plan, blue spent — so day view isn’t another horizontal bar list.</p>
       <div class="frame">
         <div class="phone">
           <div class="w-header"><h2>Wallet</h2><p>Planned vs spent</p></div>
           <div class="stat-row">
-            <div class="stat"><div class="lbl">Spent</div><div class="val">790</div><div class="unit">USD</div></div>
+            <div class="stat" style="background:var(--gcal-blue-soft);border-color:#c2d7f7"><div class="lbl" style="color:var(--gcal-blue)">Spent</div><div class="val" style="color:#0d47a1">790</div><div class="unit">USD</div></div>
             <div class="stat"><div class="lbl">Planned</div><div class="val">670</div><div class="unit">USD</div></div>
-            <div class="stat" style="background:var(--over-bg)"><div class="lbl" style="color:var(--over)">Over</div><div class="val" style="color:var(--over)">120</div><div class="unit">USD</div></div>
+            <div class="stat" style="background:var(--over-bg)"><div class="lbl" style="color:var(--over-color)">Over</div><div class="val" style="color:var(--over-color)">120</div><div class="unit">USD</div></div>
           </div>
           <div class="card">
             <h3>By category</h3>
-            <div class="treemap">
-              <div class="t1">Meal<small>$270</small></div>
-              <div class="t2">Attraction<small>$270</small></div>
-              <div class="t3">Show<small>$250</small></div>
+            <div class="seg-bar">
+              <span style="--f:270;background:var(--meal-bg);border-right:2px solid var(--meal-border)"></span>
+              <span style="--f:270;background:var(--attraction-bg);border-right:2px solid var(--attraction-border)"></span>
+              <span style="--f:250;background:var(--show-bg)"></span>
+            </div>
+            <div class="seg-legend">
+              <div><i style="background:var(--meal-border)"></i>Meal $270</div>
+              <div><i style="background:var(--attraction-border)"></i>Attraction $270</div>
+              <div><i style="background:var(--show-border)"></i>Show $250</div>
             </div>
           </div>
           <div class="card">
             <h3>By day</h3>
-            <p class="hint">Gray = planned · Color = spent</p>
+            <p class="hint">Gray = planned · Blue = spent</p>
             <div class="col-chart">
-              <div class="col-day"><div class="col-pair"><i style="height:18%;background:#c8ccd0"></i><i style="height:18%;background:#6b8cae"></i></div><label>Mon</label></div>
-              <div class="col-day"><div class="col-pair"><i style="height:28%;background:#c8ccd0"></i><i style="height:28%;background:#6b8cae"></i></div><label>Tue</label></div>
-              <div class="col-day"><div class="col-pair"><i style="height:42%;background:#c8ccd0"></i><i style="height:42%;background:#6b8cae"></i></div><label>Wed</label></div>
-              <div class="col-day"><div class="col-pair"><i style="height:22%;background:#c8ccd0"></i><i style="height:22%;background:#6b8cae"></i></div><label>Thu</label></div>
-              <div class="col-day"><div class="col-pair"><i style="height:58%;background:#c8ccd0"></i><i style="height:58%;background:#6b8cae"></i></div><label>Fri</label></div>
-              <div class="col-day"><div class="col-pair"><i style="height:24%;background:#c8ccd0"></i><i style="height:24%;background:#6b8cae"></i></div><label>Sat</label></div>
-              <div class="col-day"><div class="col-pair"><i style="height:20%;background:#c8ccd0"></i><i style="height:20%;background:#6b8cae"></i></div><label>Sun</label></div>
+              <div class="col-day"><div class="col-pair"><i style="height:18%;background:var(--gcal-border)"></i><i style="height:18%;background:var(--gcal-blue)"></i></div><label>Mon</label></div>
+              <div class="col-day"><div class="col-pair"><i style="height:28%;background:var(--gcal-border)"></i><i style="height:28%;background:var(--gcal-blue)"></i></div><label>Tue</label></div>
+              <div class="col-day"><div class="col-pair"><i style="height:42%;background:var(--gcal-border)"></i><i style="height:42%;background:var(--gcal-blue)"></i></div><label>Wed</label></div>
+              <div class="col-day"><div class="col-pair"><i style="height:22%;background:var(--gcal-border)"></i><i style="height:22%;background:var(--gcal-blue)"></i></div><label>Thu</label></div>
+              <div class="col-day"><div class="col-pair"><i style="height:58%;background:var(--gcal-border)"></i><i style="height:58%;background:var(--gcal-blue)"></i></div><label>Fri</label></div>
+              <div class="col-day"><div class="col-pair"><i style="height:24%;background:var(--gcal-border)"></i><i style="height:24%;background:var(--gcal-blue)"></i></div><label>Sat</label></div>
+              <div class="col-day"><div class="col-pair"><i style="height:20%;background:var(--gcal-border)"></i><i style="height:20%;background:var(--gcal-blue)"></i></div><label>Sun</label></div>
             </div>
           </div>
           <div class="form-card">
-            <div class="form-head" style="background:var(--meal-bg)"><b style="color:#5a7d66">Log expense</b><span>Saturday, Aug 29</span></div>
-            <div class="form-body"><button class="btn" type="button" style="background:#7a9e87">+ Add expense</button></div>
+            <div class="form-head"><b>Log expense</b><span>Saturday, Aug 29</span></div>
+            <div class="form-body"><button class="btn" type="button">+ Add expense</button></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- C -->
+    <!-- C: ring hero + day list -->
     <section class="mock" id="c">
       <div class="mock-tag">Option C</div>
-      <div class="mock-title">Lollipop ranks + heat calendar</div>
-      <p class="mock-desc">Categories as quiet lollipop marks (dot on a line). Days as a 7-cell heat map — intensity = spend. Feels lighter than full-width bars.</p>
+      <div class="mock-title">Ring summary + day list</div>
+      <p class="mock-desc">Trip total as a blue progress ring. Categories as tinted pills. Days as a simple list with tiny blue ticks — no second bar chart.</p>
       <div class="frame">
         <div class="phone">
           <div class="w-header"><h2>Wallet</h2><p>Planned vs spent</p></div>
-          <div class="stat-row">
-            <div class="stat" style="background:var(--lavender-bg)"><div class="lbl" style="color:var(--lavender)">Spent</div><div class="val" style="color:#7d7294">790</div><div class="unit">USD</div></div>
-            <div class="stat"><div class="lbl">Planned</div><div class="val">670</div><div class="unit">USD</div></div>
-            <div class="stat" style="background:var(--over-bg)"><div class="lbl" style="color:var(--over)">Over</div><div class="val" style="color:var(--over)">120</div><div class="unit">USD</div></div>
+          <div class="hero-card">
+            <div class="ring-wrap">
+              <svg viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="14" fill="none" stroke="#e8f0fe" stroke-width="4"/>
+                <circle cx="18" cy="18" r="14" fill="none" stroke="#1a73e8" stroke-width="4" stroke-dasharray="70 88" stroke-linecap="round" transform="rotate(-90 18 18)"/>
+                <circle cx="18" cy="18" r="14" fill="none" stroke="#ea4335" stroke-width="4" stroke-dasharray="18 88" stroke-dashoffset="-70" stroke-linecap="round" transform="rotate(-90 18 18)"/>
+              </svg>
+              <div class="ring-center"><div class="pct">118%</div><div class="sub">of plan</div></div>
+            </div>
+            <div class="hero-stats">
+              <div class="row">Spent <b>$790</b></div>
+              <div class="row">Planned <b>$670</b></div>
+              <div class="over">$120 over plan</div>
+            </div>
           </div>
           <div class="card">
             <h3>By category</h3>
-            <div class="lollipop">
-              <div class="lol-row"><span>Meal</span><div class="lol-track" style="--w:100%;--c:#7a9e87"><i class="lol-dot"></i></div><b>$270</b></div>
-              <div class="lol-row"><span>Attraction</span><div class="lol-track" style="--w:100%;--c:#b87d78"><i class="lol-dot"></i></div><b>$270</b></div>
-              <div class="lol-row"><span>Show</span><div class="lol-track" style="--w:93%;--c:#b89a62"><i class="lol-dot"></i></div><b>$250</b></div>
-            </div>
+            <div class="cat-pill" style="background:var(--meal-bg);color:var(--meal-color)">Meal <span>$270 / $270</span></div>
+            <div class="cat-pill" style="background:var(--attraction-bg);color:var(--attraction-color)">Attraction <span>$270 / $150</span></div>
+            <div class="cat-pill" style="background:var(--show-bg);color:var(--show-color)">Show <span>$250 / $250</span></div>
           </div>
           <div class="card">
             <h3>By day</h3>
-            <p class="hint">Darker = more spent</p>
-            <div class="heatmap">
-              <div class="heat" style="background:#e8edf2">M<br/>45</div>
-              <div class="heat" style="background:#dce5ec">T<br/>120</div>
-              <div class="heat" style="background:#cfd9e3">W<br/>185</div>
-              <div class="heat" style="background:#e0e7ee">T<br/>80</div>
-              <div class="heat" style="background:#b8c8d6;color:#4a4f54">F<br/>250</div>
-              <div class="heat" style="background:#e5ebf0">S<br/>60</div>
-              <div class="heat" style="background:#e8edf2">S<br/>50</div>
-            </div>
+            <div class="day-line"><span>Mon 31</span><div class="mini"><i style="width:18%"></i></div><span>$45</span></div>
+            <div class="day-line"><span>Wed 2</span><div class="mini"><i style="width:74%"></i></div><span>$185</span></div>
+            <div class="day-line"><span>Fri 4</span><div class="mini"><i style="width:100%"></i></div><span>$250</span></div>
+            <div class="day-line"><span>Sun 6</span><div class="mini"><i style="width:20%"></i></div><span>$50</span></div>
           </div>
           <div class="form-card">
-            <div class="form-head" style="background:var(--lavender-bg)"><b style="color:#7d7294">Log expense</b><span>Saturday, Aug 29</span></div>
-            <div class="form-body"><button class="btn" type="button" style="background:var(--lavender)">+ Add expense</button></div>
+            <div class="form-head"><b>Log expense</b><span>Saturday, Aug 29</span></div>
+            <div class="form-body"><button class="btn" type="button">+ Add expense</button></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- D -->
+    <!-- D: story-style -->
     <section class="mock" id="d">
       <div class="mock-tag">Option D</div>
-      <div class="mock-title">Arc gauge + bubble timeline</div>
-      <p class="mock-desc">Trip budget as a soft half-ring gauge. Days as sized bubbles along a week strip — quick scan without another bar chart.</p>
+      <div class="mock-title">Story-style day cards</div>
+      <p class="mock-desc">Feels like the Story tab: colored left stripe per day, amount on the right. Category as calendar chips — same tints as event blocks.</p>
       <div class="frame">
         <div class="phone">
           <div class="w-header"><h2>Wallet</h2><p>Planned vs spent</p></div>
-          <div class="card" style="margin-top:0">
-            <h3>Trip budget</h3>
-            <div class="gauge-wrap">
-              <svg class="gauge" viewBox="0 0 200 72">
-                <path d="M20,60 A80,80 0 0 1 180,60" fill="none" stroke="#eef0f2" stroke-width="14" stroke-linecap="round"/>
-                <path d="M20,60 A80,80 0 0 1 180,60" fill="none" stroke="#c4928e" stroke-width="14" stroke-linecap="round" stroke-dasharray="188 251"/>
-                <text x="100" y="48" text-anchor="middle" font-size="22" fill="#4a4f54" font-weight="700">118%</text>
-              </svg>
-              <div class="gauge-caption"><b>$120 over</b> · $790 spent of $670 planned</div>
-            </div>
+          <div class="stat-row">
+            <div class="stat" style="background:var(--gcal-blue-soft);border-color:#c2d7f7"><div class="lbl" style="color:var(--gcal-blue)">Spent</div><div class="val" style="color:#0d47a1">790</div><div class="unit">USD</div></div>
+            <div class="stat"><div class="lbl">Planned</div><div class="val">670</div><div class="unit">USD</div></div>
+            <div class="stat" style="background:var(--over-bg)"><div class="lbl" style="color:var(--over-color)">Over</div><div class="val" style="color:var(--over-color)">120</div><div class="unit">USD</div></div>
           </div>
           <div class="card">
             <h3>By category</h3>
-            <div class="legend">
-              <i style="color:#7a9e87">Meal $270</i>
-              <i style="color:#b87d78">Attraction $270</i>
-              <i style="color:#b89a62">Show $250</i>
-            </div>
-            <div style="display:flex;gap:4px;margin-top:10px;height:10px;border-radius:99px;overflow:hidden">
-              <span style="flex:270;background:#7a9e87"></span>
-              <span style="flex:270;background:#b87d78"></span>
-              <span style="flex:250;background:#b89a62"></span>
+            <div class="chips">
+              <div class="chip" style="background:var(--meal-bg);color:var(--meal-color);border-color:var(--meal-border)">Meal · $270</div>
+              <div class="chip" style="background:var(--attraction-bg);color:var(--attraction-color);border-color:var(--attraction-border)">Attraction · $270</div>
+              <div class="chip" style="background:var(--show-bg);color:var(--show-color);border-color:var(--show-border)">Show · $250</div>
             </div>
           </div>
-          <div class="card">
-            <h3>By day</h3>
-            <p class="hint">Bubble size = spend</p>
-            <div class="dot-timeline">
-              <div class="dot-day"><div class="bubble" style="width:14px;height:14px;background:#8fad96"></div><span>Mon</span></div>
-              <div class="dot-day"><div class="bubble" style="width:22px;height:22px;background:#8fad96"></div><span>Tue</span></div>
-              <div class="dot-day"><div class="bubble" style="width:28px;height:28px;background:#8fad96"></div><span>Wed</span></div>
-              <div class="dot-day"><div class="bubble" style="width:18px;height:18px;background:#8fad96"></div><span>Thu</span></div>
-              <div class="dot-day"><div class="bubble" style="width:36px;height:36px;background:#c4928e"></div><span>Fri</span></div>
-              <div class="dot-day"><div class="bubble" style="width:16px;height:16px;background:#8fad96"></div><span>Sat</span></div>
-              <div class="dot-day"><div class="bubble" style="width:14px;height:14px;background:#8fad96"></div><span>Sun</span></div>
-            </div>
+          <div style="padding:0 12px 10px">
+            <h3 style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gcal-muted);margin-bottom:8px">By day</h3>
+            <div class="story-day"><div style="background:var(--gcal-blue)"></div><div class="body"><b>Friday, Sep 4</b><span>3 expenses · on plan</span></div><div class="amt">$250</div></div>
+            <div class="story-day"><div style="background:var(--attraction-border)"></div><div class="body"><b>Wednesday, Sep 2</b><span>2 expenses · $20 over</span></div><div class="amt" style="color:var(--over-color)">$185</div></div>
+            <div class="story-day"><div style="background:var(--meal-border)"></div><div class="body"><b>Monday, Aug 31</b><span>1 expense</span></div><div class="amt">$45</div></div>
           </div>
           <div class="form-card">
-            <div class="form-head" style="background:var(--ok-bg)"><b style="color:#5f7d68">Log expense</b><span>Saturday, Aug 29</span></div>
-            <div class="form-body"><button class="btn" type="button" style="background:#8fad96">+ Add expense</button></div>
+            <div class="form-head"><b>Log expense</b><span>Saturday, Aug 29</span></div>
+            <div class="form-body"><button class="btn" type="button">+ Add expense</button></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- E -->
+    <!-- E: outline donut + table -->
     <section class="mock" id="e">
       <div class="mock-tag">Option E</div>
-      <div class="mock-title">Waterfall steps + sparkline</div>
-      <p class="mock-desc">Categories as descending waterfall blocks (running total feel). Days as a minimal sparkline with soft fill — editorial, not dashboard-heavy.</p>
+      <div class="mock-title">Outline donut + day table</div>
+      <p class="mock-desc">Category split as thin ring strokes (calendar border colors). Days as a clean table — planned vs spent numbers, no bars at all for the week view.</p>
       <div class="frame">
         <div class="phone">
           <div class="w-header"><h2>Wallet</h2><p>Planned vs spent</p></div>
           <div class="stat-row">
-            <div class="stat"><div class="lbl">Spent</div><div class="val">790</div><div class="unit">USD</div></div>
+            <div class="stat" style="background:var(--gcal-blue-soft);border-color:#c2d7f7"><div class="lbl" style="color:var(--gcal-blue)">Spent</div><div class="val" style="color:#0d47a1">790</div><div class="unit">USD</div></div>
             <div class="stat"><div class="lbl">Planned</div><div class="val">670</div><div class="unit">USD</div></div>
-            <div class="stat" style="background:var(--teal-bg)"><div class="lbl" style="color:var(--teal)">Left</div><div class="val" style="color:#5f8585">0</div><div class="unit">USD</div></div>
+            <div class="stat" style="background:var(--ok-bg)"><div class="lbl" style="color:var(--ok-color)">Left</div><div class="val" style="color:var(--ok-color)">0</div><div class="unit">USD</div></div>
           </div>
           <div class="card">
             <h3>By category</h3>
-            <p class="hint">Running spend</p>
-            <div class="waterfall">
-              <div class="wf-step"><div class="wf-bar" style="height:34%;background:#7a9e87"></div><label>Meal<br/>270</label></div>
-              <div class="wf-step"><div class="wf-bar" style="height:68%;background:#b87d78"></div><label>+Attr<br/>540</label></div>
-              <div class="wf-step"><div class="wf-bar" style="height:100%;background:#b89a62"></div><label>+Show<br/>790</label></div>
+            <div class="donut-row">
+              <svg class="donut" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="14" fill="none" stroke="#eef0f2" stroke-width="3"/>
+                <circle cx="18" cy="18" r="14" fill="none" stroke="#34a853" stroke-width="3" stroke-dasharray="34 56" transform="rotate(-90 18 18)"/>
+                <circle cx="18" cy="18" r="14" fill="none" stroke="#ea4335" stroke-width="3" stroke-dasharray="34 56" stroke-dashoffset="-34" transform="rotate(-90 18 18)"/>
+                <circle cx="18" cy="18" r="14" fill="none" stroke="#fbbc04" stroke-width="3" stroke-dasharray="32 58" stroke-dashoffset="-68" transform="rotate(-90 18 18)"/>
+              </svg>
+              <div class="donut-key">
+                <div>Meal <span>$270</span></div>
+                <div>Attraction <span>$270</span></div>
+                <div>Show <span>$250</span></div>
+              </div>
             </div>
           </div>
-          <div class="card spark-wrap">
-            <h3>Daily spend</h3>
-            <svg class="spark" viewBox="0 0 300 64">
-              <defs>
-                <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#7a9e9e" stop-opacity="0.3"/>
-                  <stop offset="100%" stop-color="#7a9e9e" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <path d="M0,52 L50,44 L100,28 L150,38 L200,12 L250,34 L300,40 L300,64 L0,64 Z" fill="url(#sg)"/>
-              <polyline points="0,52 50,44 100,28 150,38 200,12 250,34 300,40" fill="none" stroke="#7a9e9e" stroke-width="2" stroke-linejoin="round"/>
-            </svg>
-            <div class="spark-days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
-          </div>
-          <div class="exp-list">
-            <h3>All expenses</h3>
-            <div class="exp">
-              <div class="dot" style="background:#7a9e87"></div>
-              <div><div class="title">Lunch at Pier 39</div><div class="sub">Meal · Sep 6</div></div>
-              <div class="amt">$50</div>
-            </div>
+          <div class="card">
+            <h3>By day</h3>
+            <table class="table">
+              <thead><tr><th>Day</th><th>Planned</th><th>Spent</th></tr></thead>
+              <tbody>
+                <tr><td>Mon 31</td><td>$45</td><td>$45</td></tr>
+                <tr><td>Wed 2</td><td>$165</td><td class="over">$185</td></tr>
+                <tr><td>Fri 4</td><td>$250</td><td>$250</td></tr>
+                <tr><td>Sun 6</td><td>$50</td><td>$50</td></tr>
+              </tbody>
+            </table>
           </div>
           <div class="form-card">
-            <div class="form-head" style="background:var(--teal-bg)"><b style="color:#5f8585">Log expense</b><span>Saturday, Aug 29</span></div>
-            <div class="form-body"><button class="btn" type="button" style="background:var(--teal)">+ Add expense</button></div>
+            <div class="form-head"><b>Log expense</b><span>Saturday, Aug 29</span></div>
+            <div class="form-body"><button class="btn" type="button">+ Add expense</button></div>
           </div>
         </div>
       </div>
     </section>
+
+    <p style="text-align:center;font-size:13px;color:var(--gcal-muted);margin-top:8px">Reply with A–E (or mix) — all use the live app palette.</p>
   </div>
 </body>
 </html>
