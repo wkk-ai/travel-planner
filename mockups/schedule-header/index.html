@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Schedule header — mockups</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --ink: #3c4043; --muted: #70757a; --line: #dadce0; --bg: #f8f9fa; --blue: #1a73e8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Plus Jakarta Sans", system-ui, sans-serif; color: var(--ink); background: var(--bg); min-height: 100vh; }
+    main { max-width: 720px; margin: 0 auto; padding: 40px 20px 64px; }
+    h1 { font-size: 1.75rem; font-weight: 700; margin: 0 0 8px; }
+    .lede { color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+    .note { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    a.back { color: var(--blue); font-size: 14px; font-weight: 600; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+    .grid { display: grid; gap: 12px; }
+    a.card {
+      display: grid; grid-template-columns: 100px 1fr; gap: 14px; align-items: center;
+      padding: 14px 16px; background: #fff; border: 1px solid var(--line); border-radius: 14px;
+      text-decoration: none; color: inherit; transition: box-shadow .15s;
+    }
+    a.card:hover { box-shadow: 0 8px 24px rgba(60,64,67,.1); }
+    .thumb { height: 72px; border-radius: 8px; border: 1px solid var(--line); background: #fff; overflow: hidden; position: relative; }
+    h2 { margin: 0 0 4px; font-size: 1rem; font-weight: 700; }
+    p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.4; }
+    /* mini thumbs */
+    .t1 .r1 { height: 22px; background: #fff; border-bottom: 1px solid var(--line); display: flex; gap: 4px; padding: 4px; }
+    .t1 .r1 i { flex: 1; background: #e8f0fe; border-radius: 3px; }
+    .t1 .r2 { height: 14px; background: #fff; border-bottom: 1px solid var(--line); display: flex; }
+    .t1 .r2 b { flex: 1; border-bottom: 2px solid var(--blue); margin: 0 8px; }
+    .t1 .r3 { height: 18px; background: #f8f9fa; display: flex; align-items: center; padding: 0 6px; gap: 4px; }
+    .t1 .r3 i { width: 20px; height: 10px; background: var(--blue); border-radius: 2px; }
+    .t2 .r1 { height: 28px; background: #fff; border-bottom: 1px solid var(--line); padding: 4px 6px; }
+    .t2 .r1 b { display: block; height: 8px; width: 60%; background: #e8eaed; border-radius: 2px; margin-bottom: 3px; }
+    .t2 .r1 s { display: block; height: 6px; width: 40%; background: #f1f3f4; border-radius: 2px; }
+    .t2 .r2 { height: 44px; background: #e8f0fe; display: flex; align-items: center; justify-content: center; }
+    .t2 .r2 i { width: 50%; height: 12px; background: #fff; border-radius: 6px; }
+    .t3 .r1 { display: flex; height: 100%; }
+    .t3 .l { width: 45%; border-right: 1px solid var(--line); padding: 6px; }
+    .t3 .l i { display: block; height: 8px; background: #e8eaed; border-radius: 2px; margin-bottom: 4px; }
+    .t3 .r { flex: 1; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+    .t3 .r i { height: 8px; background: #f1f3f4; border-radius: 2px; }
+    .t4 .box { margin: 6px; border: 1px solid var(--line); border-radius: 6px; height: calc(100% - 12px); padding: 4px; }
+    .t4 .box i { display: block; height: 6px; background: #e8eaed; border-radius: 2px; margin-bottom: 3px; }
+    .t4 .box i:nth-child(2) { width: 70%; }
+    .t5 .r1 { height: 36px; background: #fff; border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 6px; gap: 3px; }
+    .t5 .r1 i { flex: 1; height: 10px; background: #f1f3f4; border-radius: 2px; }
+    .t5 .r1 b { width: 24px; height: 10px; background: var(--blue); border-radius: 2px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="../index.html">← All mockups</a>
+    <h1>Schedule header — round 1</h1>
+    <p class="lede">Five ways to reorganize the crowded top: trip bar, tabs, and day controls.</p>
+    <p class="note">Desktop width (~960px). Pick a number — we build it in the app.</p>
+    <div class="grid">
+      <a class="card" href="01-command.html">
+        <div class="thumb t1"><div class="r1"><i></i><i></i></div><div class="r2"><b></b></div><div class="r3"><i></i><i style="background:#f1f3f4"></i></div></div>
+        <div><h2>01 · Command bar</h2><p>Two tight rows. Actions in one ⋯ menu. Date nav owns row 2.</p></div>
+      </a>
+      <a class="card" href="02-focus.html">
+        <div class="thumb t2"><div class="r1"><b></b><s></s></div><div class="r2"><i></i></div></div>
+        <div><h2>02 · Date focus</h2><p>Strip noise. Big date hero. Trip + actions minimal above.</p></div>
+      </a>
+      <a class="card" href="03-split.html">
+        <div class="thumb t3"><div class="r1"><div class="l"><i></i><i style="width:60%"></i></div><div class="r"><i></i><i style="width:80%"></i><i style="width:50%"></i></div></div></div>
+        <div><h2>03 · Split zones</h2><p>Left = trip + tabs. Right = schedule controls only. Clear columns.</p></div>
+      </a>
+      <a class="card" href="04-context.html">
+        <div class="thumb t4"><div class="box"><i></i><i></i><i style="width:90%"></i><i style="width:40%"></i></div></div>
+        <div><h2>04 · Context card</h2><p>One grouped card with labeled sections: Trip · View · Day.</p></div>
+      </a>
+      <a class="card" href="05-rail.html">
+        <div class="thumb t5"><div class="r1"><i></i><b></b><i style="width:30%"></i><i style="width:20%"></i></div></div>
+        <div><h2>05 · Single rail</h2><p>Everything on one line. Tabs as pills. Icons for filters.</p></div>
+      </a>
+    </div>
+  </main>
+</body>
+</html>

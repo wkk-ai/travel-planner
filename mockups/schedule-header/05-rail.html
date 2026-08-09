@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>05 · Single rail</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .rail {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      flex-wrap: nowrap;
+      overflow: hidden;
+    }
+    .rail .trip-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      cursor: default;
+      padding: 4px 6px 4px 0;
+      border-radius: 8px;
+      min-width: 0;
+      flex-shrink: 1;
+    }
+    .rail .trip-btn .trip-icon { width: 28px; height: 28px; font-size: 14px; border-radius: 8px; }
+    .rail .trip-btn span {
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 140px;
+    }
+    .rail .vdiv { width: 1px; height: 20px; background: var(--line); flex-shrink: 0; }
+    .rail .tabs-pill {
+      display: flex;
+      background: var(--bg);
+      border-radius: 999px;
+      padding: 2px;
+      flex-shrink: 0;
+    }
+    .rail .tabs-pill button {
+      border: none; background: transparent; font-family: inherit;
+      font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px;
+      color: var(--muted); cursor: default;
+    }
+    .rail .tabs-pill button.on { background: #fff; color: var(--blue); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+    .rail .date-center {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+      justify-content: center;
+      min-width: 0;
+    }
+    .rail .date-center strong {
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .rail .date-center .vw {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-left: 6px;
+      padding: 2px 6px;
+      background: var(--bg);
+      border-radius: 4px;
+    }
+    .rail .end { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    .rail2 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px 10px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .rail2 .left { display: flex; gap: 12px; align-items: center; }
+    .rail2 .left b { color: var(--text); font-weight: 600; }
+    .icon-btn {
+      width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 8px;
+      background: #fff; display: grid; place-items: center; font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← Schedule header mockups</a>
+  <p class="label">05 · Single rail</p>
+  <div class="phone">
+  <div class="rail">
+    <button class="trip-btn">
+      <div class="trip-icon">📅</div>
+      <span>BigBang US</span>
+    </button>
+    <div class="vdiv"></div>
+    <div class="tabs-pill">
+      <button>Story</button>
+      <button class="on">Schedule</button>
+    </div>
+    <div class="vdiv"></div>
+    <div class="date-center">
+      <button class="icon sm">‹</button>
+      <strong>Aug 30</strong>
+      <span class="vw">Day</span>
+      <button class="icon sm">›</button>
+    </div>
+    <div class="vdiv"></div>
+    <div class="end">
+      <button class="icon-btn" title="Filter">⧉</button>
+      <button class="icon-btn" title="Search">🔍</button>
+      <button class="btn btn-primary" style="padding:6px 12px;font-size:12px">+</button>
+      <button class="icon sm">⋯</button>
+    </div>
+  </div>
+  <div class="rail2">
+    <div class="left">
+      <span class="live"><i></i> Live</span>
+      <span>21d to go</span>
+      <b>Concert in 27d</b>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn-ghost" style="font-size:12px;padding:4px 8px">Week view</button>
+      <span class="sel" style="padding:4px 8px;font-size:12px">All ▾</span>
+    </div>
+  </div>
+  <div class="cal">
+    <div class="cal-grid">
+      <div class="h"></div><div class="h">Sun</div><div class="h">Mon</div><div class="h">Tue</div><div class="h">Wed</div><div class="h">Thu</div><div class="h">Fri</div><div class="h">Sat</div>
+      <div class="h">7am</div>
+      <div class="t on"><div class="ev meal">Breakfast</div></div>
+      <div class="t"></div><div class="t"></div><div class="t"></div><div class="t"></div><div class="t"></div><div class="t"></div>
+      <div class="h">9am</div>
+      <div class="t on"><div class="ev park">Target</div></div>
+      <div class="t"></div><div class="t"><div class="ev park">Magic K.</div></div><div class="t"></div><div class="t"></div><div class="t"></div><div class="t"></div>
+    </div>
+  </div>
+  </div>
+</body>
+</html>

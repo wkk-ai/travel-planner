@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>02 · Date focus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .slim {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .slim .left { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+    .slim .left b { color: var(--text); font-weight: 600; }
+    .slim .right { display: flex; gap: 6px; align-items: center; }
+    .hero {
+      background: linear-gradient(180deg, #e8f0fe 0%, #fff 100%);
+      padding: 16px 16px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .hero-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .hero-top .tabs-pill {
+      display: flex; background: rgba(255,255,255,.8); border: 1px solid var(--line);
+      border-radius: 999px; padding: 3px;
+    }
+    .hero-top .tabs-pill button {
+      border: none; background: transparent; font-family: inherit;
+      font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 999px;
+      color: var(--muted); cursor: default;
+    }
+    .hero-top .tabs-pill button.on { background: var(--blue); color: #fff; }
+    .date-hero {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .date-hero .big { text-align: center; }
+    .date-hero .big .d { font-size: 36px; font-weight: 800; line-height: 1; color: #0d47a1; }
+    .date-hero .big .w { font-size: 15px; font-weight: 700; margin-top: 2px; }
+    .date-hero .big .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .controls .pill { background: #fff; }
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← Schedule header mockups</a>
+  <p class="label">02 · Date focus</p>
+  <div class="phone">
+  <div class="slim">
+    <div class="left">
+      <span>📅</span>
+      <b>BigBang US Trip 2026</b>
+      <span>· 21d to go</span>
+    </div>
+    <div class="right">
+      <span class="live"><i></i> Live</span>
+      <button class="icon sm">🔍</button>
+      <button class="icon sm">⋯</button>
+      <button class="btn btn-primary" style="padding:6px 12px;font-size:12px">+ Add</button>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="hero-top">
+      <span style="font-size:12px;color:var(--muted);font-weight:600">Concert in 27d</span>
+      <div class="tabs-pill">
+        <button>Story</button>
+        <button class="on">Schedule</button>
+      </div>
+    </div>
+    <div class="date-hero">
+      <button class="icon">‹</button>
+      <div class="big">
+        <div class="d">30</div>
+        <div class="w">Sunday, August</div>
+        <div class="sub">Orlando · Explore · Day 2 of 10</div>
+      </div>
+      <button class="icon">›</button>
+    </div>
+    <div class="controls">
+      <div class="pill"><button class="on">Day</button><button>Week</button></div>
+      <span class="sel">Jump to day ▾</span>
+      <span class="sel">All categories ▾</span>
+    </div>
+  </div>
+  <div class="cal">
+    <div class="cal-grid">
+      <div class="h"></div><div class="h">Sun</div><div class="h">Mon</div><div class="h">Tue</div><div class="h">Wed</div><div class="h">Thu</div><div class="h">Fri</div><div class="h">Sat</div>
+      <div class="h">7am</div>
+      <div class="t on"><div class="ev meal">Breakfast</div></div>
+      <div class="t"></div><div class="t"></div><div class="t"></div><div class="t"></div><div class="t"></div><div class="t"></div>
+      <div class="h">9am</div>
+      <div class="t on"><div class="ev park">Target</div></div>
+      <div class="t"></div><div class="t"><div class="ev park">Magic K.</div></div><div class="t"></div><div class="t"></div><div class="t"></div><div class="t"></div>
+    </div>
+  </div>
+  </div>
+</body>
+</html>
