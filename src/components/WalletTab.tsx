@@ -5,13 +5,90 @@ import { CATEGORIES } from '../data/categories'
 import {
   dayPlannedCents,
   daySpentCents,
+  dollarsToExpenseCents,
   formatUsd,
+  snapExpenseDollars,
   totalPlannedCents,
   totalSpentCents,
 } from '../lib/wallet'
 import { cn, isoDate, tripDaysIncludingEvents } from '../lib/time'
 import { useTripStore } from '../store/tripStore'
 import type { EventCategory, Expense } from '../types'
+
+function CategoryChart({
+  rows,
+}: {
+  rows: { key: string; label: string; color: string; border: string; planned: number; spent: number }[]
+}) {
+  const max = Math.max(...rows.map((r) => Math.max(r.planned, r.spent)), 1)
+  return (
+    <div className="space-y-3">
+      {rows.map((r) => (
+        <div key={r.key}>
+          <div className="mb-1 flex items-center justify-between gap-2 text-ui-xs">
+            <span className="flex items-center gap-1.5 font-semibold" style={{ color: r.color }}>
+              <span className="size-2 rounded-full" style={{ background: r.border }} />
+              {r.label}
+            </span>
+            <span className="tabular-nums text-[var(--gcal-muted)]">
+              {formatUsd(r.spent)}
+              {r.planned > 0 ? ` / ${formatUsd(r.planned)}` : ''}
+            </span>
+          </div>
+          <div className="relative h-2.5 overflow-hidden rounded-full bg-[var(--gcal-bg)]">
+            {r.planned > 0 ? (
+              <div
+                className="absolute inset-y-0 left-0 rounded-full opacity-25"
+                style={{ width: `${(r.planned / max) * 100}%`, background: r.border }}
+              />
+            ) : null}
+            <div
+              className="absolute inset-y-0 left-0 rounded-full"
+              style={{ width: `${(r.spent / max) * 100}%`, background: r.border }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function DailySpendChart({
+  days,
+}: {
+  days: { iso: string; shortLabel: string; spent: number; planned: number }[]
+}) {
+  const max = Math.max(...days.map((d) => Math.max(d.spent, d.planned)), 1)
+  return (
+    <div className="flex h-36 items-end gap-1.5">
+      {days.map((d) => (
+        <div key={d.iso} className="flex min-w-0 flex-1 flex-col items-center gap-1">
+          <div className="flex w-full flex-1 items-end justify-center gap-0.5">
+            {d.planned > 0 ? (
+              <div
+                className="w-[42%] rounded-t-sm bg-[var(--gcal-border)]"
+                style={{
+                  height: `${Math.max(4, (d.planned / max) * 100)}%`,
+                }}
+                title={`Planned ${formatUsd(d.planned)}`}
+              />
+            ) : null}
+            <div
+              className="w-[42%] rounded-t-sm bg-[var(--gcal-blue)]"
+              style={{
+                height: `${Math.max(d.spent > 0 ? 4 : 0, (d.spent / max) * 100)}%`,
+              }}
+              title={`Spent ${formatUsd(d.spent)}`}
+            />
+          </div>
+          <span className="w-full truncate text-center text-[9px] font-semibold text-[var(--gcal-muted)]">
+            {d.shortLabel}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 function ExpenseRow({
   expense,
@@ -29,6 +106,7 @@ function ExpenseRow({
   onAmountChange: (cents: number) => void
 }) {
   const cat = CATEGORIES[expense.category as EventCategory] ?? CATEGORIES.other
+  const dollars = expense.amountCents / 100
   return (
     <li className="grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-[#eef0f2] px-4 py-3 last:border-0">
       <span
@@ -61,14 +139,14 @@ function ExpenseRow({
             <input
               type="number"
               min={0}
-              step={0.01}
-              className="field w-24 text-right text-ui-sm font-bold tabular-nums"
-              value={(expense.amountCents / 100).toFixed(2)}
+              step={10}
+              className="field w-20 text-right text-ui-sm font-bold tabular-nums"
+              value={dollars}
               onChange={(e) => {
-                const n = Math.max(0, parseFloat(e.target.value || '0'))
-                onAmountChange(Math.round(n * 100))
+                const n = snapExpenseDollars(parseFloat(e.target.value || '0'))
+                onAmountChange(dollarsToExpenseCents(n))
               }}
-              aria-label="Amount"
+              aria-label="Amount in dollars"
             />
           </div>
         )}
@@ -101,6 +179,7 @@ export function WalletTab() {
 
   const [label, setLabel] = useState('')
   const [amount, setAmount] = useState('')
+  const [category, setCategory] = useState<EventCategory>('other')
 
   const days = tripDaysIncludingEvents(trip.startDate, trip.endDate, events)
 
@@ -121,7 +200,13 @@ export function WalletTab() {
       cur.spent += ex.amountCents
       map.set(ex.category, cur)
     }
-    return [...map.entries()].filter(([, v]) => v.planned > 0 || v.spent > 0)
+    return [...map.entries()]
+      .filter(([, v]) => v.planned > 0 || v.spent > 0)
+      .map(([key, v]) => {
+        const meta = CATEGORIES[key as EventCategory] ?? CATEGORIES.other
+        return { key, label: meta.label, color: meta.color, border: meta.border, ...v }
+      })
+      .sort((a, b) => b.spent - a.spent)
   }, [events, expenses])
 
   const byDay = useMemo(() => {
@@ -130,10 +215,24 @@ export function WalletTab() {
         const iso = isoDate(d)
         const p = dayPlannedCents(iso, events)
         const s = daySpentCents(iso, expenses)
-        return { iso, label: format(d, 'EEE MMM d'), planned: p, spent: s }
+        return {
+          iso,
+          label: format(d, 'EEE MMM d'),
+          shortLabel: format(d, 'EEE'),
+          planned: p,
+          spent: s,
+        }
       })
       .filter((d) => d.planned > 0 || d.spent > 0)
   }, [days, events, expenses])
+
+  const spentShare = useMemo(() => {
+    const total = spent || 1
+    return byCategory.map((c) => ({
+      ...c,
+      pct: Math.round((c.spent / total) * 100),
+    }))
+  }, [byCategory, spent])
 
   const eventTitle = (eventId: string | null) =>
     eventId ? events.find((e) => e.id === eventId)?.title : undefined
@@ -187,18 +286,51 @@ export function WalletTab() {
         </div>
       </div>
 
+      {(byCategory.length > 0 || byDay.length > 0) ? (
+        <section className="mb-5 grid gap-3 sm:grid-cols-2">
+          {byCategory.length > 0 ? (
+            <div className="rounded-2xl border border-[var(--gcal-border)] bg-white p-4 shadow-sm">
+              <h2 className="mb-3 text-ui-sm font-bold uppercase tracking-wide text-[var(--gcal-muted)]">
+                By category
+              </h2>
+              <CategoryChart rows={byCategory} />
+              {spentShare.length > 0 ? (
+                <div className="mt-4 flex h-3 overflow-hidden rounded-full">
+                  {spentShare.map((s) => (
+                    <div
+                      key={s.key}
+                      style={{ width: `${s.pct}%`, background: s.border, minWidth: s.pct > 0 ? 4 : 0 }}
+                      title={`${s.label} ${s.pct}%`}
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+          {byDay.length > 0 ? (
+            <div className="rounded-2xl border border-[var(--gcal-border)] bg-white p-4 shadow-sm">
+              <h2 className="mb-1 text-ui-sm font-bold uppercase tracking-wide text-[var(--gcal-muted)]">
+                By day
+              </h2>
+              <p className="mb-3 text-[10px] text-[var(--gcal-muted)]">Gray = planned · Blue = spent</p>
+              <DailySpendChart days={byDay} />
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
       {!readOnly ? (
         <form
           className="mb-5 rounded-2xl border border-[var(--gcal-border)] bg-white p-4 shadow-sm"
           onSubmit={(e) => {
             e.preventDefault()
-            const cents = Math.round(parseFloat(amount || '0') * 100)
+            const cents = dollarsToExpenseCents(parseFloat(amount || '0'))
             if (!label.trim() || cents <= 0) return
             void addExpense({
               label: label.trim(),
               amountCents: cents,
               spentOn: selectedDate,
-              category: 'other',
+              category,
             })
             setLabel('')
             setAmount('')
@@ -206,7 +338,7 @@ export function WalletTab() {
         >
           <h2 className="mb-1 text-ui-sm font-bold text-[var(--gcal-text)]">Log expense</h2>
           <p className="mb-3 text-ui-xs text-[var(--gcal-muted)]">
-            For {format(parseISO(selectedDate), 'EEEE, MMM d')}
+            For {format(parseISO(selectedDate), 'EEEE, MMM d')} · amounts in $10 steps
           </p>
           <div className="flex flex-col gap-2">
             <input
@@ -215,6 +347,18 @@ export function WalletTab() {
               onChange={(e) => setLabel(e.target.value)}
               placeholder="What did you buy?"
             />
+            <select
+              className="field"
+              value={category}
+              onChange={(e) => setCategory(e.target.value as EventCategory)}
+              aria-label="Expense category"
+            >
+              {Object.entries(CATEGORIES).map(([key, meta]) => (
+                <option key={key} value={key}>
+                  {meta.label}
+                </option>
+              ))}
+            </select>
             <div className="flex gap-2">
               <div className="flex min-w-0 flex-1 items-center gap-2">
                 <span className="shrink-0 text-sm font-medium text-[var(--gcal-muted)]">$</span>
@@ -222,81 +366,21 @@ export function WalletTab() {
                   className="field min-w-0 flex-1"
                   type="number"
                   min={0}
-                  step={0.01}
+                  step={10}
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.00"
+                  placeholder="0"
                 />
               </div>
               <button
                 type="submit"
-                className="flex shrink-0 items-center justify-center gap-1 rounded-xl bg-[var(--gcal-blue)] px-4 py-2.5 text-ui-sm font-semibold text-white hover:bg-[var(--gcal-blue-hover)]"
+                className="field inline-flex shrink-0 items-center justify-center gap-1 border-dashed bg-[var(--gcal-bg)] px-4 text-ui-sm font-semibold text-[var(--gcal-blue)] hover:border-[var(--gcal-blue)] hover:bg-[#e8f0fe]"
               >
                 <Plus className="size-4" /> Add
               </button>
             </div>
           </div>
         </form>
-      ) : null}
-
-      {byCategory.length > 0 ? (
-        <section className="mb-5">
-          <h2 className="mb-2 text-ui-sm font-bold uppercase tracking-wide text-[var(--gcal-muted)]">
-            By category
-          </h2>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {byCategory.map(([cat, { planned: p, spent: s }]) => {
-              const meta = CATEGORIES[cat as EventCategory] ?? CATEGORIES.other
-              return (
-                <div
-                  key={cat}
-                  className="rounded-2xl border border-[var(--gcal-border)] bg-white p-3 shadow-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="size-2.5 rounded-full" style={{ background: meta.border }} />
-                    <span className="text-ui-sm font-bold" style={{ color: meta.color }}>
-                      {meta.label}
-                    </span>
-                  </div>
-                  <div className="mt-2 flex justify-between text-ui-sm">
-                    <span className="text-[var(--gcal-muted)]">Spent</span>
-                    <span className="font-bold">{formatUsd(s)}</span>
-                  </div>
-                  {p > 0 ? (
-                    <div className="flex justify-between text-ui-xs text-[var(--gcal-muted)]">
-                      <span>Planned</span>
-                      <span>{formatUsd(p)}</span>
-                    </div>
-                  ) : null}
-                </div>
-              )
-            })}
-          </div>
-        </section>
-      ) : null}
-
-      {byDay.length > 0 ? (
-        <section className="mb-5">
-          <h2 className="mb-2 text-ui-sm font-bold uppercase tracking-wide text-[var(--gcal-muted)]">
-            By day
-          </h2>
-          <ul className="space-y-2">
-            {byDay.map((d) => (
-              <li
-                key={d.iso}
-                className="flex items-center justify-between rounded-xl border border-[var(--gcal-border)] bg-white px-4 py-3 shadow-sm"
-              >
-                <span className="text-ui-sm font-semibold">{d.label}</span>
-                <span className="text-ui-sm tabular-nums">
-                  <span className="font-bold text-[var(--gcal-text)]">{formatUsd(d.spent)}</span>
-                  {d.planned > 0 ? (
-                    <span className="text-[var(--gcal-muted)]"> / {formatUsd(d.planned)}</span>
-                  ) : null}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
       ) : null}
 
       <section>

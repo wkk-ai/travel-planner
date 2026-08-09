@@ -190,7 +190,8 @@ export function travelBufferWarnings(
       const next = sorted[i + 1]
       if (cur.category !== 'flight' && cur.category !== 'transport') continue
       const gap = gapMinutes(cur, next)
-      if (gap !== null && gap < bufferMins && gap >= 0) {
+      const nextIsBackup = /backup/i.test(next.title)
+      if (gap !== null && gap > 0 && gap < bufferMins && !nextIsBackup) {
         warnings.push({
           eventId: next.id,
           message: `Only ${gap}m after ${cur.title} — tight travel buffer`,

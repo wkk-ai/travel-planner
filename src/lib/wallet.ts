@@ -4,6 +4,15 @@ export function formatUsd(cents: number): string {
   return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`
 }
 
+/** Snap to nearest $10 for expense entry. */
+export function snapExpenseDollars(dollars: number): number {
+  return Math.max(0, Math.round(dollars / 10) * 10)
+}
+
+export function dollarsToExpenseCents(dollars: number): number {
+  return snapExpenseDollars(dollars) * 100
+}
+
 export function eventPlannedCents(event: TripEvent): number {
   return event.budgetCents
 }

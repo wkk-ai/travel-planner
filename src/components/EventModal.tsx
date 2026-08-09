@@ -7,7 +7,7 @@ import { timeOptions30, cn } from '../lib/time'
 import { EventBackupsSection } from './EventBackupsSection'
 import { mapsUrlPatch } from '../lib/googleMapsRoute'
 import { FormRow } from './FormRow'
-import { formatUsd, eventSpentCents } from '../lib/wallet'
+import { formatUsd, eventSpentCents, dollarsToExpenseCents, snapExpenseDollars } from '../lib/wallet'
 
 interface Props {
   event: TripEvent
@@ -41,9 +41,8 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
   useEffect(() => setDraft(event), [event])
 
   useEffect(() => {
-    setLogAmount(
-      event.budgetCents > 0 ? String((event.budgetCents / 100).toFixed(2)) : '',
-    )
+    const dollars = event.budgetCents > 0 ? event.budgetCents / 100 : 0
+    setLogAmount(dollars > 0 ? String(snapExpenseDollars(dollars)) : '')
   }, [event.id, event.budgetCents])
 
   useEffect(() => {
@@ -380,23 +379,23 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
                     ) : null}
                   </div>
                   {!readOnly ? (
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                    <div className="space-y-2">
+                      <div className="flex min-w-0 items-center gap-2">
                         <span className="shrink-0 text-sm text-[var(--gcal-muted)]">$</span>
                         <input
                           type="number"
                           min={0}
-                          step={0.01}
+                          step={10}
                           className="field min-w-0 flex-1"
                           value={logAmount}
                           onChange={(e) => setLogAmount(e.target.value)}
-                          placeholder="0.00"
+                          placeholder="0"
                         />
                       </div>
                       <button
                         type="button"
                         onClick={() => {
-                          const cents = Math.round(parseFloat(logAmount || '0') * 100)
+                          const cents = dollarsToExpenseCents(parseFloat(logAmount || '0'))
                           if (cents <= 0) {
                             setToast('Enter an amount to log')
                             return
@@ -410,7 +409,7 @@ export function EventModal({ event, isDraft = false, onClose }: Props) {
                           })
                           setToast('Expense logged — see Wallet')
                         }}
-                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--gcal-blue)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--gcal-blue-hover)]"
+                        className="field inline-flex w-full items-center justify-center gap-2 border-dashed bg-[var(--gcal-bg)] text-sm font-semibold text-[var(--gcal-blue)] hover:border-[var(--gcal-blue)] hover:bg-[#e8f0fe]"
                       >
                         <Receipt className="size-4" />
                         Log spent
