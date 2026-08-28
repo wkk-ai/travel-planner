@@ -14,12 +14,14 @@ jobs:
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: |
-          set -euo pipefail
+          set -u
           if [ -z "${SUPABASE_URL}" ] || [ -z "${SUPABASE_ANON_KEY}" ]; then
             echo "Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY secrets"
             exit 1
           fi
-          curl -sf "${SUPABASE_URL}/auth/v1/health" \
-            -H "apikey: ${SUPABASE_ANON_KEY}"
+          curl -sfS --connect-timeout 20 --max-time 40 \
+            "${SUPABASE_URL}/auth/v1/health" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            || { echo "curl exit $? — check project still exists (DNS/NXDOMAIN if deleted)"; exit 1; }
           echo
           echo "Keep-alive OK"
