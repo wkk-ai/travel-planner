@@ -623,6 +623,13 @@ function TripsPanel() {
   const createNewTrip = useTripStore((s) => s.createNewTrip)
   const deleteTrip = useTripStore((s) => s.deleteTrip)
   const refreshTrips = useTripStore((s) => s.refreshTrips)
+  const signedIn = useTripStore((s) => s.signedIn)
+  const signIn = useTripStore((s) => s.signIn)
+  const signOut = useTripStore((s) => s.signOut)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [authError, setAuthError] = useState<string | null>(null)
+  const [authBusy, setAuthBusy] = useState(false)
   const [name, setName] = useState('New trip')
   const [startDate, setStartDate] = useState('2026-08-29')
   const [endDate, setEndDate] = useState('2026-09-07')
@@ -731,10 +738,64 @@ function TripsPanel() {
         })}
         {!trips.length ? (
           <li className="px-3 py-8 text-center text-ui-sm text-[var(--gcal-muted)]">
-            No trips yet. Create one below.
+            {signedIn ? 'No trips yet. Create one below.' : 'No trips on this device yet. Sign in to see yours.'}
           </li>
         ) : null}
       </ul>
+
+      {signedIn ? (
+        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-[var(--gcal-border)] px-3 py-2 text-ui-sm text-[var(--gcal-muted)]">
+          <span>Signed in: all your trips are listed.</span>
+          <button type="button" className="font-medium underline" onClick={() => void signOut()}>
+            Sign out
+          </button>
+        </div>
+      ) : (
+        <form
+          className="shrink-0 space-y-2 border-t border-[var(--gcal-border)] p-3"
+          onSubmit={async (e) => {
+            e.preventDefault()
+            setAuthBusy(true)
+            setAuthError(null)
+            const error = await signIn(email.trim(), password)
+            setAuthBusy(false)
+            if (error) setAuthError(error)
+            else setPassword('')
+          }}
+        >
+          <p className="text-ui-sm text-[var(--gcal-muted)]">
+            This device only lists trips it has opened. Sign in to see all your trips and create new ones.
+          </p>
+          <input
+            type="email"
+            required
+            autoComplete="username"
+            placeholder="Email"
+            aria-label="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-lg border border-[var(--gcal-border)] px-3 py-2 text-ui-sm"
+          />
+          <input
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="Password"
+            aria-label="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-lg border border-[var(--gcal-border)] px-3 py-2 text-ui-sm"
+          />
+          {authError ? <p className="text-ui-sm text-red-600">{authError}</p> : null}
+          <button
+            type="submit"
+            disabled={authBusy}
+            className="w-full rounded-lg border border-[var(--gcal-border)] px-3 py-2 text-ui-sm font-medium disabled:opacity-60"
+          >
+            {authBusy ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
+      )}
 
       {confirmTrip ? (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">

@@ -13,9 +13,76 @@ const url = import.meta.env.VITE_SUPABASE_URL as string
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
 export const supabaseConfigured = Boolean(url && key)
+
+// Access model: the database only returns a trip to someone who presents its edit or view token
+// (sent on every request in the x-trip-tokens header) or who is signed in as an owner.
+// This browser remembers the tokens of trips it has opened or created.
+const KNOWN_TOKENS_KEY = 'travel-planner-known-tokens'
+const LAST_TOKEN_KEY = 'travel-planner-last-token'
+const pendingTokens = new Set<string>()
+const TOKEN_RE = /^[0-9a-f-]{20,64}$/i
+
+export function knownTokens(): string[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KNOWN_TOKENS_KEY) ?? '[]')
+    return Array.isArray(raw) ? raw.filter((t) => typeof t === 'string' && TOKEN_RE.test(t)) : []
+  } catch {
+    return []
+  }
+}
+
+export function rememberToken(token: string | null | undefined) {
+  if (!token || !TOKEN_RE.test(token)) return
+  const all = knownTokens()
+  if (all.includes(token)) return
+  try {
+    localStorage.setItem(KNOWN_TOKENS_KEY, JSON.stringify([...all, token].slice(-60)))
+  } catch {
+    /* storage unavailable: the token still works for this page through pendingTokens */
+  }
+  pendingTokens.add(token)
+}
+
+function tokensHeader(): string {
+  const all = new Set<string>([...knownTokens(), ...pendingTokens])
+  try {
+    const last = localStorage.getItem(LAST_TOKEN_KEY)
+    if (last && TOKEN_RE.test(last)) all.add(last)
+  } catch {
+    /* ignore */
+  }
+  const fromHash = window.location.hash.replace(/^#\/?/, '').split('/').find((p) => TOKEN_RE.test(p))
+  if (fromHash) all.add(fromHash)
+  return [...all].slice(-60).join(',')
+}
+
 export const supabase = supabaseConfigured
-  ? createClient(url, key)
+  ? createClient(url, key, {
+      global: {
+        fetch: (input, init) => {
+          const headers = new Headers(init?.headers)
+          const tokens = tokensHeader()
+          if (tokens) headers.set('x-trip-tokens', tokens)
+          return fetch(input, { ...init, headers })
+        },
+      },
+    })
   : (null as unknown as ReturnType<typeof createClient>)
+
+export async function isSignedIn(): Promise<boolean> {
+  if (!supabaseConfigured) return false
+  const { data } = await supabase.auth.getSession()
+  return Boolean(data.session)
+}
+
+export async function signIn(email: string, password: string): Promise<string | null> {
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  return error ? error.message : null
+}
+
+export async function signOut() {
+  await supabase.auth.signOut()
+}
 
 function mapTrip(row: Record<string, unknown>): Trip {
   return {
@@ -84,19 +151,26 @@ export async function fetchTripByToken(token: string): Promise<{
   mode: 'edit' | 'view'
 } | null> {
   if (!supabaseConfigured) return null
+  if (TOKEN_RE.test(token)) pendingTokens.add(token)
   const { data: editData } = await supabase
     .from('travel_trips')
     .select('*')
     .eq('edit_token', token)
     .maybeSingle()
-  if (editData) return { trip: mapTrip(editData), mode: 'edit' }
+  if (editData) {
+    rememberToken(token)
+    return { trip: mapTrip(editData), mode: 'edit' }
+  }
 
   const { data: viewData } = await supabase
     .from('travel_trips')
     .select('*')
     .eq('view_token', token)
     .maybeSingle()
-  if (viewData) return { trip: mapTrip(viewData), mode: 'view' }
+  if (viewData) {
+    rememberToken(token)
+    return { trip: mapTrip(viewData), mode: 'view' }
+  }
   return null
 }
 
@@ -167,7 +241,9 @@ export async function listTrips(): Promise<Trip[]> {
     .select('*')
     .order('created_at', { ascending: false })
   if (error) throw error
-  return (data ?? []).map((r) => mapTrip(r as Record<string, unknown>))
+  const trips = (data ?? []).map((r) => mapTrip(r as Record<string, unknown>))
+  for (const trip of trips) rememberToken(trip.editToken)
+  return trips
 }
 
 export async function createTrip(payload: {
@@ -189,7 +265,9 @@ export async function createTrip(payload: {
     .select('*')
     .single()
   if (error) throw error
-  return mapTrip(data)
+  const trip = mapTrip(data)
+  rememberToken(trip.editToken)
+  return trip
 }
 
 export async function updateTripRemote(trip: Trip) {

@@ -28,6 +28,9 @@ import {
   enqueue,
   fetchTripBundle,
   fetchTripByToken,
+  isSignedIn,
+  signIn as signInRemote,
+  signOut as signOutRemote,
   flushQueue,
   listTrips,
   loadQueue,
@@ -88,6 +91,10 @@ interface TripState {
   categoryFilter: EventCategory | 'all'
   panel: 'none' | 'plan' | 'settings' | 'checklist' | 'notes' | 'budget' | 'emergency' | 'share' | 'import' | 'whatif' | 'recap' | 'trips'
   toast: string | null
+  /** Signed in as an owner: sees every trip and can create new ones. */
+  signedIn: boolean
+  signIn: (email: string, password: string) => Promise<string | null>
+  signOut: () => Promise<void>
   init: () => Promise<void>
   refreshTrips: () => Promise<void>
   switchTrip: (editToken: string) => Promise<void>
@@ -239,6 +246,7 @@ function localFallbackTrip(): Trip {
 export const useTripStore = create<TripState>((set, get) => ({
   trip: null,
   trips: [],
+  signedIn: false,
   events: [],
   pendingDraft: null,
   notes: [],
@@ -318,6 +326,24 @@ export const useTripStore = create<TripState>((set, get) => ({
     set({ pendingDraft: null })
   },
 
+  signIn: async (email, password) => {
+    if (!supabaseConfigured) return 'Cloud is not configured'
+    const error = await signInRemote(email, password)
+    if (error) return error
+    set({ signedIn: true })
+    await get().refreshTrips()
+    const { trip, trips } = get()
+    // Working on the offline placeholder: open the latest real trip now that we can see them.
+    if (trips.length && !trips.some((t) => t.id === trip?.id)) await get().switchTrip(trips[0].editToken)
+    return null
+  },
+
+  signOut: async () => {
+    await signOutRemote()
+    set({ signedIn: false })
+    await get().refreshTrips()
+  },
+
   refreshTrips: async () => {
     if (!supabaseConfigured) return
     try {
@@ -343,6 +369,10 @@ export const useTripStore = create<TripState>((set, get) => ({
     }
     if (endDate < startDate) {
       set({ toast: 'End date cannot be before start date' })
+      return
+    }
+    if (!get().signedIn) {
+      set({ toast: 'Sign in under My trips to create a trip' })
       return
     }
     const trip = await createTrip({
@@ -455,6 +485,8 @@ export const useTripStore = create<TripState>((set, get) => ({
       }
 
       try {
+        const signedIn = await isSignedIn()
+        set({ signedIn })
         if (supabaseConfigured && token) {
           const found = await Promise.race([
             fetchTripByToken(token),
@@ -480,6 +512,12 @@ export const useTripStore = create<TripState>((set, get) => ({
               set({ toast: 'Saved link not found — opened your latest trip' })
             }
             await openTripBundle(set, get, existing[0], 'edit')
+            return
+          }
+
+          if (!signedIn) {
+            // No link and not signed in: nothing in the cloud is visible to this browser.
+            await failLocal('Sign in under My trips to open your trips')
             return
           }
 
